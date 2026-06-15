@@ -1,13 +1,13 @@
 # LiuLuit Docs
 
-基于 **Dockit - Astro** 的文档站重构版本，面向长期维护、可扩展和稳定发布。
+基于 Starlight 的技术博客站，面向长期维护、可扩展和稳定发布。
 
 ## 技术栈
 
 - Astro 6
 - Starlight
 - Tailwind CSS 4
-- Dockit override components
+- Custom Starlight overrides
 
 ## 本地运行
 

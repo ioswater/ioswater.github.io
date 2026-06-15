@@ -1,75 +1,43 @@
 {
   "main": [
+    { "name": "首页", "url": "/" },
+    { "name": "博客", "url": "/blog/" },
     {
-      "name": "首页",
-      "url": "/"
-    },
-    {
-      "name": "快速开始",
-      "url": "/getting-started/quickstart/"
-    },
-    {
-      "name": "运维",
+      "name": "分类",
       "url": "",
       "hasChildren": true,
       "children": [
-        {
-          "name": "部署方案",
-          "url": "/operations/deployment-options/"
-        },
-        {
-          "name": "发布清单",
-          "url": "/operations/release-checklist/"
-        }
+        { "name": "iOS 基础知识", "url": "/ios-basics/swift-concurrency-basics/" },
+        { "name": "AI 项目实战架构", "url": "/ai-project-architecture/rag-system-architecture/" },
+        { "name": "个人项目", "url": "/personal-projects/liuluit-docs-evolution/" },
+        { "name": "个人简介", "url": "/profile/about-me/" }
       ]
     }
   ],
   "footer": {
     "community": {
-      "title": "协作与反馈",
+      "title": "社区与更新",
       "links": [
-        {
-          "name": "GitHub Issues",
-          "url": "https://github.com/"
-        },
-        {
-          "name": "更新记录",
-          "url": "/content/release-notes/"
-        }
+        { "name": "博客聚合页", "url": "/blog/" },
+        { "name": "更新记录", "url": "/content/release-notes/" },
+        { "name": "GitHub", "url": "https://github.com/ioswater" }
       ]
     },
     "help_links": {
-      "title": "文档入口",
+      "title": "栏目入口",
       "links": [
-        {
-          "name": "快速开始",
-          "url": "/getting-started/quickstart/"
-        },
-        {
-          "name": "架构概览",
-          "url": "/architecture/system-overview/"
-        },
-        {
-          "name": "内容发布流程",
-          "url": "/content/authoring-and-review/"
-        }
+        { "name": "iOS 基础知识", "url": "/ios-basics/swift-concurrency-basics/" },
+        { "name": "AI 项目实战架构", "url": "/ai-project-architecture/rag-system-architecture/" },
+        { "name": "个人项目", "url": "/personal-projects/liuluit-docs-evolution/" },
+        { "name": "个人简介", "url": "/profile/about-me/" }
       ]
     },
     "company": {
-      "title": "发布与运维",
+      "title": "站点维护",
       "links": [
-        {
-          "name": "部署方案",
-          "url": "/operations/deployment-options/"
-        },
-        {
-          "name": "CI/CD 设计",
-          "url": "/operations/ci-cd/"
-        },
-        {
-          "name": "迁移说明",
-          "url": "/migration/from-hexo/"
-        }
+        { "name": "内容发布流程", "url": "/content/authoring-and-review/" },
+        { "name": "部署方案", "url": "/operations/deployment-options/" },
+        { "name": "发布清单", "url": "/operations/release-checklist/" }
       ]
     }
   }

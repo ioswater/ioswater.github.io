@@ -3,123 +3,125 @@ import Search from "./Search.astro";
 const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline } = data.hero || {};
 const { sidebar } = Astro.locals.starlightRoute;
+const locale = Astro.currentLocale || "root";
+const blogLink = locale === "en" ? "/en/blog/" : "/blog/";
 
 function getFirstHref(item: any): string | null {
-  if (typeof item?.href === "string" && item.href) {
-    return item.href;
-  }
-  if (item?.entries && Array.isArray(item.entries) && item.entries.length > 0) {
-    return getFirstHref(item.entries[0]);
-  }
-  return null; // No valid href found
+  if (typeof item?.href === "string" && item.href) return item.href;
+  if (item?.entries?.length) return getFirstHref(item.entries[0]);
+  return null;
 }
 
-// check if 404 page
-const is404 = Astro.locals.starlightRoute?.id === "404";
+const quickLinks = sidebar
+  .map((item: any) => ({ label: String(item.label).replace(/\[[^\]]+\]\s*/g, ""), href: getFirstHref(item) }))
+  .filter((item: any) => item.href)
+  .slice(0, 6);
 ---
 
-<div
-  class="hero flex flex-col items-center mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-35"
->
-  {title && <h1 set:html={title} class="mb-8 text-center rounded-2xl" />}
-  {tagline && <p set:html={tagline} class="text-xl text-center" />}
-
-  {
-    !is404 && (
-      <div class="mt-12 max-w-4xl">
-        <div class="search-container rounded-2xl p-2 mb-6">
-          <div class="search-bar">
-            <Search />
-          </div>
-        </div>
-
-        <div class="flex justify-center items-center flex-wrap gap-4">
-          <p class="text-base font-normal">
-            {Astro.locals.t("hero.popular", "Popular")}:
-          </p>
-          <div class="flex gap-4 badges px-3 py-2.5 rounded-xl flex-wrap justify-center">
-            {sidebar.map((item: any) => {
-              const href = getFirstHref(item);
-              return (
-                <div class="badge rounded-lg px-2 py-1.5 group transition">
-                  <a
-                    class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors"
-                    href={href}
-                  >
-                    {item.label}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+<section class="hero-wrap">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      {title && <h1 set:html={title} />}
+      {tagline && <p set:html={tagline} class="hero-tagline" />}
+      <div class="hero-cta-row">
+        <a class="btn btn-primary" href={blogLink}>开始浏览文章</a>
+        <a class="btn btn-secondary" href={locale === "en" ? "/en/content/blog-portal/" : "/content/blog-portal/"}>查看导航总览</a>
       </div>
-    )
-  }
-</div>
+      <div class="hero-search">
+        <Search />
+      </div>
+    </div>
+
+    <div class="hero-panel">
+      <h3>快速入口</h3>
+      <ul>
+        {quickLinks.map((item: any) => (
+          <li><a href={item.href}>{item.label}</a></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</section>
 
 <style>
   @layer starlight.core {
-    h1 {
-      font-size: 7rem !important;
-      line-height: 6.5rem !important;
-      letter-spacing: -4px;
+    .hero-wrap {
+      padding: 2rem 0 1.25rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 1.2rem;
+      grid-template-columns: 1fr;
+      align-items: start;
+    }
+
+    .hero-copy h1 {
+      font-size: clamp(2.2rem, 5vw, 4.8rem) !important;
+      line-height: 1.02 !important;
+      letter-spacing: -0.03em;
+      margin: 0;
+      max-width: 16ch;
+    }
+
+    .hero-tagline {
+      margin-top: 1rem;
+      font-size: 1.02rem;
+      color: var(--sl-color-gray-3);
+      max-width: 56ch;
+    }
+
+    .hero-cta-row {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-search {
+      margin-top: 1rem;
+      max-width: 36rem;
+    }
+
+    .hero-panel {
+      border: 1px solid var(--sl-color-hairline);
+      background: color-mix(in srgb, var(--sl-color-gray-6) 22%, transparent);
+      border-radius: 16px;
+      padding: 1rem;
+    }
+
+    .hero-panel h3 {
+      margin: 0;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+      color: var(--sl-color-gray-3);
+    }
+
+    .hero-panel ul {
+      list-style: none;
+      margin: 0.8rem 0 0;
+      padding: 0;
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .hero-panel a {
+      text-decoration: none;
       color: var(--sl-color-white);
-    }
-    .search-container {
-      width: 90%;
-      margin: auto;
-      border: 1px solid
-        color-mix(in srgb, var(--sl-color-white) 5%, transparent);
+      border-bottom: 1px dashed color-mix(in srgb, var(--sl-color-gray-4) 50%, transparent);
+      padding-bottom: 0.2rem;
+      transition: color 0.2s ease;
     }
 
-    .badges {
-      background-color: color-mix(
-        in srgb,
-        var(--sl-color-white) 3%,
-        transparent
-      );
-    }
-    .badge {
-      background: color-mix(in srgb, var(--sl-color-white) 7%, transparent);
-      font-size: 14px;
-    }
-    .badge:hover {
-      background: color-mix(in srgb, var(--sl-color-white) 15%, transparent);
+    .hero-panel a:hover {
+      color: var(--sl-color-accent);
     }
 
-    @media (max-width: 940px) {
-      h1 {
-        font-size: 3.5rem !important;
-        line-height: 3.5rem !important;
-        letter-spacing: -2px;
-      }
-      .search-container {
-        width: 100%;
+    @media (min-width: 980px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
       }
     }
   }
 </style>
-<script>
-  const iconElements = document.querySelector("[data-icon-path]");
-  const heroSection = document.querySelector(".hero");
-  const header = document.querySelector(".header");
-  const heroBG = document.querySelector(".hero-bg") as HTMLElement;
-
-  const totalHeight =
-    (heroSection?.clientHeight || 0) + (header?.clientHeight || 0) + 24;
-
-  heroBG.style.height = `${totalHeight}px`;
-
-  // make image element and add the path to src
-  if (iconElements) {
-    const iconPath = iconElements.getAttribute("data-icon-path");
-
-    const img = document.createElement("img");
-    img.src = `/${iconPath}` || "";
-    img.alt = "icon";
-    img.className =
-      "hidden lg:inline-block size-20 -mb-2 rounded-2xl animate-[bounce_2s_ease-in-out_infinite]";
-    iconElements.replaceWith(img);
-  }
-</script>

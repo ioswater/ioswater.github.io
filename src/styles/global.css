@@ -8,114 +8,42 @@
 @plugin "../tailwind-plugin/tw-bs-grid";
 
 :root {
-  --sl-color-accent-low: color-mix(in srgb, var(--color-primary), #000 90%);
+  --sl-color-accent-low: color-mix(in srgb, var(--color-primary), #000 86%);
   --sl-color-accent: var(--color-primary);
-  --sl-color-accent-high: color-mix(in srgb, var(--color-primary), #fff 70%);
+  --sl-color-accent-high: color-mix(in srgb, var(--color-primary), #fff 74%);
 
   --sl-color-white: var(--color-light);
-  --sl-color-gray-1: color-mix(
-    in srgb,
-    var(--color-dark) 6%,
-    var(--color-light) 94%
-  ); /* #eeeeee */
-  --sl-color-gray-2: color-mix(
-    in srgb,
-    var(--color-dark) 24%,
-    var(--color-light) 76%
-  ); /* #c2c2c2 */
-  --sl-color-gray-3: color-mix(
-    in srgb,
-    var(--color-dark) 45%,
-    var(--color-light) 55%
-  ); /* #8b8b8b */
-  --sl-color-gray-4: color-mix(
-    in srgb,
-    var(--color-dark) 65%,
-    var(--color-light) 35%
-  ); /* #585858 */
-  --sl-color-gray-5: color-mix(
-    in srgb,
-    var(--color-dark) 78%,
-    var(--color-light) 22%
-  ); /* #383838 */
-  --sl-color-gray-6: color-mix(
-    in srgb,
-    var(--color-dark) 85%,
-    var(--color-light) 15%
-  ); /* #272727 */
-
-  /* color-dark: #040404 */
+  --sl-color-gray-1: color-mix(in srgb, var(--color-dark) 8%, var(--color-light) 92%);
+  --sl-color-gray-2: color-mix(in srgb, var(--color-dark) 22%, var(--color-light) 78%);
+  --sl-color-gray-3: color-mix(in srgb, var(--color-dark) 42%, var(--color-light) 58%);
+  --sl-color-gray-4: color-mix(in srgb, var(--color-dark) 62%, var(--color-light) 38%);
+  --sl-color-gray-5: color-mix(in srgb, var(--color-dark) 79%, var(--color-light) 21%);
+  --sl-color-gray-6: color-mix(in srgb, var(--color-dark) 88%, var(--color-light) 12%);
   --sl-color-black: var(--color-dark);
-  --sl-sidebar-width: 320px;
-  --sl-color-hairline: color-mix(
-    in srgb,
-    var(--sl-color-white) 10%,
-    transparent
-  );
-  --sl-color-hairline-light:#252525;
+  --sl-sidebar-width: 300px;
+  --sl-color-hairline: color-mix(in srgb, var(--sl-color-white) 12%, transparent);
 }
 
-/* Light mode colors. */
 :root[data-theme="light"] {
-  --sl-color-accent-low: color-mix(
-    in srgb,
-    var(--color-lightmode-primary),
-    #fff 70%
-  );
+  --sl-color-accent-low: color-mix(in srgb, var(--color-lightmode-primary), #fff 72%);
   --sl-color-accent: var(--color-lightmode-primary);
-  --sl-color-accent-high: color-mix(
-    in srgb,
-    var(--color-lightmode-primary),
-    #000 90%
-  );
-  /* color-lightmode-light: #181818 */
+  --sl-color-accent-high: color-mix(in srgb, var(--color-lightmode-primary), #001 84%);
+
   --sl-color-white: var(--color-lightmode-light);
-  --sl-color-gray-1: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 15%,
-    var(--color-lightmode-light) 85%
-  ); /* #272727 */
-  --sl-color-gray-2: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 22%,
-    var(--color-lightmode-light) 78%
-  ); /* #383838 */
-  --sl-color-gray-3: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 35%,
-    var(--color-lightmode-light) 65%
-  ); /* #585858 */
-  --sl-color-gray-4: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 55%,
-    var(--color-lightmode-light) 45%
-  ); /* #8b8b8b */
-  --sl-color-gray-5: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 76%,
-    var(--color-lightmode-light) 24%
-  ); /* #c2c2c2 */
-  --sl-color-gray-6: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 94%,
-    var(--color-lightmode-light) 6%
-  ); /* #eeeeee */
-  --sl-color-gray-7: color-mix(
-    in srgb,
-    var(--color-lightmode-dark) 96%,
-    var(--color-lightmode-light) 4%
-  ); /* #f6f6f6 */
-
-
+  --sl-color-gray-1: color-mix(in srgb, var(--color-lightmode-dark) 12%, var(--color-lightmode-light) 88%);
+  --sl-color-gray-2: color-mix(in srgb, var(--color-lightmode-dark) 25%, var(--color-lightmode-light) 75%);
+  --sl-color-gray-3: color-mix(in srgb, var(--color-lightmode-dark) 47%, var(--color-lightmode-light) 53%);
+  --sl-color-gray-4: color-mix(in srgb, var(--color-lightmode-dark) 66%, var(--color-lightmode-light) 34%);
+  --sl-color-gray-5: color-mix(in srgb, var(--color-lightmode-dark) 81%, var(--color-lightmode-light) 19%);
+  --sl-color-gray-6: color-mix(in srgb, var(--color-lightmode-dark) 92%, var(--color-lightmode-light) 8%);
   --sl-color-black: var(--color-lightmode-dark);
 }
 
 @theme {
   --color-primary-gradient: linear-gradient(
-    35.65deg,
-    #3a1c71 -10.94%,
-    var(--color-primary) 61.04%,
-    #ffca7b 133.01%
+    135deg,
+    color-mix(in srgb, var(--sl-color-accent) 80%, #38bdf8 20%),
+    color-mix(in srgb, var(--sl-color-accent) 68%, #1d4ed8 32%)
   );
 }
 
@@ -123,4 +51,3 @@
 @import "./navigation.css";
 @import "./components.css";
 @import "./button.css";
-

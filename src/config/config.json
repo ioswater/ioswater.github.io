@@ -1,10 +1,10 @@
 {
   "site": {
-    "title": "LiuLuit Docs",
-    "logo": "/src/assets/logo-light.svg",
-    "logo_darkmode": "/src/assets/logo-dark.svg",
-    "logo_width": "127",
-    "logo_height": "32",
+    "title": "LiuLuit Tech Blog",
+    "logo": "",
+    "logo_darkmode": "",
+    "logo_width": "0",
+    "logo_height": "0",
     "logo_text": "LiuLuit"
   },
   "settings": {
@@ -16,14 +16,14 @@
       "enable": false,
       "action": "#"
     },
-    "copyright": "&copy; 2026 LiuLuit. Built with Astro + Starlight."
+    "copyright": "&copy; 2026 LiuLuit. Notes on iOS, AI architecture, and real projects."
   },
   "navigation_button": {
     "enable": true,
-    "label": "开始阅读",
+    "label": "进入博客",
     "translations": {
-      "en": "Get Started"
+      "en": "Open Blog"
     },
-    "link": "/getting-started/quickstart/"
+    "link": "/blog/"
   }
 }

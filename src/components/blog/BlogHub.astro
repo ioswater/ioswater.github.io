@@ -1,0 +1,453 @@
+---
+interface BlogPost {
+  title: string;
+  description: string;
+  url: string;
+  category: string;
+  categoryLabel: string;
+  date: string;
+}
+
+const { posts = [], locale = "zh-CN" } = Astro.props as {
+  posts?: BlogPost[];
+  locale?: string;
+};
+const isEn = locale === "en";
+
+const labels = isEn
+  ? {
+      title: "Blog Hub",
+      subtitle: "Search by keyword, filter by category and date, then jump to the exact note.",
+      search: "Search title or summary",
+      category: "Category",
+      startDate: "Start",
+      endDate: "End",
+      sort: "Sort",
+      newest: "Newest first",
+      oldest: "Oldest first",
+      clear: "Clear",
+      hierarchy: "Directory Layers",
+      latest: "Latest Update",
+      total: "Total Posts",
+      empty: "No posts matched the current filter.",
+      read: "Read",
+      all: "All categories"
+    }
+  : {
+      title: "博客聚合页",
+      subtitle: "按关键词搜索、按分类和时间筛选，快速定位到具体文章。",
+      search: "搜索标题或摘要",
+      category: "分类",
+      startDate: "开始日期",
+      endDate: "结束日期",
+      sort: "排序",
+      newest: "最新优先",
+      oldest: "最早优先",
+      clear: "清空",
+      hierarchy: "目录分层",
+      latest: "最近更新",
+      total: "文章总数",
+      empty: "当前筛选条件下没有文章。",
+      read: "阅读全文",
+      all: "全部分类"
+    };
+
+const latestDate = posts.length ? posts.map((p) => p.date).sort().at(-1) : "-";
+const categoryOrder = [...new Set(posts.map((p) => p.category))];
+const categories = categoryOrder.map((key) => ({
+  key,
+  label: posts.find((p) => p.category === key)?.categoryLabel || key,
+  count: posts.filter((p) => p.category === key).length
+}));
+---
+
+<section class="blog-hub">
+  <header class="hub-header">
+    <div>
+      <h1>{labels.title}</h1>
+      <p>{labels.subtitle}</p>
+    </div>
+    <div class="hub-stats">
+      <div>
+        <span>{labels.total}</span>
+        <strong>{posts.length}</strong>
+      </div>
+      <div>
+        <span>{labels.latest}</span>
+        <strong>{latestDate}</strong>
+      </div>
+    </div>
+  </header>
+
+  <div class="hub-controls">
+    <input id="blog-q" type="search" placeholder={labels.search} />
+
+    <select id="blog-category" aria-label={labels.category}>
+      <option value="">{labels.all}</option>
+      {categories.map((c) => <option value={c.key}>{c.label}</option>)}
+    </select>
+
+    <input id="blog-start" type="date" aria-label={labels.startDate} />
+    <input id="blog-end" type="date" aria-label={labels.endDate} />
+
+    <select id="blog-sort" aria-label={labels.sort}>
+      <option value="newest">{labels.newest}</option>
+      <option value="oldest">{labels.oldest}</option>
+    </select>
+
+    <button id="blog-clear" type="button">{labels.clear}</button>
+  </div>
+
+  <div class="hub-layout">
+    <aside class="hub-tree">
+      <h2>{labels.hierarchy}</h2>
+      <ul>
+        {categories.map((c) => (
+          <li>
+            <button class="tree-filter" data-category={c.key}>
+              <span>{c.label}</span>
+              <em>{c.count}</em>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </aside>
+
+    <div>
+      <div id="blog-result-meta" class="result-meta"></div>
+      <div id="blog-list" class="blog-list"></div>
+    </div>
+  </div>
+</section>
+
+<script is:inline id="blog-posts-data" type="application/json" set:html={JSON.stringify(posts)}></script>
+<script is:inline id="blog-labels-data" type="application/json" set:html={JSON.stringify(labels)}></script>
+
+<script>
+  interface BlogPostClient {
+    title: string;
+    description: string;
+    url: string;
+    category: string;
+    categoryLabel: string;
+    date: string;
+  }
+
+  interface BlogLabels {
+    empty: string;
+    read: string;
+  }
+
+  const posts = JSON.parse(document.getElementById("blog-posts-data")?.textContent || "[]") as BlogPostClient[];
+  const labels = JSON.parse(document.getElementById("blog-labels-data")?.textContent || "{}") as BlogLabels;
+
+  const qEl = document.getElementById("blog-q") as HTMLInputElement | null;
+  const catEl = document.getElementById("blog-category") as HTMLSelectElement | null;
+  const startEl = document.getElementById("blog-start") as HTMLInputElement | null;
+  const endEl = document.getElementById("blog-end") as HTMLInputElement | null;
+  const sortEl = document.getElementById("blog-sort") as HTMLSelectElement | null;
+  const clearEl = document.getElementById("blog-clear") as HTMLButtonElement | null;
+  const listEl = document.getElementById("blog-list") as HTMLDivElement | null;
+  const metaEl = document.getElementById("blog-result-meta") as HTMLDivElement | null;
+  const treeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".tree-filter"));
+
+  if (!listEl || !metaEl) {
+    console.warn("BlogHub mount skipped: missing list or meta container.");
+  } else {
+    const parse = (v: string): number | null => (v ? new Date(v).getTime() : null);
+
+    const syncTreeState = (currentCategory: string) => {
+      treeButtons.forEach((btn) => {
+        const isActive = currentCategory !== "" && btn.dataset.category === currentCategory;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-pressed", String(isActive));
+      });
+    };
+
+    const render = () => {
+      const q = (qEl?.value || "").trim().toLowerCase();
+      const category = catEl?.value || "";
+      const start = parse(startEl?.value || "");
+      const end = parse(endEl?.value || "");
+      const sort = sortEl?.value || "newest";
+
+      const filtered: BlogPostClient[] = posts.filter((p: BlogPostClient) => {
+        const matchedText = !q || `${p.title} ${p.description}`.toLowerCase().includes(q);
+        const matchedCategory = !category || p.category === category;
+        const t = parse(p.date);
+        const matchedStart = !start || (t !== null && t >= start);
+        const matchedEnd = !end || (t !== null && t <= end);
+        return matchedText && matchedCategory && matchedStart && matchedEnd;
+      });
+
+      filtered.sort((a: BlogPostClient, b: BlogPostClient) => {
+        if (sort === "oldest") return a.date.localeCompare(b.date);
+        return b.date.localeCompare(a.date);
+      });
+
+      metaEl.textContent = `${filtered.length} / ${posts.length}`;
+      syncTreeState(category);
+
+      if (!filtered.length) {
+        listEl.innerHTML = `<div class=\"empty\">${labels.empty}</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered
+        .map(
+          (p: BlogPostClient) => `
+          <article class=\"post-card\">
+            <div class=\"post-head\">
+              <span class=\"post-cat\">${p.categoryLabel}</span>
+              <time datetime=\"${p.date}\">${p.date}</time>
+            </div>
+            <h3>${p.title}</h3>
+            <p>${p.description || ""}</p>
+            <a href=\"${p.url}\">${labels.read}</a>
+          </article>
+        `
+        )
+        .join("");
+    };
+
+    [qEl, catEl, startEl, endEl, sortEl].forEach((el) => el?.addEventListener("input", render));
+    clearEl?.addEventListener("click", () => {
+      if (qEl) qEl.value = "";
+      if (catEl) catEl.value = "";
+      if (startEl) startEl.value = "";
+      if (endEl) endEl.value = "";
+      if (sortEl) sortEl.value = "newest";
+      render();
+    });
+
+    treeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.category || "";
+        if (catEl) catEl.value = target;
+        render();
+      });
+    });
+
+    render();
+  }
+</script>
+
+<style>
+  .blog-hub {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem 2rem;
+  }
+
+  .hub-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .hub-header h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    letter-spacing: -0.03em;
+  }
+
+  .hub-header p {
+    margin: 0.6rem 0 0;
+    max-width: 60ch;
+    color: var(--sl-color-gray-3);
+  }
+
+  .hub-stats {
+    display: grid;
+    gap: 0.6rem;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .hub-stats div {
+    padding: 0.8rem;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 16%, transparent);
+  }
+
+  .hub-stats span {
+    display: block;
+    color: var(--sl-color-gray-3);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .hub-stats strong {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+  }
+
+  .hub-controls {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)) auto;
+    gap: 0.55rem;
+    margin-bottom: 1rem;
+  }
+
+  .hub-controls input,
+  .hub-controls select,
+  .hub-controls button {
+    border: 1px solid var(--sl-color-hairline);
+    background: color-mix(in srgb, var(--sl-color-black) 84%, transparent);
+    color: var(--sl-color-white);
+    border-radius: 10px;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+  }
+
+  .hub-controls button {
+    cursor: pointer;
+  }
+
+  .hub-layout {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .hub-tree {
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 14px;
+    padding: 0.9rem;
+    height: fit-content;
+    position: sticky;
+    top: 6.2rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 16%, transparent);
+  }
+
+  .hub-tree h2 {
+    margin: 0;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--sl-color-gray-3);
+  }
+
+  .hub-tree ul {
+    list-style: none;
+    margin: 0.8rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .tree-filter {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    border: 1px solid var(--sl-color-hairline);
+    background: transparent;
+    color: var(--sl-color-white);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    cursor: pointer;
+  }
+
+  .tree-filter:hover {
+    border-color: color-mix(in srgb, var(--sl-color-accent) 52%, transparent);
+    color: var(--sl-color-accent);
+  }
+
+  .tree-filter.active {
+    border-color: color-mix(in srgb, var(--sl-color-accent) 52%, transparent);
+    background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
+    color: var(--sl-color-accent-high);
+  }
+
+  .tree-filter em {
+    font-style: normal;
+    opacity: 0.72;
+  }
+
+  .result-meta {
+    margin-bottom: 0.7rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.9rem;
+  }
+
+  .blog-list {
+    display: grid;
+    gap: 0.8rem;
+  }
+
+  .post-card {
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 14px;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 18%, transparent);
+  }
+
+  .post-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .post-cat {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--sl-color-gray-3);
+  }
+
+  .post-card time {
+    color: var(--sl-color-gray-3);
+    font-size: 0.83rem;
+  }
+
+  .post-card h3 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .post-card p {
+    margin: 0.55rem 0;
+    color: var(--sl-color-gray-3);
+  }
+
+  .post-card a {
+    text-decoration: none;
+    color: var(--sl-color-accent);
+    font-weight: 600;
+  }
+
+  .empty {
+    border: 1px dashed var(--sl-color-hairline);
+    border-radius: 12px;
+    padding: 1.2rem;
+    color: var(--sl-color-gray-3);
+  }
+
+  :root[data-theme="light"] .hub-controls input,
+  :root[data-theme="light"] .hub-controls select,
+  :root[data-theme="light"] .hub-controls button {
+    background: color-mix(in srgb, var(--sl-color-white) 88%, transparent);
+    color: var(--sl-color-black);
+  }
+
+  @media (max-width: 980px) {
+    .hub-controls {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .hub-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .hub-tree {
+      position: static;
+    }
+  }
+</style>

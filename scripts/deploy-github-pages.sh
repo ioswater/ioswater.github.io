@@ -50,7 +50,7 @@ fi
 
 git config user.name "${GIT_COMMITTER_NAME:-codex-deploy-bot}"
 git config user.email "${GIT_COMMITTER_EMAIL:-codex-deploy-bot@users.noreply.github.com}"
-git commit -m "deploy: publish Dockit Astro site ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
+git commit -m "deploy: publish liuluit docs site ($(date -u +"%Y-%m-%dT%H:%M:%SZ"))"
 git push origin "$DEPLOY_BRANCH"
 
 echo "Deploy completed successfully."

@@ -1,28 +1,31 @@
 .btn {
-  @apply inline-block no-underline  px-5 py-2 font-medium capitalize transition;
+  @apply inline-flex items-center justify-center no-underline px-4 py-2.5 text-sm font-semibold rounded-xl transition;
 }
 
 .btn-primary {
   background: var(--color-primary-gradient);
-  @apply text-white hover:brightness-105 rounded-xl py-3;
-}
-.btn-outline-primary {
-  @apply relative rounded-xl py-3 px-6 border-none text-lightmode-text dark:text-text  hover:text-text! dark:hover:text-text;
-  color: var(--sl-color-white);
-}
-.btn-outline-primary:hover {
-  background: var(--color-primary-gradient);
-  color: #fff !important;
+  color: #f8fbff;
 }
 
-.btn-outline-primary::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 2px;
-  background: var(--color-primary-gradient);
-  border-radius: inherit;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask-composite: xor;
+.btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.btn-secondary,
+.btn-outline-primary {
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-white);
+  background: color-mix(in srgb, var(--sl-color-black) 78%, transparent);
+}
+
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-outline-primary {
+  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
+}
+
+.btn-secondary:hover,
+.btn-outline-primary:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+  color: var(--sl-color-accent);
 }

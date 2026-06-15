@@ -12,7 +12,7 @@ h3,
 h4,
 h5,
 h6 {
-  @apply  font-bold leading-tight;
+  @apply font-semibold leading-tight;
   color: var(--sl-color-white);
 }
 
@@ -46,13 +46,17 @@ h6,
   @apply text-h6;
 }
 
+a {
+  color: color-mix(in srgb, var(--sl-color-accent) 84%, var(--sl-color-white) 16%);
+}
+
+a:hover {
+  color: var(--sl-color-accent);
+}
+
 b,
 strong {
   @apply font-semibold;
-}
-
-code {
-  @apply after:border-none;
 }
 
 blockquote > p {

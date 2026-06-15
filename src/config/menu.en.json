@@ -1,75 +1,43 @@
 {
   "main": [
+    { "name": "Home", "url": "/en/" },
+    { "name": "Blog", "url": "/en/blog/" },
     {
-      "name": "Home",
-      "url": "/en/"
-    },
-    {
-      "name": "Getting Started",
-      "url": "/en/getting-started/quickstart/"
-    },
-    {
-      "name": "Operations",
+      "name": "Categories",
       "url": "",
       "hasChildren": true,
       "children": [
-        {
-          "name": "Deployment",
-          "url": "/en/operations/deployment-options/"
-        },
-        {
-          "name": "Release Checklist",
-          "url": "/en/operations/release-checklist/"
-        }
+        { "name": "iOS Fundamentals", "url": "/en/ios-basics/swift-concurrency-basics/" },
+        { "name": "AI Architecture", "url": "/en/ai-project-architecture/rag-system-architecture/" },
+        { "name": "Projects", "url": "/en/personal-projects/liuluit-docs-evolution/" },
+        { "name": "About", "url": "/en/profile/about-me/" }
       ]
     }
   ],
   "footer": {
     "community": {
-      "title": "Collaboration",
+      "title": "Community",
       "links": [
-        {
-          "name": "GitHub Issues",
-          "url": "https://github.com/"
-        },
-        {
-          "name": "Release Notes",
-          "url": "/en/content/release-notes/"
-        }
+        { "name": "Blog Hub", "url": "/en/blog/" },
+        { "name": "Release Notes", "url": "/en/content/release-notes/" },
+        { "name": "GitHub", "url": "https://github.com/ioswater" }
       ]
     },
     "help_links": {
-      "title": "Documentation",
+      "title": "Sections",
       "links": [
-        {
-          "name": "Quickstart",
-          "url": "/en/getting-started/quickstart/"
-        },
-        {
-          "name": "Architecture",
-          "url": "/en/architecture/system-overview/"
-        },
-        {
-          "name": "Publishing Workflow",
-          "url": "/en/content/authoring-and-review/"
-        }
+        { "name": "iOS Fundamentals", "url": "/en/ios-basics/swift-concurrency-basics/" },
+        { "name": "AI Project Architecture", "url": "/en/ai-project-architecture/rag-system-architecture/" },
+        { "name": "Personal Projects", "url": "/en/personal-projects/liuluit-docs-evolution/" },
+        { "name": "About Me", "url": "/en/profile/about-me/" }
       ]
     },
     "company": {
       "title": "Operations",
       "links": [
-        {
-          "name": "Deployment",
-          "url": "/en/operations/deployment-options/"
-        },
-        {
-          "name": "CI/CD",
-          "url": "/en/operations/ci-cd/"
-        },
-        {
-          "name": "Migration",
-          "url": "/en/migration/from-hexo/"
-        }
+        { "name": "Authoring Workflow", "url": "/en/content/authoring-and-review/" },
+        { "name": "Deployment", "url": "/en/operations/deployment-options/" },
+        { "name": "Release Checklist", "url": "/en/operations/release-checklist/" }
       ]
     }
   }

@@ -6,7 +6,7 @@ description: 旧站资源保留策略与后续迁移路径。
 ## 已完成迁移
 
 - 原站静态文件已整体移动至 `legacy/hexo-export/`。
-- 新站点已切换为 Dockit + Astro 文档架构。
+- 新站点已切换为 Starlight + Astro 文档架构。
 
 ## 为什么保留 legacy
 

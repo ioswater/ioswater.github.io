@@ -1,120 +1,109 @@
-
-.no-sidebar{
-  @apply py-3;
-}
-.has-sidebar{
-  @apply  lg:z-100;
+.top-nav {
+  @apply relative flex items-center justify-between gap-4 py-2;
 }
 
-/* navbar items */
-.has-sidebar .navbar{
-  @apply justify-stretch
-}
-.has-sidebar .search-bar{
-  @apply xl:w-[350px] mr-4 lg:mr-12 
-}
-.has-sidebar .navbar-actions{
-  @apply ml-auto;
-}
-.has-sidebar .search-bar button[data-open-modal]{
-  @apply md:h-[2.7rem] h-[2rem] rounded-full p-1 md:p-1.5 md:px-2.5 md:rounded-lg
-}
-.has-sidebar .search-bar span {
-  @apply hidden md:inline-block
-}
-.has-sidebar .search-bar kbd {
-  @apply hidden md:inline-block
+.brand-wrap {
+  @apply flex items-center gap-2;
 }
 
-.navbar {
-  @apply relative flex flex-wrap items-center justify-between ;
-}
-.navbar-scrolled{
-  @apply bg-lightmode-body dark:bg-body;
-}
 .navbar-brand {
-  @apply  text-xl font-semibold flex items-center select-none;
-  image {
-    @apply max-h-full max-w-full;
-  }
+  @apply no-underline text-white text-lg font-semibold;
 }
 
-#nav-menu {
-  @apply list-none;
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--sl-color-accent);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
 }
-.navbar-nav {
-  @apply text-center lg:text-left select-none;
+
+.nav-toggle {
+  @apply md:hidden inline-flex flex-col gap-1.5 cursor-pointer;
+}
+
+.nav-toggle span {
+  @apply block h-0.5 w-5 rounded bg-lightmode-light dark:bg-light;
+}
+
+.nav-menu {
+  @apply hidden md:flex items-center gap-1 md:gap-2 list-none m-0 p-0;
+}
+
+.nav-menu.open {
+  @apply block absolute top-[3.4rem] left-0 right-0 p-3 rounded-xl border;
+  border-color: var(--sl-color-hairline);
+  background: color-mix(in srgb, var(--sl-color-black) 92%, transparent);
+}
+
+.nav-item {
+  @apply relative;
 }
 
 .nav-link {
-  @apply  hover:text-lightmode-primary! dark:hover:text-primary block p-3 cursor-pointer font-medium transition lg:px-2 lg:py-3 no-underline;
-  color: color-mix(in srgb, var(--sl-color-white) 90%, transparent);
+  @apply no-underline text-sm px-3 py-2 rounded-lg transition-colors;
+  color: color-mix(in srgb, var(--sl-color-white) 88%, transparent);
 }
 
-.nav-dropdown {
-  @apply mr-0;
-}
-
-.nav-dropdown > svg {
-  @apply pointer-events-none;
-}
-
-.nav-dropdown.active .nav-dropdown-list {
-  @apply block;
+.nav-link:hover,
+.nav-link.active {
+  color: var(--sl-color-white);
+  background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
 }
 
 .nav-dropdown-list {
-  @apply list-none z-10 min-w-[180px] rounded p-4 shadow-sm hidden lg:absolute lg:block bg-lightmode-dark dark:bg-dark;
+  @apply hidden md:absolute top-[2.4rem] left-0 z-20 min-w-[220px] p-2 rounded-xl border;
+  border-color: var(--sl-color-hairline);
+  background: color-mix(in srgb, var(--sl-color-black) 92%, transparent);
 }
 
-.nav-dropdown-item {
-  @apply [&:not(:last-child)]:mb-2;
+.nav-dropdown.open .nav-dropdown-list,
+.nav-dropdown:hover .nav-dropdown-list {
+  @apply block;
 }
 
 .nav-dropdown-link {
-  @apply hover:text-lightmode-primary  dark:hover:text-lightmode-primary block py-1 font-medium transition  no-underline;
-  color: color-mix(in srgb, var(--sl-color-white) 90%, transparent);
+  @apply block no-underline text-sm px-3 py-2 rounded-md;
+  color: color-mix(in srgb, var(--sl-color-white) 86%, transparent);
 }
 
-/* navbar toggler */
-.no-sidebar.hamburger-menu {
-  @apply lg:hidden;
-}
-.has-sidebar .hamburger-menu {
-  @apply hidden;
-}
-input#nav-toggle:checked + label #show-button {
-  @apply hidden;
+.nav-dropdown-link:hover,
+.nav-dropdown-link.active {
+  color: var(--sl-color-white);
+  background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
 }
 
-input#nav-toggle:checked + label #hide-button {
-  @apply block;
+.nav-actions {
+  @apply flex items-center gap-2;
 }
 
-input#nav-toggle:checked ~ #nav-menu {
-  @apply block;
+.nav-mobile-cta {
+  @apply mt-2 md:hidden;
 }
-/* theme-switcher */
+
+.nav-desktop-cta {
+  @apply hidden md:inline-flex;
+}
+
 .theme-switcher {
-  @apply inline-flex border border-lightmode-light/10! dark:border-light/10!  rounded-full py-2 px-1  bg-lightmode-dark dark:bg-dark;
-
-  label {
-    @apply relative h-4 w-6 cursor-pointer rounded-2xl lg:w-13 bg-transparent flex justify-between items-center;
-  }
-
-  input {
-    @apply absolute opacity-0;
-  }
-
-  span {
-    @apply bg-dark absolute -top-1 left-0 flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300 dark:bg-white;
-  }
-
-  input:checked + label {
-    span {
-      @apply lg:left-7;
-    }
-  }
+  @apply inline-flex border rounded-full py-1.5 px-1;
+  border-color: var(--sl-color-hairline);
+  background: color-mix(in srgb, var(--sl-color-black) 86%, transparent);
 }
 
+.theme-switcher label {
+  @apply relative h-4 w-12 cursor-pointer rounded-full bg-transparent flex justify-between items-center;
+}
 
+.theme-switcher input {
+  @apply absolute opacity-0;
+}
+
+.theme-switcher span {
+  @apply absolute -top-1 left-0 flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300;
+  background: color-mix(in srgb, var(--sl-color-accent) 28%, var(--sl-color-white) 72%);
+}
+
+.theme-switcher input:checked + label span {
+  @apply left-6;
+}

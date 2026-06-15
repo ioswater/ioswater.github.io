@@ -2,17 +2,23 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
-
 import tailwindcss from "@tailwindcss/vite";
 import config from "./src/config/config.json";
 import social from "./src/config/social.json";
 import locals from "./src/config/locals.json";
 import sidebar from "./src/config/sidebar.json";
-
 import { fileURLToPath } from "url";
 
 const { site } = config;
 const { title, logo, logo_darkmode } = site;
+
+const logoConfig = logo
+  ? {
+      light: logo,
+      dark: logo_darkmode || logo,
+      alt: "LiuLuit"
+    }
+  : undefined;
 
 export const locales = locals;
 
@@ -25,11 +31,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title,
-      logo: {
-        light: logo,
-        dark: logo_darkmode,
-        alt: "LiuLuit Docs"
-      },
+      logo: logoConfig,
       // @ts-ignore
       social: social.main || [],
       locales,
@@ -45,7 +47,8 @@ export default defineConfig({
           "./src/components/override-components/TwoColumnContent.astro",
         ContentPanel: "./src/components/override-components/ContentPanel.astro",
         Pagination: "./src/components/override-components/Pagination.astro",
-        Sidebar: "./src/components/override-components/Sidebar.astro"
+        Sidebar: "./src/components/override-components/Sidebar.astro",
+        Footer: "./src/components/override-components/Footer.astro"
       }
     })
   ],
