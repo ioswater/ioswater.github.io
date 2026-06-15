@@ -1,51 +1,11 @@
 ---
 import { getCollection } from "astro:content";
-import BlogHub from "@/components/blog/BlogHub.astro";
+import BlogHubPage from "@/components/blog/BlogHubPage.astro";
+import { buildBlogHubPosts } from "@/lib/utils/blogHub";
 import "@/styles/global.css";
 
-const categoryMap: Record<string, string> = {
-  "ios-basics": "iOS 基础知识",
-  "ai-project-architecture": "AI 项目实战架构",
-  "personal-projects": "个人项目",
-  "profile": "个人简介"
-};
-
 const docs = await getCollection("docs");
-
-interface HubPost {
-  title: string;
-  description: string;
-  url: string;
-  category: string;
-  categoryLabel: string;
-  date: string;
-}
-
-const toDate = (lastUpdated: Date | boolean | undefined): string => {
-  if (lastUpdated instanceof Date && !Number.isNaN(lastUpdated.getTime())) {
-    return lastUpdated.toISOString().slice(0, 10);
-  }
-
-  return "1970-01-01";
-};
-
-const posts = docs.reduce<HubPost[]>((acc, entry) => {
-  if (!entry.id.startsWith("en/")) {
-    const seg = entry.id.split("/")[0];
-    if (!categoryMap[seg]) return acc;
-
-    acc.push({
-      title: entry.data.title,
-      description: entry.data.description || "",
-      url: `/${entry.id}/`,
-      category: seg,
-      categoryLabel: categoryMap[seg],
-      date: toDate(entry.data.lastUpdated)
-    });
-  }
-
-  return acc;
-}, []);
+const posts = buildBlogHubPosts(docs, "zh-CN");
 ---
 
 <html lang="zh-CN">
@@ -54,8 +14,16 @@ const posts = docs.reduce<HubPost[]>((acc, entry) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>博客聚合页 | LiuLuit Tech Blog</title>
     <meta name="description" content="按关键词、分类和日期筛选技术文章。" />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <script is:inline>
+      const savedTheme = localStorage.getItem("starlight-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.dataset.theme = savedTheme;
+      }
+    </script>
   </head>
   <body>
-    <BlogHub posts={posts} locale="zh-CN" />
+    <BlogHubPage posts={posts} locale="zh-CN" />
   </body>
 </html>

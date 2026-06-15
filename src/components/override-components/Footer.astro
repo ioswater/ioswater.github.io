@@ -10,6 +10,13 @@ const footer = menu.footer;
 
 <footer class="site-footer">
   <div class="container footer-grid">
+    <div class="footer-brand">
+      <a href={locale === "en" ? "/en/" : "/"} class="footer-brand-link">
+        <img src="/favicon.svg" alt="LiuLuit Mark" width="22" height="22" />
+        <strong>LiuLuit</strong>
+      </a>
+    </div>
+
     <div>
       <h4>{footer.community?.title || "Community"}</h4>
       <ul>
@@ -58,6 +65,24 @@ const footer = menu.footer;
       padding: 2.2rem 0 1.2rem;
     }
 
+    .footer-brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      text-decoration: none;
+      color: var(--sl-color-white);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .footer-brand-link img {
+      border-radius: 8px;
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--sl-color-white) 12%, transparent),
+        0 8px 18px color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
+    }
+
     .footer-grid h4 {
       margin: 0;
       font-size: 0.88rem;
@@ -93,7 +118,7 @@ const footer = menu.footer;
 
     @media (min-width: 860px) {
       .footer-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 0.7fr) repeat(3, minmax(0, 1fr));
       }
     }
   }

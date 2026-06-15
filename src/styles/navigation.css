@@ -1,5 +1,6 @@
 .top-nav {
   @apply relative flex items-center justify-between gap-4 py-2;
+  animation: nav-rise 0.5s ease-out both;
 }
 
 .brand-wrap {
@@ -8,6 +9,32 @@
 
 .navbar-brand {
   @apply no-underline text-white text-lg font-semibold;
+  transition: transform 0.24s ease;
+}
+
+.navbar-brand:hover {
+  transform: translateY(-1px);
+}
+
+.site-title-with-mark {
+  @apply inline-flex items-center gap-2;
+}
+
+.site-title-with-mark img {
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--sl-color-white) 12%, transparent),
+    0 7px 18px color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar-brand:hover .site-title-with-mark img {
+  transform: rotate(-4deg) translateY(-1px);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--sl-color-white) 20%, transparent),
+    0 10px 24px color-mix(in srgb, var(--sl-color-accent) 28%, transparent);
 }
 
 .brand-dot {
@@ -43,18 +70,42 @@
 .nav-link {
   @apply no-underline text-sm px-3 py-2 rounded-lg transition-colors;
   color: color-mix(in srgb, var(--sl-color-white) 88%, transparent);
+  position: relative;
+  overflow: hidden;
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: 0.2rem;
+  height: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--sl-color-accent) 84%, #38bdf8 16%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.25s ease;
 }
 
 .nav-link:hover,
 .nav-link.active {
   color: var(--sl-color-white);
   background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+  transform: translateY(-1px);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
 }
 
 .nav-dropdown-list {
   @apply hidden md:absolute top-[2.4rem] left-0 z-20 min-w-[220px] p-2 rounded-xl border;
   border-color: var(--sl-color-hairline);
   background: color-mix(in srgb, var(--sl-color-black) 92%, transparent);
+  animation: menu-fade 0.22s ease-out both;
 }
 
 .nav-dropdown.open .nav-dropdown-list,
@@ -89,6 +140,12 @@
   @apply inline-flex border rounded-full py-1.5 px-1;
   border-color: var(--sl-color-hairline);
   background: color-mix(in srgb, var(--sl-color-black) 86%, transparent);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.theme-switcher:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--sl-color-accent) 42%, transparent);
 }
 
 .theme-switcher label {
@@ -106,4 +163,40 @@
 
 .theme-switcher input:checked + label span {
   @apply left-6;
+}
+
+@keyframes nav-rise {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menu-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-nav,
+  .nav-dropdown-list {
+    animation: none;
+  }
+
+  .navbar-brand,
+  .site-title-with-mark img,
+  .nav-link,
+  .theme-switcher {
+    transition: none;
+  }
 }

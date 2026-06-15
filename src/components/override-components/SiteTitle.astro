@@ -56,10 +56,11 @@ const {
           />
         )}
       </>
-    ) : logo_text ? (
-      logo_text
     ) : (
-      siteTitle || title
+      <span class="site-title-with-mark">
+        <img src="/favicon.svg" alt="" width="22" height="22" aria-hidden="true" />
+        <span>{logo_text || siteTitle || title}</span>
+      </span>
     )
   }</a
 >

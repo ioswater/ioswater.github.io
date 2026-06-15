@@ -11,6 +11,8 @@ const menu = await getTranslations(locale);
 const { settings, navigation_button } = config;
 const navTranslations = navigation_button.translations as Record<string, string> | undefined;
 const navButtonLabel = navTranslations?.[locale] || navigation_button.label;
+const navLinks = navigation_button.links as Record<string, string> | undefined;
+const navButtonLink = navLinks?.[locale] || navLinks?.root || navigation_button.link;
 const { main }: { main: any[] } = menu;
 const pathname = new URL(Astro.request.url).pathname;
 const hasSidebar = Astro.locals.starlightRoute.hasSidebar;
@@ -59,7 +61,7 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
     {
       navigation_button.enable && (
         <li class="nav-item nav-mobile-cta">
-          <a class="btn btn-primary" href={navigation_button.link}>
+          <a class="btn btn-primary" href={navButtonLink}>
             {navButtonLabel}
           </a>
         </li>
@@ -73,7 +75,7 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
     {settings.theme_switcher && <ThemeSwitch className="mx-2" />}
     {
       navigation_button.enable && (
-        <a class="btn btn-primary nav-desktop-cta" href={navigation_button.link}>
+        <a class="btn btn-primary nav-desktop-cta" href={navButtonLink}>
           {navButtonLabel}
         </a>
       )

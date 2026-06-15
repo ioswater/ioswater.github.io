@@ -24,6 +24,11 @@
     "translations": {
       "en": "Open Blog"
     },
+    "links": {
+      "root": "/blog/",
+      "zh-CN": "/blog/",
+      "en": "/en/blog/"
+    },
     "link": "/blog/"
   }
 }

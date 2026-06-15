@@ -193,10 +193,10 @@ const categories = categoryOrder.map((key) => ({
         return;
       }
 
-      listEl.innerHTML = filtered
-        .map(
-          (p: BlogPostClient) => `
-          <article class=\"post-card\">
+    listEl.innerHTML = filtered
+      .map(
+        (p: BlogPostClient, index: number) => `
+          <article class=\"post-card\" style=\"--idx:${index};\">
             <div class=\"post-head\">
               <span class=\"post-cat\">${p.categoryLabel}</span>
               <time datetime=\"${p.date}\">${p.date}</time>
@@ -234,9 +234,10 @@ const categories = categoryOrder.map((key) => ({
 
 <style>
   .blog-hub {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem 2rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.2rem 0 1.6rem;
   }
 
   .hub-header {
@@ -245,6 +246,7 @@ const categories = categoryOrder.map((key) => ({
     gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 1rem;
+    animation: hub-rise 0.48s ease-out both;
   }
 
   .hub-header h1 {
@@ -291,6 +293,7 @@ const categories = categoryOrder.map((key) => ({
     grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)) auto;
     gap: 0.55rem;
     margin-bottom: 1rem;
+    animation: hub-rise 0.54s ease-out both;
   }
 
   .hub-controls input,
@@ -306,6 +309,19 @@ const categories = categoryOrder.map((key) => ({
 
   .hub-controls button {
     cursor: pointer;
+  }
+
+  .hub-controls input:focus,
+  .hub-controls select:focus,
+  .hub-controls button:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--sl-color-accent) 62%, transparent);
+    outline-offset: 2px;
+    border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
+  }
+
+  .hub-controls button:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 44%, transparent);
   }
 
   .hub-layout {
@@ -351,11 +367,13 @@ const categories = categoryOrder.map((key) => ({
     border-radius: 10px;
     padding: 0.55rem 0.65rem;
     cursor: pointer;
+    transition: border-color 0.22s ease, color 0.22s ease, background-color 0.22s ease, transform 0.22s ease;
   }
 
   .tree-filter:hover {
     border-color: color-mix(in srgb, var(--sl-color-accent) 52%, transparent);
     color: var(--sl-color-accent);
+    transform: translateY(-1px);
   }
 
   .tree-filter.active {
@@ -385,6 +403,16 @@ const categories = categoryOrder.map((key) => ({
     border-radius: 14px;
     padding: 1rem;
     background: color-mix(in srgb, var(--sl-color-gray-6) 18%, transparent);
+    backdrop-filter: blur(8px);
+    transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    animation: card-rise 0.42s ease-out both;
+    animation-delay: calc(var(--idx, 0) * 0.04s);
+  }
+
+  .post-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 38%, transparent);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
   }
 
   .post-head {
@@ -437,6 +465,28 @@ const categories = categoryOrder.map((key) => ({
     color: var(--sl-color-black);
   }
 
+  @keyframes hub-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes card-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (max-width: 980px) {
     .hub-controls {
       grid-template-columns: 1fr 1fr;
@@ -448,6 +498,20 @@ const categories = categoryOrder.map((key) => ({
 
     .hub-tree {
       position: static;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hub-header,
+    .hub-controls,
+    .post-card {
+      animation: none;
+    }
+
+    .tree-filter,
+    .post-card,
+    .hub-controls button {
+      transition: none;
     }
   }
 </style>

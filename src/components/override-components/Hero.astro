@@ -62,6 +62,7 @@ const quickLinks = sidebar
       letter-spacing: -0.03em;
       margin: 0;
       max-width: 16ch;
+      animation: hero-rise 0.55s ease-out both;
     }
 
     .hero-tagline {
@@ -69,6 +70,7 @@ const quickLinks = sidebar
       font-size: 1.02rem;
       color: var(--sl-color-gray-3);
       max-width: 56ch;
+      animation: hero-rise 0.62s ease-out both;
     }
 
     .hero-cta-row {
@@ -76,18 +78,43 @@ const quickLinks = sidebar
       gap: 0.8rem;
       margin-top: 1rem;
       flex-wrap: wrap;
+      animation: hero-rise 0.7s ease-out both;
     }
 
     .hero-search {
       margin-top: 1rem;
       max-width: 36rem;
+      animation: hero-rise 0.78s ease-out both;
     }
 
     .hero-panel {
+      position: relative;
       border: 1px solid var(--sl-color-hairline);
       background: color-mix(in srgb, var(--sl-color-gray-6) 22%, transparent);
       border-radius: 16px;
       padding: 1rem;
+      overflow: hidden;
+      animation: hero-rise 0.68s ease-out both;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          120deg,
+          transparent 8%,
+          color-mix(in srgb, var(--sl-color-accent) 16%, transparent) 28%,
+          transparent 50%
+        );
+      transform: translateX(-80%);
+      transition: transform 0.9s ease;
+    }
+
+    .hero-panel:hover::before {
+      transform: translateX(80%);
     }
 
     .hero-panel h3 {
@@ -111,16 +138,45 @@ const quickLinks = sidebar
       color: var(--sl-color-white);
       border-bottom: 1px dashed color-mix(in srgb, var(--sl-color-gray-4) 50%, transparent);
       padding-bottom: 0.2rem;
-      transition: color 0.2s ease;
+      transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
     }
 
     .hero-panel a:hover {
       color: var(--sl-color-accent);
+      border-color: color-mix(in srgb, var(--sl-color-accent) 55%, transparent);
+      transform: translateX(2px);
+    }
+
+    @keyframes hero-rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @media (min-width: 980px) {
       .hero-grid {
         grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-copy h1,
+      .hero-tagline,
+      .hero-cta-row,
+      .hero-search,
+      .hero-panel {
+        animation: none;
+      }
+
+      .hero-panel::before,
+      .hero-panel a {
+        transition: none;
       }
     }
   }
