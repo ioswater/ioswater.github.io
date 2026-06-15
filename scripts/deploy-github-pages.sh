@@ -9,8 +9,22 @@ echo "[1/5] Installing dependencies"
 cd "$REPO_ROOT"
 npm ci
 
-echo "[2/5] Building static site"
-npm run build
+echo "[2/5] Building static site (with retries)"
+build_ok=0
+for attempt in 1 2 3; do
+  echo "Build attempt ${attempt}/3"
+  if npm run build; then
+    build_ok=1
+    break
+  fi
+  echo "Build failed on attempt ${attempt}; retrying in 5s..."
+  sleep 5
+done
+
+if [[ "$build_ok" -ne 1 ]]; then
+  echo "Build failed after 3 attempts."
+  exit 1
+fi
 
 TMP_DIR="$(mktemp -d)"
 cleanup() {
