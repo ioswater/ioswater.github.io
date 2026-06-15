@@ -1,203 +1,46 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  
-  <title>刘璐-技术博客</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="刘璐-技术博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="刘璐-技术博客">
-<meta property="og:url" content="https://liuluit.com/index.html">
-<meta property="og:site_name" content="刘璐-技术博客">
-<meta property="og:description" content="刘璐-技术博客">
-<meta property="og:locale" content="zh_CN">
-<meta property="article:author" content="IT-Liu">
-<meta name="twitter:card" content="summary">
-  
-    <link rel="alternate" href="/atom.xml" title="刘璐-技术博客" type="application/atom+xml">
-  
-  
-    <link rel="shortcut icon" href="/favicon.png">
-  
-  
-    
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-hero class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>LiuLuit 文档中心 | LiuLuit Docs</title><link rel="canonical" href="https://liuluit.com/"/><link rel="alternate" hreflang="zh-CN" href="https://liuluit.com/"/><link rel="alternate" hreflang="en" href="https://liuluit.com/en/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.4"/><meta name="generator" content="Starlight v0.38.1"/><meta property="og:title" content="LiuLuit 文档中心"/><meta property="og:type" content="article"/><meta property="og:url" content="https://liuluit.com/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="基于 Dockit + Astro 的新一代文档站。"/><meta property="og:site_name" content="LiuLuit Docs"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="基于 Dockit + Astro 的新一代文档站。"/><!-- google font css --><style>@font-face {unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+1F00-1FFF;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;font-weight: 400;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2)} @font-face {unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+1F00-1FFF;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;font-weight: 500;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2)} @font-face {unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2JL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa0ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+1F00-1FFF;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2ZL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa2pL7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7W0Q5n-wU.woff2)} @font-face {unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;font-weight: 600;font-style: normal;font-family: 'Inter';font-display: swap;src: url(https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2)} :root{ --font-primary: 'Inter', '_font_fallback_137752962390', sans-serif; } @font-face { font-family: '_font_fallback_137752962390'; size-adjust: 100.00%; src: local('Arial'); ascent-override: 96.88%; descent-override: 24.12%; line-gap-override: 0.00%; } :root{ --font-secondary: 'undefined', '_font_fallback_1362549374564', sans-serif; }</style><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BYEwNlOD.css">
+<link rel="stylesheet" href="/_astro/Section.CkWzL61B.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script><style>@layer starlight.components{.card:where(.astro-gobme5xh){display:flex;flex-direction:column;border-radius:1rem;position:relative;transition:all .5s ease;border:1px solid var(--sl-color-gray-6)}.card:where(.astro-gobme5xh):before{content:"";position:absolute;inset:0;padding:1px;background:var(--color-primary-gradient);border-radius:inherit;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;-webkit-mask-composite:xor;opacity:0;transition:opacity .5s ease}.card:where(.astro-gobme5xh):hover:before{opacity:1}.title:where(.astro-gobme5xh){font-size:var(--sl-text-h4);color:var(--sl-color-white);line-height:var(--sl-line-height-headings);gap:1rem;align-items:center}.card:where(.astro-gobme5xh) .body:where(.astro-gobme5xh){margin:0;font-size:clamp(var(--sl-text-body))}}@layer starlight.components{.card-grid:where(.astro-ex5q2lsb){display:grid;gap:1rem;grid-template-columns:1fr;margin-top:1.4rem!important}.card-grid:where(.astro-ex5q2lsb)>*{margin-top:0!important}@media(max-width:767px){.card-grid:where(.astro-ex5q2lsb){grid-template-columns:1fr!important;gap:1rem}}@media(min-width:768px)and (max-width:1023px){.card-grid:where(.astro-ex5q2lsb){grid-template-columns:repeat(min(var(--columns),2),1fr);gap:1.5rem}}@media(min-width:1024px){.card-grid:where(.astro-ex5q2lsb){grid-template-columns:repeat(var(--columns),1fr);gap:1.7rem}}@media(min-width:1440px){.card-grid:where(.astro-ex5q2lsb){grid-template-columns:repeat(min(var(--columns),4),1fr);gap:1.8rem;max-width:1400px;margin:0 auto}}}.link-arrow:where(.astro-5eunqzkt){transition:transform .3s ease}a:where(.astro-5eunqzkt):hover .link-arrow:where(.astro-5eunqzkt){transform:translate(4px)}
+</style></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">跳转到内容</a> <div class="page sl-flex astro-cqnilpoy"> <div class="hero-bg astro-cqnilpoy"> <img src="/_astro/hero-bg-light.BvOVB4f8_2hLISe.png" alt="Hero Background Light" loading="eager" decoding="async" fetchpriority="high" width="1920" height="856" class="dark:hidden w-full h-full object-cover astro-cqnilpoy"> <img src="/_astro/hero-bg-dark.C4mslBUl_Z1rly5E.png" alt="Hero Background Dark" loading="eager" decoding="async" fetchpriority="high" width="1920" height="820" class="hidden dark:block w-full h-full object-cover astro-cqnilpoy"> </div> <header class="header no-sidebar astro-cqnilpoy"> <nav class="navbar container"> <!-- logo --> <div class="order-0"> <a href="/" class="navbar-brand inline-block">  <img src="/_astro/logo-light.B-OAwsTH_19DKCs.svg" alt="LiuLuit Docs" loading="lazy" decoding="async" style="height:32px;width:127px" width="254" height="64" class="inline-block  dark:hidden"> <img src="/_astro/logo-dark.B7suPJoV_19DKCs.svg" alt="LiuLuit Docs" loading="lazy" decoding="async" style="height:32px;width:127px" width="254" height="64" class="hidden dark:inline-block"></a> </div> <!-- navbar toggler --> <input id="nav-toggle" type="checkbox" class="hidden"> <label for="nav-toggle" class="order-3 cursor-pointer flex items-center lg:hidden dark:text-white lg:order-1 hamburger-menu"> <svg id="show-button" class="h-6 fill-current block" viewBox="0 0 20 20"> <title>Menu Open</title> <path d="M0 3h20v2H0V3z m0 6h20v2H0V9z m0 6h20v2H0V0z"></path> </svg> <svg id="hide-button" class="h-6 fill-current hidden" viewBox="0 0 20 20"> <title>Menu Close</title> <polygon points="11 9 22 9 22 11 11 11 11 22 9 22 9 11 -2 11 -2 9 9 9 9 -2 11 -2" transform="rotate(45 10 10)"></polygon> </svg> </label> <!-- /navbar toggler --> <ul id="nav-menu" class="navbar-nav order-3 hidden w-full pb-6 lg:order-1 lg:flex lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8"> <li class="nav-item"> <a href="/" class="nav-link block false"> 首页 </a> </li><li class="nav-item"> <a href="/getting-started/quickstart/" class="nav-link block false"> 快速开始 </a> </li><li class="nav-item nav-dropdown group relative"> <span class="nav-link flex! gap-1! items-center justify-center "> 运维 <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20"> <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"></path> </svg> </span> <ul class="nav-dropdown-list hidden group-hover:block lg:invisible lg:absolute lg:block lg:opacity-0 lg:group-hover:visible lg:group-hover:opacity-100"> <li class="nav-dropdown-item"> <a href="/operations/deployment-options/" aria-label="部署方案" class="nav-dropdown-link block false"> 部署方案 </a> </li><li class="nav-dropdown-item"> <a href="/operations/release-checklist/" aria-label="发布清单" class="nav-dropdown-link block false"> 发布清单 </a> </li> </ul> </li> <li class="mt-4 inline-block lg:hidden"> <a class="btn btn-outline-primary btn-sm" href="/getting-started/quickstart/"> 开始阅读 </a> </li> </ul> <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0 navbar-actions">  <div class="mr-4"><starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">选择语言</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/" class="astro-4yphtoen">简体中文</option><option value="/en/" class="astro-4yphtoen">English</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script></div> <div class="theme-switcher lg:mx-6 mr-10 astro-vke6obp2"><input id="theme-switcher" data-theme-switcher type="checkbox" class="astro-vke6obp2"><label for="theme-switcher" class="astro-vke6obp2"><span class="sr-only astro-vke6obp2">theme switcher</span><svg class="dark:opacity-40 opacity-0 size-4 ml-1 astro-vke6obp2" viewBox="0 0 56 56" fill="#fff" height="16" width="16"><path d="M30 4.6c0-1-.9-2-2-2a2 2 0 0 0-2 2v5c0 1 .9 2 2 2s2-1 2-2Zm9.6 9a2 2 0 0 0 0 2.8c.8.8 2 .8 2.9 0L46 13a2 2 0 0 0 0-2.9 2 2 0 0 0-3 0Zm-26 2.8c.7.8 2 .8 2.8 0 .8-.7.8-2 0-2.9L13 10c-.7-.7-2-.8-2.9 0-.7.8-.7 2.1 0 3ZM28 16a12 12 0 0 0-12 12 12 12 0 0 0 12 12 12 12 0 0 0 12-12 12 12 0 0 0-12-12Zm23.3 14c1.1 0 2-.9 2-2s-.9-2-2-2h-4.9a2 2 0 0 0-2 2c0 1.1 1 2 2 2ZM4.7 26a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4.9c1 0 2-.9 2-2s-1-2-2-2Zm37.8 13.6a2 2 0 0 0-3 0 2 2 0 0 0 0 2.9l3.6 3.5a2 2 0 0 0 2.9 0c.8-.8.8-2.1 0-3ZM10 43.1a2 2 0 0 0 0 2.9c.8.7 2.1.8 3 0l3.4-3.5c.8-.8.8-2.1 0-2.9-.8-.8-2-.8-2.9 0Zm20 3.4c0-1.1-.9-2-2-2a2 2 0 0 0-2 2v4.9c0 1 .9 2 2 2s2-1 2-2Z" class="astro-vke6obp2"></path></svg><span class="astro-vke6obp2"><svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-100 dark:opacity-0 astro-vke6obp2" viewBox="0 0 56 56" fill="#fff" height="16" width="16"><path d="M30 4.6c0-1-.9-2-2-2a2 2 0 0 0-2 2v5c0 1 .9 2 2 2s2-1 2-2Zm9.6 9a2 2 0 0 0 0 2.8c.8.8 2 .8 2.9 0L46 13a2 2 0 0 0 0-2.9 2 2 0 0 0-3 0Zm-26 2.8c.7.8 2 .8 2.8 0 .8-.7.8-2 0-2.9L13 10c-.7-.7-2-.8-2.9 0-.7.8-.7 2.1 0 3ZM28 16a12 12 0 0 0-12 12 12 12 0 0 0 12 12 12 12 0 0 0 12-12 12 12 0 0 0-12-12Zm23.3 14c1.1 0 2-.9 2-2s-.9-2-2-2h-4.9a2 2 0 0 0-2 2c0 1.1 1 2 2 2ZM4.7 26a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4.9c1 0 2-.9 2-2s-1-2-2-2Zm37.8 13.6a2 2 0 0 0-3 0 2 2 0 0 0 0 2.9l3.6 3.5a2 2 0 0 0 2.9 0c.8-.8.8-2.1 0-3ZM10 43.1a2 2 0 0 0 0 2.9c.8.7 2.1.8 3 0l3.4-3.5c.8-.8.8-2.1 0-2.9-.8-.8-2-.8-2.9 0Zm20 3.4c0-1.1-.9-2-2-2a2 2 0 0 0-2 2v4.9c0 1 .9 2 2 2s2-1 2-2Z" class="astro-vke6obp2"></path></svg><svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-0 dark:opacity-100 astro-vke6obp2" viewBox="0 0 24 24" fill="none" height="16" width="16"><path fill="#000" fill-rule="evenodd" clip-rule="evenodd" d="M8.2 2.2c1-.4 2 .6 1.6 1.5-1 3-.4 6.4 1.8 8.7a8.4 8.4 0 0 0 8.7 1.8c1-.3 2 .5 1.5 1.5v.1a10.3 10.3 0 0 1-9.4 6.2A10.3 10.3 0 0 1 3.2 6.7c1-2 2.9-3.5 4.9-4.4Z" class="astro-vke6obp2"></path></svg></span><svg class="opacity-40 size-4 dark:opacity-0 mr-1 astro-vke6obp2" viewBox="0 0 24 24" fill="none" height="16" width="16"><path fill="#000" fill-rule="evenodd" clip-rule="evenodd" d="M8.2 2.2c1-.4 2 .6 1.6 1.5-1 3-.4 6.4 1.8 8.7a8.4 8.4 0 0 0 8.7 1.8c1-.3 2 .5 1.5 1.5v.1a10.3 10.3 0 0 1-9.4 6.2A10.3 10.3 0 0 1 3.2 6.7c1-2 2.9-3.5 4.9-4.4Z" class="astro-vke6obp2"></path></svg></label></div><script type="module">const e=document.querySelector("input[data-theme-switcher]");e?.addEventListener("change",t=>{t.currentTarget.checked?(document.documentElement.dataset.theme="dark",localStorage.setItem("starlight-theme","dark")):(document.documentElement.dataset.theme="light",localStorage.setItem("starlight-theme","light"))});document.addEventListener("DOMContentLoaded",()=>{localStorage.getItem("starlight-theme")==="light"?(e.checked=!1,document.documentElement.dataset.theme="light"):(e.checked=!0,document.documentElement.dataset.theme="dark")});</script> <a class="btn btn-outline-primary hidden! lg:inline-block!" href="/getting-started/quickstart/"> 开始阅读 </a> </div> </nav> <script type="module">const e=document.querySelector(".navbar"),o=document.querySelector(".sidebar-nav");window.onscroll=function(){document.body.scrollTop>10||document.documentElement.scrollTop>10?(e?.parentElement?.classList.add("navbar-scrolled"),o?.classList.add("navbar-scrolled")):(e?.parentElement?.classList.remove("navbar-scrolled"),o?.classList.remove("navbar-scrolled"))};const s=document.querySelectorAll(".nav-dropdown > .nav-link");s.forEach(n=>{n?.addEventListener("click",l=>{l?.target?.closest(".nav-item")?.classList.toggle("active")})});</script> </header>  <div class="main-frame astro-cqnilpoy"> <div class="container flex relative astro-cqnilpoy">    <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="content-container astro-ik4k6pip"> <div class="main-pane astro-ik4k6pip">    <main data-pagefind-body class="astro-bguv2lll" lang="zh-CN" dir="ltr">   <div class="content-panel astro-p5qdsdza"> <div class="sl-container astro-p5qdsdza"> <div class="hero flex flex-col items-center mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-35 astro-7zvk25vt"> <h1 class="mb-8 text-center rounded-2xl astro-7zvk25vt">工程化文档平台
+<span class="light-text">可扩展、可维护、可发布</span>
+</h1> <p class="text-xl text-center astro-7zvk25vt">这套站点用于承载技术文档、发布说明、架构决策和迁移记录。</p> <div class="mt-12 max-w-4xl astro-7zvk25vt"> <div class="search-container rounded-2xl p-2 mb-6 astro-7zvk25vt"> <div class="search-bar astro-7zvk25vt"> <site-search class="astro-7zvk25vt astro-jpvz53k3" data-translations="{&#34;placeholder&#34;:&#34;搜索&#34;}"> <button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-jpvz53k3"> <svg aria-hidden="true" class="astro-jpvz53k3 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.3rem;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-block astro-jpvz53k3" aria-hidden="true">搜索</span> <kbd class="sl-flex astro-jpvz53k3"> <kbd class="astro-jpvz53k3">Ctrl</kbd><kbd class="astro-jpvz53k3">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="搜索" class="astro-jpvz53k3"> <div class="dialog-frame sl-flex astro-jpvz53k3">  <button data-close-modal class="sl-flex md:sl-hidden astro-jpvz53k3"> 取消 </button> <div class="search-container astro-jpvz53k3"> <div id="starlight__search" class="astro-jpvz53k3"></div> </div> </div> </dialog> </site-search>  <script>
+  (() => {
+    const openBtn = document.querySelector("button[data-open-modal]");
+    const shortcut = openBtn?.querySelector("kbd");
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+    const platformKey = shortcut.querySelector("kbd");
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgentData?.platform ?? navigator.userAgent)) {
+      platformKey.textContent = "⌘";
+      openBtn.setAttribute("aria-keyshortcuts", "Meta+K");
+    }
 
-  
-  
-<link rel="stylesheet" href="/css/style.css">
-
-  
-    
-<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
-
-  
-<meta name="generator" content="Hexo 7.3.0"></head>
-
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">刘璐-技术博客</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS 订阅"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://liuluit.com"></form>
-      </div>
-    </div>
-  </div>
-</header>
-
-      <div class="outer">
-        <section id="main">
-  
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/03/29/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2022-03-29T14:22:28.000Z" itemprop="datePublished">2022-03-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/03/29/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your first post in the new private source repository.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="Start-local-preview"><a href="#Start-local-preview" class="headerlink" title="Start local preview"></a>Start local preview</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run server</span><br></pre></td></tr></table></figure>
-
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run build</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://liuluit.com/2022/03/29/hello-world/" data-id="cmq0r0eh90000n2289dw39uu5" data-title="Hello World" class="article-share-link">分享</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">最新文章</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2022/03/29/hello-world/">Hello World</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      
-      &copy; 2026 IT-Liu<br>
-      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-
-<script src="/js/jquery-3.4.1.min.js"></script>
-
-
-
-  
-<script src="/fancybox/jquery.fancybox.min.js"></script>
-
-
-
-
-<script src="/js/script.js"></script>
-
-
-
-
-
-  </div>
-</body>
-</html>
+    shortcut.style.display = "";
+  })();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> </div> <div class="flex justify-center items-center flex-wrap gap-4 astro-7zvk25vt"> <p class="text-base font-normal astro-7zvk25vt"> 常看:
+</p> <div class="flex gap-4 badges px-3 py-2.5 rounded-xl flex-wrap justify-center astro-7zvk25vt"> <div class="badge rounded-lg px-2 py-1.5 group transition astro-7zvk25vt"> <a class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors astro-7zvk25vt" href="/getting-started/project-structure/"> [rocket] 快速开始 </a> </div><div class="badge rounded-lg px-2 py-1.5 group transition astro-7zvk25vt"> <a class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors astro-7zvk25vt" href="/architecture/extension-points/"> [seti:config] 架构设计 </a> </div><div class="badge rounded-lg px-2 py-1.5 group transition astro-7zvk25vt"> <a class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors astro-7zvk25vt" href="/content/authoring-and-review/"> [pencil] 内容管理 </a> </div><div class="badge rounded-lg px-2 py-1.5 group transition astro-7zvk25vt"> <a class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors astro-7zvk25vt" href="/operations/ci-cd/"> [document] 发布运维 </a> </div><div class="badge rounded-lg px-2 py-1.5 group transition astro-7zvk25vt"> <a class="cursor-pointer text-text no-underline group-hover:text-black dark:group-hover:text-white transition-colors astro-7zvk25vt" href="/migration/from-hexo/"> [seti:git] 迁移归档 </a> </div> </div> </div> </div> </div>  <script type="module">const t=document.querySelector("[data-icon-path]"),o=document.querySelector(".hero"),c=document.querySelector(".header"),i=document.querySelector(".hero-bg"),r=(o?.clientHeight||0)+(c?.clientHeight||0)+24;i.style.height=`${r}px`;if(t){const n=t.getAttribute("data-icon-path"),e=document.createElement("img");e.src=`/${n}`||"",e.alt="icon",e.className="hidden lg:inline-block size-20 -mb-2 rounded-2xl animate-[bounce_2s_ease-in-out_infinite]",t.replaceWith(e)}</script> <div class="sl-markdown-content"> <section class="section"> <div class="text-center mb-16"> <h2 class="section-title mb-4">你现在可以做什么</h2> <p class="section-description">围绕长期维护和持续发布，文档被拆分成清晰模块。</p> </div> <div> <div class="card-grid astro-ex5q2lsb" style="--columns: 3"><article class="card bg-lightmode-dark dark:bg-dark group py-12 px-10 astro-gobme5xh"> <svg aria-hidden="true" class="icon astro-gobme5xh astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: #7BE1A4;--sl-icon-size: 2rem;"><path fill-rule="evenodd" d="M1.44 8.855v-.001l3.527-3.516c.34-.344.802-.541 1.285-.548h6.649l.947-.947c3.07-3.07 6.207-3.072 7.62-2.868a1.821 1.821 0 0 1 1.557 1.557c.204 1.413.203 4.55-2.868 7.62l-.946.946v6.649a1.845 1.845 0 0 1-.549 1.286l-3.516 3.528a1.844 1.844 0 0 1-3.11-.944l-.858-4.275-4.52-4.52-2.31-.463-1.964-.394A1.847 1.847 0 0 1 .98 10.693a1.843 1.843 0 0 1 .46-1.838Zm5.379 2.017-3.873-.776L6.32 6.733h4.638l-4.14 4.14Zm8.403-5.655c2.459-2.46 4.856-2.463 5.89-2.33.134 1.035.13 3.432-2.329 5.891l-6.71 6.71-3.561-3.56 6.71-6.711Zm-1.318 15.837-.776-3.873 4.14-4.14v4.639l-3.364 3.374Z" clip-rule="evenodd"/><path d="M9.318 18.345a.972.972 0 0 0-1.86-.561c-.482 1.435-1.687 2.204-2.934 2.619a8.22 8.22 0 0 1-1.23.302c.062-.365.157-.79.303-1.229.415-1.247 1.184-2.452 2.62-2.935a.971.971 0 1 0-.62-1.842c-.12.04-.236.084-.35.13-2.02.828-3.012 2.588-3.493 4.033a10.383 10.383 0 0 0-.51 2.845l-.001.016v.063c0 .536.434.972.97.972H2.24a7.21 7.21 0 0 0 .878-.065c.527-.063 1.248-.19 2.02-.447 1.445-.48 3.205-1.472 4.033-3.494a5.828 5.828 0 0 0 .147-.407Z"/></svg> <p class="title mt-11 mb-4 astro-gobme5xh"> <span class="astro-gobme5xh">快速上手</span> </p> <div class="body astro-gobme5xh"><p>新成员可在 10 分钟内完成本地运行和发布预览。</p></div> <div class="mt-15 astro-gobme5xh"> <span class="astro-gobme5xh"> <svg class="transition-transform duration-300 group-hover:-rotate-45 astro-gobme5xh" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3209 0.715753L17.3509 7.84376C17.7823 8.28117 17.7823 8.99035 17.3509 9.42776L10.3209 16.5558C9.88952 16.9932 9.1901 16.9932 8.7587 16.5558C8.32731 16.1184 8.32731 15.4092 8.7587 14.9718L13.9029 9.75582H1.10465C0.494569 9.75582 0 9.25435 0 8.63576C0 8.01717 0.494569 7.5157 1.10465 7.5157H13.9029L8.7587 2.29975C8.32731 1.86234 8.32731 1.15316 8.7587 0.715753C9.1901 0.278343 9.88952 0.278343 10.3209 0.715753Z" class="fill-lightmode-light dark:fill-light astro-gobme5xh"></path> </svg> </span> </div> </article><article class="card bg-lightmode-dark dark:bg-dark group py-12 px-10 astro-gobme5xh"> <svg aria-hidden="true" class="icon astro-gobme5xh astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: #FFD97B;--sl-icon-size: 2rem;"><path d="M23.165 13.645L23.165 13.645Q22.829 13.561 22.199 13.309L22.199 13.309L21.695 13.099Q21.695 12.637 21.632 11.797Q21.569 10.957 21.569 10.495L21.569 10.495Q21.569 10.411 21.632 10.348Q21.695 10.285 21.695 10.201L21.695 10.201L23.165 9.571Q23.543 9.361 23.669 9.004Q23.795 8.647 23.669 8.269L23.669 8.269L22.493 5.623Q22.283 5.203 21.926 5.056Q21.569 4.909 21.191 5.119L21.191 5.119L19.721 5.749Q19.469 5.749 19.469 5.623L19.469 5.623Q19.301 5.371 18.839 4.951L18.839 4.951L18.545 4.699Q18.419 4.573 18.104 4.300Q17.789 4.027 17.621 3.901L17.621 3.901Q17.789 3.649 17.978 3.124Q18.167 2.599 18.293 2.347L18.293 2.347Q18.503 1.843 18.314 1.465Q18.125 1.087 17.621 0.919L17.621 0.919Q17.075 0.793 15.815 0.373L15.815 0.373L15.143 0.121Q14.639-0.089 14.261 0.100Q13.883 0.289 13.715 0.751L13.715 0.751Q13.631 1.087 13.379 1.717L13.379 1.717L13.169 2.221Q12.707 2.221 11.867 2.284Q11.027 2.347 10.565 2.347L10.565 2.347Q10.481 2.347 10.418 2.284Q10.355 2.221 10.271 2.221L10.271 2.221L9.641 0.751Q9.431 0.373 9.074 0.247Q8.717 0.121 8.339 0.247L8.339 0.247L5.693 1.423Q5.273 1.633 5.126 1.990Q4.979 2.347 5.189 2.725L5.189 2.725L5.819 4.195Q5.819 4.447 5.693 4.447L5.693 4.447L5.399 4.699Q5.105 4.909 5.021 5.077L5.021 5.077Q4.853 5.287 4.517 5.686Q4.181 6.085 3.971 6.295L3.971 6.295Q3.677 6.211 3.047 5.959L3.047 5.959L2.543 5.749Q2.039 5.539 1.661 5.728Q1.283 5.917 1.115 6.421L1.115 6.421L0.905 6.925Q0.401 8.185 0.191 8.773Q-0.019 9.361 0.128 9.697Q0.275 10.033 0.821 10.201L0.821 10.201Q1.157 10.285 1.787 10.537L1.787 10.537L2.291 10.747Q2.291 11.209 2.354 12.049Q2.417 12.889 2.417 13.351L2.417 13.351Q2.417 13.435 2.354 13.498Q2.291 13.561 2.291 13.645L2.291 13.645L0.821 14.275Q0.443 14.485 0.317 14.842Q0.191 15.199 0.317 15.577L0.317 15.577L1.493 18.223Q1.703 18.643 2.060 18.790Q2.417 18.937 2.795 18.727L2.795 18.727L4.265 18.097Q4.517 18.097 4.517 18.223L4.517 18.223Q4.685 18.475 5.147 18.895L5.147 18.895L5.441 19.147Q5.567 19.273 5.882 19.525Q6.197 19.777 6.365 19.945L6.365 19.945Q6.239 20.197 6.029 20.722Q5.819 21.247 5.693 21.499L5.693 21.499Q5.483 22.003 5.672 22.381Q5.861 22.759 6.365 22.969L6.365 22.969Q6.659 23.053 7.331 23.305L7.331 23.305Q8.297 23.725 8.864 23.893Q9.431 24.061 9.767 23.935Q10.103 23.809 10.271 23.221L10.271 23.221Q10.355 22.885 10.607 22.255L10.607 22.255L10.817 21.751Q11.279 21.751 12.119 21.688Q12.959 21.625 13.421 21.625L13.421 21.625Q13.505 21.625 13.568 21.688Q13.631 21.751 13.715 21.751L13.715 21.751L14.345 23.221Q14.555 23.599 14.912 23.725Q15.269 23.851 15.647 23.725L15.647 23.725L18.293 22.549Q18.713 22.339 18.860 21.982Q19.007 21.625 18.797 21.247L18.797 21.247L18.167 19.819Q18.167 19.525 18.293 19.525L18.293 19.525Q18.545 19.357 18.965 18.895L18.965 18.895L19.217 18.601Q19.343 18.475 19.595 18.160Q19.847 17.845 20.015 17.719L20.015 17.719Q20.309 17.761 20.939 18.055L20.939 18.055L21.443 18.223Q21.947 18.433 22.325 18.244Q22.703 18.055 22.871 17.551L22.871 17.551Q22.997 17.257 23.249 16.585L23.249 16.585Q23.669 15.619 23.795 15.073L23.795 15.073Q24.257 13.981 23.165 13.645ZM13.967 16.375L13.967 16.375Q12.077 17.173 10.250 16.459Q8.423 15.745 7.541 13.897L7.541 13.897Q6.743 12.007 7.457 10.180Q8.171 8.353 10.019 7.471L10.019 7.471Q11.909 6.673 13.736 7.387Q15.563 8.101 16.445 9.949L16.445 9.949Q17.243 11.839 16.529 13.666Q15.815 15.493 13.967 16.375Z"/></svg> <p class="title mt-11 mb-4 astro-gobme5xh"> <span class="astro-gobme5xh">架构可演进</span> </p> <div class="body astro-gobme5xh"><p>支持多语言、组件覆盖、文档目录自动生成，后续扩展成本低。</p></div> <div class="mt-15 astro-gobme5xh"> <span class="astro-gobme5xh"> <svg class="transition-transform duration-300 group-hover:-rotate-45 astro-gobme5xh" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3209 0.715753L17.3509 7.84376C17.7823 8.28117 17.7823 8.99035 17.3509 9.42776L10.3209 16.5558C9.88952 16.9932 9.1901 16.9932 8.7587 16.5558C8.32731 16.1184 8.32731 15.4092 8.7587 14.9718L13.9029 9.75582H1.10465C0.494569 9.75582 0 9.25435 0 8.63576C0 8.01717 0.494569 7.5157 1.10465 7.5157H13.9029L8.7587 2.29975C8.32731 1.86234 8.32731 1.15316 8.7587 0.715753C9.1901 0.278343 9.88952 0.278343 10.3209 0.715753Z" class="fill-lightmode-light dark:fill-light astro-gobme5xh"></path> </svg> </span> </div> </article><article class="card bg-lightmode-dark dark:bg-dark group py-12 px-10 astro-gobme5xh"> <svg aria-hidden="true" class="icon astro-gobme5xh astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: #979BFF;--sl-icon-size: 2rem;"><path d="M0.355 12.231L0.355 12.231L0.355 11.853Q0.397 11.517 0.565 11.265L0.565 11.265Q0.691 11.097 0.943 10.803L0.943 10.803L1.279 10.425L7.831 3.831L7.873 3.873Q7.957 3.873 7.957 3.957L7.957 3.957L10.309 6.351Q10.519 6.519 10.309 6.729L10.309 6.729Q10.225 7.317 10.435 7.863Q10.645 8.409 11.107 8.703L11.107 8.703Q11.275 8.787 11.317 8.892Q11.359 8.997 11.359 9.207L11.359 9.207L11.359 15.003Q11.359 15.255 11.107 15.507L11.107 15.507Q10.603 15.843 10.372 16.389Q10.141 16.935 10.330 17.502Q10.519 18.069 10.981 18.447Q11.443 18.825 12.031 18.825Q12.619 18.825 13.081 18.489Q13.543 18.153 13.732 17.586Q13.921 17.019 13.753 16.473Q13.585 15.927 13.081 15.507L13.081 15.507Q12.913 15.423 12.871 15.318Q12.829 15.213 12.829 15.003L12.829 15.003L12.829 9.081L12.955 9.081L15.055 11.181Q15.139 11.265 15.139 11.391L15.139 11.391L15.181 11.475L15.181 12.231Q15.265 13.029 15.874 13.470Q16.483 13.911 17.281 13.806Q18.079 13.701 18.562 13.029Q19.045 12.357 18.835 11.601L18.835 11.601Q18.751 10.929 18.100 10.488Q17.449 10.047 16.735 10.131L16.735 10.131Q16.483 10.131 16.231 10.005L16.231 10.005L14.005 7.779Q13.879 7.653 13.879 7.401L13.879 7.401Q14.005 6.813 13.711 6.267Q13.417 5.721 12.871 5.448Q12.325 5.175 11.779 5.301L11.779 5.301Q11.359 5.301 11.359 5.175L11.359 5.175Q9.805 3.579 9.007 2.907L9.007 2.907Q8.797 2.739 9.007 2.529L9.007 2.529Q9.469 2.193 10.183 1.353L10.183 1.353L10.729 0.807Q11.905-0.369 13.081 0.807L13.081 0.807L23.035 10.803Q24.253 11.979 23.035 13.155L23.035 13.155L13.291 22.941Q12.913 23.319 12.745 23.445L12.745 23.445Q12.409 23.739 12.031 23.781L12.031 23.781L11.779 23.781L11.569 23.697Q11.065 23.487 10.855 23.277L10.855 23.277L10.057 22.479Q8.881 21.387 8.335 20.757L8.335 20.757L1.153 13.575Q1.069 13.365 0.775 13.029L0.775 13.029Q0.397 12.525 0.355 12.231Z"/></svg> <p class="title mt-11 mb-4 astro-gobme5xh"> <span class="astro-gobme5xh">发布可追踪</span> </p> <div class="body astro-gobme5xh"><p>通过发布清单和 CI，确保每次上线都可验证、可回滚。</p></div> <div class="mt-15 astro-gobme5xh"> <span class="astro-gobme5xh"> <svg class="transition-transform duration-300 group-hover:-rotate-45 astro-gobme5xh" width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"> <path fill-rule="evenodd" clip-rule="evenodd" d="M10.3209 0.715753L17.3509 7.84376C17.7823 8.28117 17.7823 8.99035 17.3509 9.42776L10.3209 16.5558C9.88952 16.9932 9.1901 16.9932 8.7587 16.5558C8.32731 16.1184 8.32731 15.4092 8.7587 14.9718L13.9029 9.75582H1.10465C0.494569 9.75582 0 9.25435 0 8.63576C0 8.01717 0.494569 7.5157 1.10465 7.5157H13.9029L8.7587 2.29975C8.32731 1.86234 8.32731 1.15316 8.7587 0.715753C9.1901 0.278343 9.88952 0.278343 10.3209 0.715753Z" class="fill-lightmode-light dark:fill-light astro-gobme5xh"></path> </svg> </span> </div> </article></div><div class="mt-8 flex flex-wrap gap-4"><a href="/getting-started/quickstart/" class=" flex items-center gap-2 text-black dark:text-white no-underline  undefined astro-5eunqzkt"> 开始集成 <svg class="mt-0! astro-5eunqzkt" width="9" height="16" viewBox="0 0 9 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-arrow"> <path d="M1 15L8 8L1 1" class="stroke-black dark:stroke-white astro-5eunqzkt" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </a><a href="/operations/deployment-options/" class=" flex items-center gap-2 text-black dark:text-white no-underline  undefined astro-5eunqzkt"> 查看发布方案 <svg class="mt-0! astro-5eunqzkt" width="9" height="16" viewBox="0 0 9 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-arrow"> <path d="M1 15L8 8L1 1" class="stroke-black dark:stroke-white astro-5eunqzkt" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </a><a href="/migration/from-hexo/" class=" flex items-center gap-2 text-black dark:text-white no-underline  undefined astro-5eunqzkt"> 查看旧站迁移 <svg class="mt-0! astro-5eunqzkt" width="9" height="16" viewBox="0 0 9 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="link-arrow"> <path d="M1 15L8 8L1 1" class="stroke-black dark:stroke-white astro-5eunqzkt" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </svg> </a></div> </div> </section> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-3tgidlls" dir="ltr">   </div>  </footer> </div> </div> </main>  </div>  </div>  <script type="module">const t=document.querySelector(".content-container");t&&(t.style.opacity="1");</script>  </div> </div> <div class="cta-container astro-4xty6sx2"><section class="section"> <div class="text-center mb-16"> <h2 class="section-title mb-4">开始构建你的<span class='light-text'>工程化文档站</span>
+</h2> <p class="section-description">从本地预览到自动发布，这套模板已经具备完整流程。</p> </div> <div> <a href="/getting-started/quickstart/" class="btn btn-primary">快速开始</a><a href="/operations/deployment-options/" class="btn btn-outline-primary">查看发布方案</a> </div> </section></div><script type="module">const e=document.querySelector(".cta-container a"),t=e?.parentElement;t&&(t.style.display="flex",t.style.justifyContent="center",t.style.gap="1rem");</script> <footer class="astro-73uoctsa"> <div class="container astro-73uoctsa"> <div class="top-footer astro-73uoctsa"> <div class="astro-73uoctsa"> <h4 class="astro-73uoctsa">协作与反馈</h4> <ul class="astro-73uoctsa"> <li class="astro-73uoctsa"> <a href="https://github.com/" class="astro-73uoctsa">GitHub Issues</a> </li><li class="astro-73uoctsa"> <a href="/content/release-notes/" class="astro-73uoctsa">更新记录</a> </li> </ul> </div> <div class="astro-73uoctsa"> <h4 class="astro-73uoctsa">文档入口</h4> <ul class="astro-73uoctsa"> <li class="astro-73uoctsa"> <a href="/getting-started/quickstart/" class="astro-73uoctsa">快速开始</a> </li><li class="astro-73uoctsa"> <a href="/architecture/system-overview/" class="astro-73uoctsa">架构概览</a> </li><li class="astro-73uoctsa"> <a href="/content/authoring-and-review/" class="astro-73uoctsa">内容发布流程</a> </li> </ul> </div> <div class="astro-73uoctsa"> <h4 class="astro-73uoctsa">发布与运维</h4> <ul class="astro-73uoctsa"> <li class="astro-73uoctsa"> <a href="/operations/deployment-options/" class="astro-73uoctsa">部署方案</a> </li><li class="astro-73uoctsa"> <a href="/operations/ci-cd/" class="astro-73uoctsa">CI/CD 设计</a> </li><li class="astro-73uoctsa"> <a href="/migration/from-hexo/" class="astro-73uoctsa">迁移说明</a> </li> </ul> </div>  </div> <div class="bottom-footer astro-73uoctsa"> <p class="astro-73uoctsa">&copy; 2026 LiuLuit. Built with Astro + Starlight.</p> <a href="/operations/release-checklist/" class="astro-73uoctsa">发布清单</a> </div> </div> </footer> </div>  <script type="module">const i=document.querySelector(".sidebar");function a(){i&&(i.style.opacity="1")}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",a):a();const c=document.querySelectorAll(".accordion");c.forEach(e=>{e.addEventListener("click",()=>{c.forEach(t=>{t!==e&&t.classList.remove("active")}),e.classList.toggle("active")})});</script> </body></html>
