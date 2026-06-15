@@ -1,0 +1,29 @@
+{
+  "main": [
+    {
+      "label": "[rocket] 快速开始",
+      "translations": { "en": "[rocket] Getting Started" },
+      "autogenerate": { "directory": "getting-started" }
+    },
+    {
+      "label": "[seti:config] 架构设计",
+      "translations": { "en": "[seti:config] Architecture" },
+      "autogenerate": { "directory": "architecture" }
+    },
+    {
+      "label": "[pencil] 内容管理",
+      "translations": { "en": "[pencil] Content Ops" },
+      "autogenerate": { "directory": "content" }
+    },
+    {
+      "label": "[document] 发布运维",
+      "translations": { "en": "[document] Operations" },
+      "autogenerate": { "directory": "operations" }
+    },
+    {
+      "label": "[seti:git] 迁移归档",
+      "translations": { "en": "[seti:git] Migration" },
+      "autogenerate": { "directory": "migration" }
+    }
+  ]
+}

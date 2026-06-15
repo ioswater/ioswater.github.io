@@ -1,0 +1,35 @@
+---
+title: LiuLuit 文档中心
+description: 基于 Dockit + Astro 的新一代文档站。
+template: splash
+hero:
+  title: |
+    工程化文档平台
+    <span class="light-text">可扩展、可维护、可发布</span>
+  tagline: 这套站点用于承载技术文档、发布说明、架构决策和迁移记录。
+---
+
+import Section from "~/components/Section.astro";
+import Card from "~/components/user-components/NewCard.astro";
+import Grid from "~/components/user-components/Grid.astro";
+import LinkButton from "~/components/LinkButton.astro";
+
+<Section title="你现在可以做什么" description="围绕长期维护和持续发布，文档被拆分成清晰模块。">
+  <Grid columns={3}>
+    <Card title="快速上手" icon="rocket" iconColor="#7BE1A4">
+      新成员可在 10 分钟内完成本地运行和发布预览。
+    </Card>
+    <Card title="架构可演进" icon="seti:config" iconColor="#FFD97B">
+      支持多语言、组件覆盖、文档目录自动生成，后续扩展成本低。
+    </Card>
+    <Card title="发布可追踪" icon="seti:git" iconColor="#979BFF">
+      通过发布清单和 CI，确保每次上线都可验证、可回滚。
+    </Card>
+  </Grid>
+
+  <div class="mt-8 flex flex-wrap gap-4">
+    <LinkButton href="/getting-started/quickstart/" variant="text">开始集成</LinkButton>
+    <LinkButton href="/operations/deployment-options/" variant="text">查看发布方案</LinkButton>
+    <LinkButton href="/migration/from-hexo/" variant="text">查看旧站迁移</LinkButton>
+  </div>
+</Section>

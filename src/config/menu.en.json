@@ -1,0 +1,76 @@
+{
+  "main": [
+    {
+      "name": "Home",
+      "url": "/en/"
+    },
+    {
+      "name": "Getting Started",
+      "url": "/en/getting-started/quickstart/"
+    },
+    {
+      "name": "Operations",
+      "url": "",
+      "hasChildren": true,
+      "children": [
+        {
+          "name": "Deployment",
+          "url": "/en/operations/deployment-options/"
+        },
+        {
+          "name": "Release Checklist",
+          "url": "/en/operations/release-checklist/"
+        }
+      ]
+    }
+  ],
+  "footer": {
+    "community": {
+      "title": "Collaboration",
+      "links": [
+        {
+          "name": "GitHub Issues",
+          "url": "https://github.com/"
+        },
+        {
+          "name": "Release Notes",
+          "url": "/en/content/release-notes/"
+        }
+      ]
+    },
+    "help_links": {
+      "title": "Documentation",
+      "links": [
+        {
+          "name": "Quickstart",
+          "url": "/en/getting-started/quickstart/"
+        },
+        {
+          "name": "Architecture",
+          "url": "/en/architecture/system-overview/"
+        },
+        {
+          "name": "Publishing Workflow",
+          "url": "/en/content/authoring-and-review/"
+        }
+      ]
+    },
+    "company": {
+      "title": "Operations",
+      "links": [
+        {
+          "name": "Deployment",
+          "url": "/en/operations/deployment-options/"
+        },
+        {
+          "name": "CI/CD",
+          "url": "/en/operations/ci-cd/"
+        },
+        {
+          "name": "Migration",
+          "url": "/en/migration/from-hexo/"
+        }
+      ]
+    }
+  }
+}

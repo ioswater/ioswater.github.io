@@ -1,0 +1,76 @@
+{
+  "main": [
+    {
+      "name": "首页",
+      "url": "/"
+    },
+    {
+      "name": "快速开始",
+      "url": "/getting-started/quickstart/"
+    },
+    {
+      "name": "运维",
+      "url": "",
+      "hasChildren": true,
+      "children": [
+        {
+          "name": "部署方案",
+          "url": "/operations/deployment-options/"
+        },
+        {
+          "name": "发布清单",
+          "url": "/operations/release-checklist/"
+        }
+      ]
+    }
+  ],
+  "footer": {
+    "community": {
+      "title": "协作与反馈",
+      "links": [
+        {
+          "name": "GitHub Issues",
+          "url": "https://github.com/"
+        },
+        {
+          "name": "更新记录",
+          "url": "/content/release-notes/"
+        }
+      ]
+    },
+    "help_links": {
+      "title": "文档入口",
+      "links": [
+        {
+          "name": "快速开始",
+          "url": "/getting-started/quickstart/"
+        },
+        {
+          "name": "架构概览",
+          "url": "/architecture/system-overview/"
+        },
+        {
+          "name": "内容发布流程",
+          "url": "/content/authoring-and-review/"
+        }
+      ]
+    },
+    "company": {
+      "title": "发布与运维",
+      "links": [
+        {
+          "name": "部署方案",
+          "url": "/operations/deployment-options/"
+        },
+        {
+          "name": "CI/CD 设计",
+          "url": "/operations/ci-cd/"
+        },
+        {
+          "name": "迁移说明",
+          "url": "/migration/from-hexo/"
+        }
+      ]
+    }
+  }
+}

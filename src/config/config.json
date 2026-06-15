@@ -1,0 +1,29 @@
+{
+  "site": {
+    "title": "LiuLuit Docs",
+    "logo": "/src/assets/logo-light.svg",
+    "logo_darkmode": "/src/assets/logo-dark.svg",
+    "logo_width": "127",
+    "logo_height": "32",
+    "logo_text": "LiuLuit"
+  },
+  "settings": {
+    "search": true,
+    "theme_switcher": true
+  },
+  "params": {
+    "footer_contact": {
+      "enable": false,
+      "action": "#"
+    },
+    "copyright": "&copy; 2026 LiuLuit. Built with Astro + Starlight."
+  },
+  "navigation_button": {
+    "enable": true,
+    "label": "开始阅读",
+    "translations": {
+      "en": "Get Started"
+    },
+    "link": "/getting-started/quickstart/"
+  }
+}
