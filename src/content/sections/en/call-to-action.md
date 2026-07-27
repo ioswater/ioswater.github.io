@@ -2,7 +2,7 @@
 title: |
   Build your <span class='light-text'>engineering-grade docs</span>
 description: From local preview to automated publishing, the template is ready.
-enable: true
+enable: false
 fill_button:
   enable: true
   label: Quickstart

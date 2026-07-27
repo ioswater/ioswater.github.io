@@ -5,121 +5,49 @@ import { getTranslations } from "@/lib/utils/languagePerser";
 
 const locale = Astro.currentLocale || "root";
 const menu = await getTranslations(locale);
-const footer = menu.footer;
+const footer = menu.footer || {};
+
+// 扁平化配置里的真实链接，凑成设计稿的极简链接行（不 404）
+const footerLinks = [
+  ...(footer.community?.links || []),
+  ...(footer.help_links?.links || []),
+  ...(footer.company?.links || []),
+];
 ---
 
 <footer class="site-footer">
-  <div class="container footer-grid">
-    <div class="footer-brand">
-      <a href={locale === "en" ? "/en/" : "/"} class="footer-brand-link">
-        <img src="/favicon.svg" alt="LiuLuit Mark" width="22" height="22" />
-        <strong>LiuLuit</strong>
-      </a>
-    </div>
-
-    <div>
-      <h4>{footer.community?.title || "Community"}</h4>
-      <ul>
-        {footer.community?.links?.map((link: any) => (
-          <li><a href={link.url}>{link.name}</a></li>
-        ))}
-      </ul>
-    </div>
-
-    <div>
-      <h4>{footer.help_links?.title || "Sections"}</h4>
-      <ul>
-        {footer.help_links?.links?.map((link: any) => (
-          <li><a href={link.url}>{link.name}</a></li>
-        ))}
-      </ul>
-    </div>
-
-    <div>
-      <h4>{footer.company?.title || "Operations"}</h4>
-      <ul>
-        {footer.company?.links?.map((link: any) => (
-          <li><a href={link.url}>{link.name}</a></li>
-        ))}
-      </ul>
-    </div>
-  </div>
-
-  <div class="container footer-meta">
-    <p set:html={markdownify(config?.params?.copyright)} />
+  <div class="wrap foot-grid">
+    <p class="copyright" set:html={markdownify(config?.params?.copyright)} />
+    <nav class="foot-links" aria-label="页脚导航">
+      {footerLinks.map((link: any) => <a href={link.url}>{link.name}</a>)}
+    </nav>
   </div>
 </footer>
 
 <style>
-  @layer starlight.core {
-    .site-footer {
-      margin-top: 2rem;
-      border-top: 1px solid var(--sl-color-hairline);
-      background: color-mix(in srgb, var(--sl-color-black) 82%, transparent);
-    }
+  .site-footer {
+    margin-top: 4rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    padding: 3rem 0;
+    background: color-mix(in srgb, var(--sl-color-black) 82%, transparent);
+  }
+  .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.5rem; }
+  .foot-grid {
+    display: flex; justify-content: space-between; gap: 1.25rem;
+    flex-wrap: wrap; align-items: center;
+  }
+  .copyright {
+    margin: 0; font-size: 0.875rem; color: var(--sl-color-gray-3);
+    font-family: "Instrument Sans", system-ui, sans-serif;
+  }
+  .foot-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .foot-links a {
+    font-size: 0.875rem; color: var(--sl-color-gray-3);
+    text-decoration: none; transition: color 120ms ease;
+  }
+  .foot-links a:hover { color: var(--sl-color-accent); }
 
-    .footer-grid {
-      display: grid;
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-      gap: 1.2rem;
-      padding: 2.2rem 0 1.2rem;
-    }
-
-    .footer-brand-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-      text-decoration: none;
-      color: var(--sl-color-white);
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.01em;
-    }
-
-    .footer-brand-link img {
-      border-radius: 8px;
-      box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--sl-color-white) 12%, transparent),
-        0 8px 18px color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
-    }
-
-    .footer-grid h4 {
-      margin: 0;
-      font-size: 0.88rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--sl-color-gray-3);
-    }
-
-    .footer-grid ul {
-      list-style: none;
-      margin: 0.8rem 0 0;
-      padding: 0;
-      display: grid;
-      gap: 0.45rem;
-    }
-
-    .footer-grid a {
-      text-decoration: none;
-      color: var(--sl-color-white);
-      opacity: 0.92;
-    }
-
-    .footer-grid a:hover {
-      color: var(--sl-color-accent);
-    }
-
-    .footer-meta {
-      border-top: 1px solid var(--sl-color-hairline);
-      padding: 0.9rem 0 1.5rem;
-      color: var(--sl-color-gray-3);
-      font-size: 0.88rem;
-    }
-
-    @media (min-width: 860px) {
-      .footer-grid {
-        grid-template-columns: minmax(0, 0.7fr) repeat(3, minmax(0, 1fr));
-      }
-    }
+  @media (prefers-reduced-motion: reduce) {
+    .foot-links a { transition: none; }
   }
 </style>
