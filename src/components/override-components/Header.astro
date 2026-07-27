@@ -70,7 +70,7 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
   </ul>
 
   <div class="nav-actions">
-    {hasSidebar && settings.search && <Search />}
+    {settings.search && <Search />}
     {!hasSidebar && <LanguageSelect />}
     {settings.theme_switcher && <ThemeSwitch className="mx-2" />}
     {

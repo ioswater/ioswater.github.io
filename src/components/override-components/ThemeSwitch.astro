@@ -78,13 +78,16 @@ const { className }: { className?: string } = Astro.props;
     "input[data-theme-switcher]"
   ) as HTMLInputElement;
   themeSwitcher?.addEventListener("change", (e) => {
+    const html = document.documentElement;
+    html.classList.add("theme-transition");
     if ((e.currentTarget as HTMLInputElement).checked) {
-      document.documentElement.dataset.theme = "dark";
+      html.dataset.theme = "dark";
       localStorage.setItem("starlight-theme", "dark");
     } else {
-      document.documentElement.dataset.theme = "light";
+      html.dataset.theme = "light";
       localStorage.setItem("starlight-theme", "light");
     }
+    window.setTimeout(() => html.classList.remove("theme-transition"), 400);
   });
 
   document.addEventListener("DOMContentLoaded", () => {

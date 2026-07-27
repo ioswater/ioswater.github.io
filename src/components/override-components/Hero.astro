@@ -2,6 +2,9 @@
 import Search from "./Search.astro";
 const locale = Astro.currentLocale || "root";
 const blogLink = locale === "en" ? "/en/blog/" : "/blog/";
+// 语言前缀：根语言为空，en 为 /en，保证站内链接在当前语言区内
+const base = locale === "en" ? "/en" : "";
+const withLocale = (p: string) => `${base}${p}`;
 
 // 分类卡片图标（内联 SVG，沿用设计稿线性风格）—— 服务端渲染
 function iconSvg(name: string): string {
@@ -14,7 +17,7 @@ function iconSvg(name: string): string {
   return paths[name] || paths.phone;
 }
 
-// 真实可达的站内链接，保证设计稿可点击、不 404
+// 真实可达的站内链接（统一走 withLocale，避免跨语言跳转），保证设计稿可点击、不 404
 const categories = [
   { icon: "phone", title: "iOS 基础", desc: "从 Swift 语法到 SwiftUI 布局，打牢工程基本功。", count: "42 篇", href: "/ios-basics/" },
   { icon: "cpu", title: "AI 架构", desc: "RAG、Agent 与推理服务的系统设计与落地经验。", count: "28 篇", href: "/ai-project-architecture/" },
@@ -104,15 +107,15 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
       <div class="cards">
         {
           categories.map((c, i) => (
-            <article class="card reveal" style={`--i:${i}`}>
+            <a class="card reveal" href={withLocale(c.href)} style={`--i:${i}`}>
               <span class="ico" set:html={iconSvg(c.icon)} />
               <h3>{c.title}</h3>
               <p>{c.desc}</p>
               <div class="meta">
                 <span>{c.count}</span>
-                <a href={c.href}>查看 →</a>
+                <span class="more">查看 →</span>
               </div>
-            </article>
+            </a>
           ))
         }
       </div>
@@ -135,7 +138,7 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
               <article class="post reveal" style={`--i:${i}`}>
                 <span class="date">{p.date}</span>
                 <div>
-                  <h3><a href={p.href}>{p.title}</a></h3>
+                  <h3><a href={withLocale(p.href)}>{p.title}</a></h3>
                   <p>{p.desc}</p>
                   <div class="row">
                     {p.tags.map((t) => <span class="chip">{t}</span>)}
@@ -219,7 +222,7 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
   }
 
   .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--space-5); }
-  .section { padding: var(--space-9) 0; }
+  .section { padding: var(--space-9) 0; scroll-margin-top: 5.5rem; }
   .eyebrow {
     font-family: var(--font-mono); font-size: var(--fs-xs);
     letter-spacing: 0.18em; text-transform: uppercase;
@@ -305,19 +308,22 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
     background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg);
     padding: var(--space-5); transition: transform var(--dur) var(--ease-expo), border-color var(--dur), box-shadow var(--dur);
     display: flex; flex-direction: column; gap: var(--space-3);
+    text-decoration: none; color: inherit;
   }
   .card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
   .card .ico { width: 42px; height: 42px; border-radius: var(--r-md); display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
   .card .ico :global(svg) { width: 22px; height: 22px; }
   .card h3 { font-size: var(--fs-lg); }
   .card p { font-size: var(--fs-sm); color: var(--text-muted); }
   .card .meta { margin-top: auto; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-3); border-top: 1px solid var(--border); }
-  .card .meta a { color: var(--accent); font-weight: 500; }
+  .card .meta .more { color: var(--accent); font-weight: 500; }
 
   /* ---------------- ARTICLES ---------------- */
   .articles { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-7); align-items: start; }
   .post-list { display: flex; flex-direction: column; }
   .post {
+    position: relative;
     display: grid; grid-template-columns: auto 1fr; gap: var(--space-4);
     padding: var(--space-5) 0; border-top: 1px solid var(--border);
     transition: padding-left var(--dur) var(--ease-expo);
@@ -326,17 +332,21 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
   .post .date { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); padding-top: 4px; white-space: nowrap; }
   .post h3 { font-size: var(--fs-lg); margin-bottom: var(--space-2); transition: color var(--dur-fast); font-family: var(--font-display); }
   .post h3 a { color: var(--text-strong); text-decoration: none; }
+  .post h3 a::after { content: ""; position: absolute; inset: 0; }
   .post:hover h3 a { color: var(--accent); }
+  .post h3 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
   .post p { font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: var(--space-3); line-height: 1.6; }
   .post .row { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
   .chip { font-size: var(--fs-xs); color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); padding: 0.2rem 0.6rem; border-radius: var(--r-full); }
   .read { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); }
 
-  .toc { position: sticky; top: 92px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--space-5); }
+  .toc { position: sticky; top: 92px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--space-5); scroll-margin-top: 5.5rem; }
   .toc h4 { font-size: var(--fs-sm); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin: 0 0 var(--space-3); }
   .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
   .toc a { font-size: var(--fs-sm); color: var(--text-muted); padding-left: var(--space-3); border-left: 2px solid var(--border); transition: color var(--dur-fast), border-color var(--dur-fast); text-decoration: none; }
   .toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+  .toc a.active { color: var(--accent); border-left-color: var(--accent); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------------- SHOWCASE ---------------- */
   .showcase { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; }
@@ -351,7 +361,7 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
     .hero-grid { grid-template-columns: 1fr; }
     .cards { grid-template-columns: repeat(2, 1fr); }
     .articles { grid-template-columns: 1fr; }
-    .toc { position: static; }
+    .toc { position: static; top: auto; }
   }
   @media (max-width: 680px) {
     .cards { grid-template-columns: 1fr; }
@@ -361,5 +371,29 @@ const tokenCode = `<pre><code><span class="tok-com"># 设计 token 落地示例�
   @media (prefers-reduced-motion: reduce) {
     .reveal { animation: none; opacity: 1; }
     .ll-home * { transition-duration: 0.01ms !important; }
+    html { scroll-behavior: auto; }
   }
 </style>
+
+<script>
+  // 本页目录滚动高亮（scrollspy）
+  const tocLinks = Array.from(document.querySelectorAll(".ll-home .toc a"));
+  const sections = tocLinks
+    .map((l) => document.getElementById(l.getAttribute("href")?.slice(1) || ""))
+    .filter((s): s is HTMLElement => !!s);
+
+  if (sections.length && "IntersectionObserver" in window) {
+    const setActive = (id: string) => {
+      tocLinks.forEach((l) => l.classList.toggle("active", l.getAttribute("href") === `#${id}`));
+    };
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive((e.target as HTMLElement).id);
+        });
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+    );
+    sections.forEach((s) => obs.observe(s));
+  }
+</script>

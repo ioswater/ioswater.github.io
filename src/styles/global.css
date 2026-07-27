@@ -43,6 +43,30 @@
   --sl-color-black: var(--color-lightmode-dark) !important;
 }
 
+/* 主题切换时的平滑过渡：仅在切换瞬间启用，避免首次加载闪动 */
+html { scroll-behavior: smooth; }
+.theme-transition,
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    fill 0.35s ease,
+    box-shadow 0.35s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: none !important;
+  }
+}
+
 @theme {
   --color-primary-gradient: linear-gradient(135deg, #22d3ee 0%, #0ea5a1 56%, #1d4ed8 100%);
 }
