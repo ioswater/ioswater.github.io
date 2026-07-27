@@ -208,7 +208,8 @@ if ((project as any)?.trailingSlash === "never")
       cursor: pointer;
       height: 3rem;
       font-size: var(--sl-text-sm);
-      width: 100%;
+      width: auto;
+      max-width: 14rem;
     }
     button[data-open-modal] kbd {
       margin-inline-start: auto;
@@ -218,8 +219,8 @@ if ((project as any)?.trailingSlash === "never")
       button[data-open-modal] {
         color: var(--sl-color-gray-2);
         font-size: var(--sl-text-sm);
-        width: 100%;
-        max-width: 100%;
+        width: auto;
+        max-width: 14rem;
       }
       button[data-open-modal]:hover {
         border-color: var(--sl-color-gray-2);

@@ -125,7 +125,38 @@
 }
 
 .nav-actions {
-  @apply flex items-center gap-2;
+  @apply flex items-center;
+  /* 比默认 gap-2 略宽松，让图标组与 CTA 的横向节奏更协调 */
+  gap: 0.625rem;
+}
+
+/* 导航内搜索框：限定上限宽度，不再以 width:100% 吞噬整行，
+   整组控件得以横向均衡分布（覆盖 Search.astro 的 starlight.core 层规则） */
+.nav-actions site-search button[data-open-modal] {
+  width: auto;
+  max-width: 14rem;
+  flex: 0 1 auto;
+}
+
+/* CTA 与左侧图标组之间的细竖向分隔线，让“进入博客”归属清晰 */
+.nav-desktop-cta {
+  position: relative;
+  margin-left: 0.125rem;
+}
+.nav-desktop-cta::before {
+  content: "";
+  position: absolute;
+  left: -0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 1.375rem;
+  background: var(--sl-color-hairline);
+  pointer-events: none;
+}
+.nav-desktop-cta:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 3px;
 }
 
 .nav-mobile-cta {
