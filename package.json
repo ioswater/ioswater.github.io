@@ -1,0 +1,39 @@
+{
+  "name": "liuluit-docs",
+  "version": "1.0.0",
+  "description": "LiuLuit documentation site built with Dockit, Astro and Starlight",
+  "author": "IT-Liu",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "deploy:github-pages": "bash ./scripts/deploy-github-pages.sh",
+    "deploy:cf-workers": "npm run build && wrangler deploy",
+    "preview:cf-workers": "npm run build && wrangler dev"
+  },
+  "dependencies": {
+    "@astro-community/astro-embed-youtube": "^0.5.10",
+    "@astrojs/starlight": "0.38.1",
+    "@astrojs/starlight-tailwind": "5.0.0",
+    "@tailwindcss/vite": "^4.1.17",
+    "astro": "6.0.4",
+    "astro-font": "^1.1.0",
+    "marked": "^17.0.1",
+    "sharp": "^0.34.5",
+    "vite": "^7.2.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.7",
+    "astro-vtbot": "^2.1.9",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.0.0",
+    "wrangler": "^4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

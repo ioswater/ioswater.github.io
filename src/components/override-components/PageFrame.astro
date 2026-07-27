@@ -1,0 +1,117 @@
+---
+import MobileMenuToggle from "./MobileMenuToggle.astro";
+import SidebarNav from "../SidebarNav.astro";
+
+const { hasSidebar } = Astro.locals.starlightRoute;
+---
+
+<div class="site-shell sl-flex">
+  <header class={"header" + (hasSidebar ? " has-sidebar" : " no-sidebar")}>
+    <slot name="header" />
+  </header>
+
+  {hasSidebar && <SidebarNav />}
+
+  <div class="main-frame">
+    <div class="container flex relative">
+      {
+        hasSidebar && (
+          <nav class="sidebar print:hidden" aria-label={Astro.locals.t("sidebarNav.accessibleLabel")}>
+            <MobileMenuToggle />
+            <div id="starlight__sidebar" class="sidebar-pane">
+              <div class="sidebar-content sl-flex">
+                <slot name="sidebar" />
+              </div>
+            </div>
+          </nav>
+        )
+      }
+      <slot />
+    </div>
+  </div>
+
+  <slot name="footer" />
+</div>
+
+<style>
+  @layer starlight.core {
+    .site-shell {
+      min-height: 100dvh;
+      flex-direction: column;
+      background:
+        radial-gradient(circle at 20% -10%, color-mix(in srgb, var(--sl-color-accent) 16%, transparent), transparent 48%),
+        radial-gradient(circle at 85% -20%, color-mix(in srgb, #38bdf8 15%, transparent), transparent 42%),
+        var(--sl-color-black);
+    }
+
+    :root[data-theme="light"] .site-shell {
+      background:
+        radial-gradient(circle at 20% -10%, color-mix(in srgb, var(--sl-color-accent) 14%, transparent), transparent 45%),
+        radial-gradient(circle at 90% -25%, color-mix(in srgb, #0ea5e9 12%, transparent), transparent 38%),
+        var(--sl-color-black);
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: var(--sl-z-index-navbar);
+      border-bottom: 1px solid var(--sl-color-hairline);
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--sl-color-black) 72%, transparent);
+    }
+
+    .main-frame {
+      padding-top: 1.2rem;
+      padding-bottom: 2rem;
+    }
+
+    .sidebar-pane {
+      visibility: var(--sl-sidebar-visibility, hidden);
+      position: sticky;
+      height: calc(100dvh - 8.5rem);
+      z-index: var(--sl-z-index-menu);
+      overflow-y: auto;
+      inset-inline-start: 0;
+      width: 100%;
+      padding-bottom: 1.2rem;
+      border-right: 1px solid var(--sl-color-hairline);
+      scrollbar-width: thin;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar-pane {
+        inset-block: var(--sl-nav-height);
+      }
+    }
+
+    @media (max-width: 799px) {
+      .sidebar-pane {
+        position: fixed;
+        inset: var(--sl-nav-height) 0 0;
+        height: auto;
+        background: color-mix(in srgb, var(--sl-color-black) 94%, transparent);
+      }
+    }
+
+    :global([aria-expanded="true"]) ~ .sidebar-pane {
+      --sl-sidebar-visibility: visible;
+    }
+
+    .sidebar-content {
+      height: 100%;
+      min-height: max-content;
+      padding: 0.8rem var(--sl-sidebar-pad-x) 0;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    @media (min-width: 50rem) {
+      .sidebar-pane {
+        --sl-sidebar-visibility: visible;
+        width: var(--sl-sidebar-width);
+        background: transparent;
+        inset-block: calc(var(--sl-nav-height) + 0.8rem) 0;
+      }
+    }
+  }
+</style>

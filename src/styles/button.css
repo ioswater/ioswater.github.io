@@ -1,0 +1,31 @@
+.btn {
+  @apply inline-flex items-center justify-center no-underline px-4 py-2.5 text-sm font-semibold rounded-xl transition;
+}
+
+.btn-primary {
+  background: var(--color-primary-gradient);
+  color: #f8fbff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+.btn-secondary,
+.btn-outline-primary {
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-white);
+  background: color-mix(in srgb, var(--sl-color-black) 78%, transparent);
+}
+
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-outline-primary {
+  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
+}
+
+.btn-secondary:hover,
+.btn-outline-primary:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+  color: var(--sl-color-accent);
+}

@@ -1,0 +1,246 @@
+---
+import BlogHub from "./BlogHub.astro";
+import ThemeSwitch from "@/components/override-components/ThemeSwitch.astro";
+import Footer from "@/components/override-components/Footer.astro";
+import type { HubPost } from "@/lib/utils/blogHub";
+
+const { posts = [], locale = "zh-CN" } = Astro.props as {
+  posts?: HubPost[];
+  locale?: "zh-CN" | "en";
+};
+
+const isEn = locale === "en";
+const homeLink = isEn ? "/en/" : "/";
+const langSwitchLink = isEn ? "/blog/" : "/en/blog/";
+
+const copy = isEn
+  ? {
+      title: "Engineering Notes Hub",
+      subtitle:
+        "A unified, high-signal stream for iOS fundamentals, AI architecture practice, personal projects, and profile notes.",
+      backDocs: "Back to Docs",
+      switchLang: "中文",
+      nav: [
+        { label: "iOS", href: "/en/ios-basics/swift-concurrency-basics/" },
+        { label: "AI Architecture", href: "/en/ai-project-architecture/rag-system-architecture/" },
+        { label: "Projects", href: "/en/personal-projects/liuluit-docs-evolution/" },
+        { label: "Profile", href: "/en/profile/about-me/" }
+      ]
+    }
+  : {
+      title: "技术博客聚合中心",
+      subtitle: "将 iOS 基础、AI 项目实战架构、个人项目与个人简介统一在一个高效检索入口。",
+      backDocs: "返回文档",
+      switchLang: "EN",
+      nav: [
+        { label: "iOS 基础", href: "/ios-basics/swift-concurrency-basics/" },
+        { label: "AI 架构", href: "/ai-project-architecture/rag-system-architecture/" },
+        { label: "个人项目", href: "/personal-projects/liuluit-docs-evolution/" },
+        { label: "个人简介", href: "/profile/about-me/" }
+      ]
+    };
+---
+
+<div class="blog-page-shell">
+  <header class="blog-page-header">
+    <div class="container blog-header-inner">
+      <a class="blog-brand" href={homeLink} aria-label="LiuLuit Home">
+        <img src="/favicon.svg" alt="LiuLuit Mark" width="22" height="22" />
+        <span>LiuLuit</span>
+      </a>
+
+      <nav class="blog-top-nav" aria-label="Blog sections">
+        {copy.nav.map((item) => (
+          <a href={item.href}>{item.label}</a>
+        ))}
+      </nav>
+
+      <div class="blog-header-actions">
+        <a class="btn btn-secondary" href={homeLink}>{copy.backDocs}</a>
+        <a class="blog-lang-switch" href={langSwitchLink}>{copy.switchLang}</a>
+        <ThemeSwitch />
+      </div>
+    </div>
+  </header>
+
+  <main class="container blog-page-main">
+    <section class="blog-page-hero">
+      <p class="blog-hero-kicker">LiuLuit Tech Field Notes</p>
+      <h1>{copy.title}</h1>
+      <p>{copy.subtitle}</p>
+    </section>
+
+    <BlogHub posts={posts} locale={locale} />
+  </main>
+
+  <Footer />
+</div>
+
+<style>
+  .blog-page-shell {
+    min-height: 100dvh;
+    background:
+      radial-gradient(circle at 20% -12%, color-mix(in srgb, var(--sl-color-accent) 20%, transparent), transparent 42%),
+      radial-gradient(circle at 84% -22%, color-mix(in srgb, #38bdf8 16%, transparent), transparent 38%),
+      var(--sl-color-black);
+  }
+
+  :root[data-theme="light"] .blog-page-shell {
+    background:
+      radial-gradient(circle at 20% -12%, color-mix(in srgb, var(--sl-color-accent) 16%, transparent), transparent 44%),
+      radial-gradient(circle at 84% -22%, color-mix(in srgb, #0ea5e9 12%, transparent), transparent 38%),
+      var(--sl-color-black);
+  }
+
+  .blog-page-header {
+    position: sticky;
+    top: 0;
+    z-index: 70;
+    border-bottom: 1px solid var(--sl-color-hairline);
+    background: color-mix(in srgb, var(--sl-color-black) 72%, transparent);
+    backdrop-filter: blur(16px);
+  }
+
+  .blog-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4.2rem;
+  }
+
+  .blog-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    text-decoration: none;
+    color: var(--sl-color-white);
+    font-size: 1.04rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .blog-brand img {
+    border-radius: 7px;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--sl-color-white) 14%, transparent);
+  }
+
+  .blog-top-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .blog-top-nav a {
+    text-decoration: none;
+    color: color-mix(in srgb, var(--sl-color-white) 86%, transparent);
+    font-size: 0.86rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: border-color 0.22s ease, color 0.22s ease, transform 0.22s ease;
+    white-space: nowrap;
+  }
+
+  .blog-top-nav a:hover {
+    color: var(--sl-color-white);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .blog-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .blog-lang-switch {
+    text-decoration: none;
+    color: var(--sl-color-white);
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 10px;
+    padding: 0.45rem 0.58rem;
+    line-height: 1;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .blog-lang-switch:hover {
+    color: var(--sl-color-accent);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+  }
+
+  .blog-page-main {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .blog-page-hero {
+    margin-bottom: 0.8rem;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 18%, transparent);
+    padding: clamp(1.1rem, 2vw, 1.6rem);
+    animation: hero-rise 0.58s ease-out both;
+  }
+
+  .blog-hero-kicker {
+    margin: 0;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sl-color-gray-3);
+  }
+
+  .blog-page-hero h1 {
+    margin: 0.42rem 0 0;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    letter-spacing: -0.02em;
+  }
+
+  .blog-page-hero > p:last-child {
+    margin: 0.5rem 0 0;
+    max-width: 72ch;
+    color: var(--sl-color-gray-3);
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 1180px) {
+    .blog-top-nav {
+      display: none;
+    }
+  }
+
+  @media (max-width: 680px) {
+    .blog-header-inner {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 0.7rem;
+      padding-top: 0.4rem;
+      padding-bottom: 0.4rem;
+    }
+
+    .blog-header-actions {
+      margin-left: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blog-page-hero {
+      animation: none;
+    }
+  }
+</style>

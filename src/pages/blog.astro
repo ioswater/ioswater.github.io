@@ -1,0 +1,29 @@
+---
+import { getCollection } from "astro:content";
+import BlogHubPage from "@/components/blog/BlogHubPage.astro";
+import { buildBlogHubPosts } from "@/lib/utils/blogHub";
+import "@/styles/global.css";
+
+const docs = await getCollection("docs");
+const posts = buildBlogHubPosts(docs, "zh-CN");
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>博客聚合页 | LiuLuit Tech Blog</title>
+    <meta name="description" content="按关键词、分类和日期筛选技术文章。" />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <script is:inline>
+      const savedTheme = localStorage.getItem("starlight-theme");
+      if (savedTheme === "light" || savedTheme === "dark") {
+        document.documentElement.dataset.theme = savedTheme;
+      }
+    </script>
+  </head>
+  <body>
+    <BlogHubPage posts={posts} locale="zh-CN" />
+  </body>
+</html>

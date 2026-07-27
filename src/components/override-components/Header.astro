@@ -1,0 +1,103 @@
+---
+import SiteTitle from "./SiteTitle.astro";
+import { getTranslations } from "@/lib/utils/languagePerser";
+import config from "@/config/config.json" assert { type: "json" };
+import ThemeSwitch from "./ThemeSwitch.astro";
+import Search from "./Search.astro";
+import LanguageSelect from "@astrojs/starlight/components/LanguageSelect.astro";
+
+const locale = Astro.currentLocale || "root";
+const menu = await getTranslations(locale);
+const { settings, navigation_button } = config;
+const navTranslations = navigation_button.translations as Record<string, string> | undefined;
+const navButtonLabel = navTranslations?.[locale] || navigation_button.label;
+const navLinks = navigation_button.links as Record<string, string> | undefined;
+const navButtonLink = navLinks?.[locale] || navLinks?.root || navigation_button.link;
+const { main }: { main: any[] } = menu;
+const pathname = new URL(Astro.request.url).pathname;
+const hasSidebar = Astro.locals.starlightRoute.hasSidebar;
+
+const isActive = (url: string) => pathname === url || pathname === `${url}`;
+---
+
+<nav class="top-nav container">
+  <div class="brand-wrap">
+    <SiteTitle />
+    <span class="brand-dot" aria-hidden="true"></span>
+  </div>
+
+  <input id="nav-toggle" type="checkbox" class="hidden" />
+  <label for="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </label>
+
+  <ul id="nav-menu" class="nav-menu">
+    {
+      main.map((item) =>
+        item.hasChildren ? (
+          <li class="nav-item nav-dropdown">
+            <button class={`nav-link ${item.children?.some((c: any) => isActive(c.url)) ? "active" : ""}`}>
+              {item.name}
+            </button>
+            <ul class="nav-dropdown-list">
+              {item.children?.map((child: any) => (
+                <li>
+                  <a class={`nav-dropdown-link ${isActive(child.url) ? "active" : ""}`} href={child.url}>
+                    {child.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </li>
+        ) : (
+          <li class="nav-item">
+            <a class={`nav-link ${isActive(item.url) ? "active" : ""}`} href={item.url}>
+              {item.name}
+            </a>
+          </li>
+        )
+      )
+    }
+    {
+      navigation_button.enable && (
+        <li class="nav-item nav-mobile-cta">
+          <a class="btn btn-primary" href={navButtonLink}>
+            {navButtonLabel}
+          </a>
+        </li>
+      )
+    }
+  </ul>
+
+  <div class="nav-actions">
+    {hasSidebar && settings.search && <Search />}
+    {!hasSidebar && <LanguageSelect />}
+    {settings.theme_switcher && <ThemeSwitch className="mx-2" />}
+    {
+      navigation_button.enable && (
+        <a class="btn btn-primary nav-desktop-cta" href={navButtonLink}>
+          {navButtonLabel}
+        </a>
+      )
+    }
+  </div>
+</nav>
+
+<script>
+  const trigger = document.querySelector("#nav-toggle") as HTMLInputElement | null;
+  const menu = document.querySelector("#nav-menu") as HTMLElement | null;
+  const dropdownButtons = document.querySelectorAll<HTMLButtonElement>(".nav-dropdown > .nav-link");
+
+  dropdownButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const parent = btn.closest(".nav-dropdown");
+      parent?.classList.toggle("open");
+    });
+  });
+
+  if (trigger && menu) {
+    trigger.addEventListener("change", () => {
+      menu.classList.toggle("open", trigger.checked);
+    });
+  }
+</script>

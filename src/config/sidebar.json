@@ -1,0 +1,60 @@
+{
+  "main": [
+    {
+      "label": "博客总览",
+      "translations": { "en": "Blog Hub" },
+      "slug": "content/blog-portal"
+    },
+    {
+      "label": "iOS 基础知识",
+      "translations": { "en": "iOS Fundamentals" },
+      "autogenerate": { "directory": "ios-basics" }
+    },
+    {
+      "label": "AI 项目实战架构",
+      "translations": { "en": "AI Project Architecture" },
+      "autogenerate": { "directory": "ai-project-architecture" }
+    },
+    {
+      "label": "个人项目",
+      "translations": { "en": "Personal Projects" },
+      "autogenerate": { "directory": "personal-projects" }
+    },
+    {
+      "label": "个人简介",
+      "translations": { "en": "About Me" },
+      "autogenerate": { "directory": "profile" }
+    },
+    {
+      "label": "站点维护",
+      "translations": { "en": "Site Operations" },
+      "items": [
+        {
+          "label": "内容发布流程",
+          "translations": { "en": "Authoring Workflow" },
+          "slug": "content/authoring-and-review"
+        },
+        {
+          "label": "发布记录",
+          "translations": { "en": "Release Notes" },
+          "slug": "content/release-notes"
+        },
+        {
+          "label": "instinct-envolve 团队指南",
+          "translations": { "en": "instinct-envolve Team Guide" },
+          "slug": "content/instinct-envolve-team-guide"
+        },
+        {
+          "label": "部署方案",
+          "translations": { "en": "Deployment" },
+          "slug": "operations/deployment-options"
+        },
+        {
+          "label": "CI/CD",
+          "translations": { "en": "CI/CD" },
+          "slug": "operations/ci-cd"
+        }
+      ]
+    }
+  ]
+}
