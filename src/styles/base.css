@@ -13,6 +13,7 @@ h4,
 h5,
 h6 {
   @apply font-semibold leading-tight;
+  font-family: "Space Grotesk", system-ui, sans-serif;
   color: var(--sl-color-white);
 }
 

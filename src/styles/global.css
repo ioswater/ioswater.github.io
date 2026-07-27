@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @layer base, starlight, theme, components, utilities;
 
 @import "@astrojs/starlight-tailwind";
@@ -8,9 +10,9 @@
 @plugin "../tailwind-plugin/tw-bs-grid";
 
 :root {
-  --sl-color-accent-low: color-mix(in srgb, var(--color-primary), #000 86%);
-  --sl-color-accent: var(--color-primary);
-  --sl-color-accent-high: color-mix(in srgb, var(--color-primary), #fff 74%);
+  --sl-color-accent-low: color-mix(in srgb, var(--color-primary), #000 86%) !important;
+  --sl-color-accent: var(--color-primary) !important;
+  --sl-color-accent-high: color-mix(in srgb, var(--color-primary), #fff 74%) !important;
 
   --sl-color-white: var(--color-light);
   --sl-color-gray-1: color-mix(in srgb, var(--color-dark) 8%, var(--color-light) 92%);
@@ -21,13 +23,15 @@
   --sl-color-gray-6: color-mix(in srgb, var(--color-dark) 88%, var(--color-light) 12%);
   --sl-color-black: var(--color-dark);
   --sl-sidebar-width: 300px;
+  --sl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --sl-font: "Instrument Sans", system-ui, -apple-system, Segoe UI, sans-serif;
   --sl-color-hairline: color-mix(in srgb, var(--sl-color-white) 12%, transparent);
 }
 
 :root[data-theme="light"] {
-  --sl-color-accent-low: color-mix(in srgb, var(--color-lightmode-primary), #fff 72%);
-  --sl-color-accent: var(--color-lightmode-primary);
-  --sl-color-accent-high: color-mix(in srgb, var(--color-lightmode-primary), #001 84%);
+  --sl-color-accent-low: color-mix(in srgb, var(--color-lightmode-primary), #fff 72%) !important;
+  --sl-color-accent: var(--color-lightmode-primary) !important;
+  --sl-color-accent-high: color-mix(in srgb, var(--color-lightmode-primary), #001 84%) !important;
 
   --sl-color-white: var(--color-lightmode-light);
   --sl-color-gray-1: color-mix(in srgb, var(--color-lightmode-dark) 12%, var(--color-lightmode-light) 88%);
@@ -40,11 +44,7 @@
 }
 
 @theme {
-  --color-primary-gradient: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--sl-color-accent) 80%, #38bdf8 20%),
-    color-mix(in srgb, var(--sl-color-accent) 68%, #1d4ed8 32%)
-  );
+  --color-primary-gradient: linear-gradient(135deg, #22d3ee 0%, #0ea5a1 56%, #1d4ed8 100%);
 }
 
 @import "./base.css";

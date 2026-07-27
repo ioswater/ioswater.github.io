@@ -2,6 +2,11 @@
   @apply inline-flex items-center justify-center no-underline px-4 py-2.5 text-sm font-semibold rounded-xl transition;
 }
 
+.btn:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 3px;
+}
+
 .btn-primary {
   background: var(--color-primary-gradient);
   color: #f8fbff;
