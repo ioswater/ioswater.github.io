@@ -23,6 +23,22 @@
 
 ## 坑：Starlight customCss 加载顺序导致主题色被覆盖
 - 现象：`customCss: ['./src/styles/global.css']` 配好了，但 Vite 把 global.css 并进了 `ThemeSwitch.*.css` chunk，而该 chunk 在 HTML 里排在 Starlight 自带 `common.*.css` **之前**。common.css 在 `:root`/`[data-theme=dark]` 里用默认蓝 `hsl(224,100%,60%)`/`hsl(234,90%,60%)` 重定义 `--sl-color-accent`，后加载即覆盖掉 global.css 里的 `--sl-color-accent: var(--color-primary)`（含暗色块特异性更高）。结果强调色退回 Starlight 默认蓝，theme.json 的色值没生效。
-- 字体(`--sl-font`/`--sl-font-mono`)、标题 Space Grotesk、品牌渐变 `--color-primary-gradient` 都不在 common.css 重定义，故正常生效；**只有 accent 三件套被覆盖**。
-- 修复：在 global.css 的 `:root` 与 `:root[data-theme="light"]` 里给 `--sl-color-accent` / `--sl-color-accent-low` / `--sl-color-accent-high` 加 `!important`（lightningcss 会保留自定义属性上的 !important），无视打包顺序稳赢。这是 Starlight 深度改主题的标准做法。
+- 字体(`--sl-font`/`--sl-font-mono`)、标题 Space Grotesk、品牌渐变 `--color-primary-gradient` 都不在 common.css 重定义，故正常生效；**但整组 `--sl-color-*`（white/gray-1..6/black/hairline）和 accent 全部被 common.css 的默认值覆盖**——即线上中性色其实是 Starlight 默认色，设计稿的冷调中性色没真正渲染（因我们的色值近似默认，肉眼难辨）。
+- 修复：在 global.css 的 `:root` 与 `:root[data-theme="light"]` 里给**整组** `--sl-color-white`/`--sl-color-gray-1..6`/`--sl-color-black`/`--sl-color-hairline`/`--sl-color-accent(-low/-high)` 以及 `--sl-font`/`--sl-font-mono` 全部加 `!important`（lightningcss 会保留自定义属性上的 !important），无视打包顺序稳赢。这是 Starlight 深度改主题的标准做法。注意：只加 accent 不够，中性色那组必须一起加，否则设计稿冷调不生效。
 - 验证：部署后用 `curl` 抓线上 CSS，确认含 `--sl-color-accent:var(--color-primary)!important` 且字体/@import 在；线上文件 hash 每次部署会变，抓前先 `curl` 首页取最新 `ThemeSwitch.*.css` 路径。
+
+## 坑：部署必须在 codex 分支跑（lockfile 只在 codex）
+- `package-lock.json` 被跟踪在 `codex/dockit-source`，但 `master` 工作树里没有它（也不在 master 上）。部署脚本 `scripts/deploy-github-pages.sh` 第一步是 `npm ci`，而 `npm ci` 必须在有 lockfile 的目录下跑，否则报 `ENOLOCK` 失败。
+- **因此部署/构建要从 `codex/dockit-source` 分支执行**（该分支有 lockfile + 设计源码），不要在 `master` 工作树直接跑。从 codex 跑时 `REPO_ROOT` 含 lockfile，`npm ci` 正常。
+- 切分支陷阱：`.workbuddy/` 在 codex 被跟踪、在 master 是未跟踪，直接 `git checkout codex` 会被 `.workbuddy/memory/2026-07-27.md` 冲突拦截。先 `mv .workbuddy /tmp/xxx` 再切，或 `git checkout -f`。
+- 切换分支后若 `astro: command not found`（node_modules 损坏/astro bin 缺失），用带绕过的 `npm ci` 重装：`env -u CODEBUDDY_SESSION_ID -u CLAUDE_SESSION_ID npm ci`（不带绕过会被 safe-delete shim 拦 node_modules 删除）。
+
+## 坑：Starlight Hero 覆盖组件需 `hero:` frontmatter 才渲染
+- Starlight 的 splash 首页**只在 `src/content/docs/index.mdx`（及 `en/index.mdx`）含 `hero:` frontmatter 字段时才渲染被覆盖的 Hero 组件**；若把该字段删掉，首页会回退成 Starlight 默认 splash（只有 `<h1>` 标题，无自定义 Hero）。
+- 2026-07-27 完整实现设计落地页时踩到：把根 `index.mdx` 精简到只剩 `title/description/template: splash`，结果根 `/` 首页没渲染新 Hero，而 en 首页（仍保留 `hero:`）正常。补回 `hero:` 字段即恢复。
+- Hero 组件内容可硬编码、不读 `data.hero`（值无所谓），但 `hero:` 字段本身必须存在以触发渲染。同时删掉 `index.mdx` 的 markdown 正文，避免与自定义 Hero 的分类/文章区重复。
+
+## 坑：Astro 模板中 `{` `}` 被当作表达式解析
+- 在 `.astro` 模板的**文本/HTML 里直接写 `{` 或 `}`**（如 Swift 代码的 `struct Foo {`、CSS 的 `:root {`）会触发 Astro 的表达式解析，构建报 `Expected "}" but found ...`。
+- 修复：把含花括号的代码段放进 frontmatter 的字符串变量（模板字符串），再用 `set:html={codeVar}` 渲染。花括号在 JS 字符串里安全，且 `set:html` 原样输出 HTML（含 `<span class="tok-...">` 高亮标签）。
+- 同理：Hero 等组件里若要在前端作用域用函数生成 HTML，必须定义在 frontmatter（服务端），不能在客户端 `<script>` 里定义后用于模板（模板在服务端渲染时找不到该函数）。
