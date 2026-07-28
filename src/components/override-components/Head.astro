@@ -5,4 +5,12 @@ const { head } = Astro.locals.starlightRoute;
 <meta name="theme-color" content="#0b1220" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
 
+<script is:inline>
+  try {
+    if (localStorage.getItem("reading-focus") === "on") {
+      document.documentElement.classList.add("reading-focus");
+    }
+  } catch (e) {}
+</script>
+
 {head.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}

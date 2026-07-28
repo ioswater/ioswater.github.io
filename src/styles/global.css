@@ -75,3 +75,133 @@ html { scroll-behavior: smooth; }
 @import "./navigation.css";
 @import "./components.css";
 @import "./button.css";
+
+/* ============================================================
+   专注阅读模式 + 阅读增强（进度条 / 快捷键提示）
+   ============================================================ */
+
+/* 专注模式开关按钮（Header 内，仅文章页渲染） */
+.focus-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sl-color-black) 78%, transparent);
+  color: var(--sl-color-white);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease,
+    transform 0.2s ease;
+}
+:root[data-theme="light"] .focus-toggle {
+  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
+  color: var(--sl-color-black);
+}
+.focus-toggle:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+  color: var(--sl-color-accent);
+}
+.focus-toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
+  color: var(--sl-color-accent);
+  background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+}
+.focus-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 专注态：隐藏左右侧栏与面包屑，正文限宽居中 */
+html.reading-focus .sidebar,
+html.reading-focus .right-sidebar-container {
+  display: none !important;
+}
+html.reading-focus .content-container {
+  display: block !important;
+}
+html.reading-focus .breadcrumb-container {
+  display: none !important;
+}
+html.reading-focus .main-pane {
+  max-width: 72ch;
+  margin-inline: auto;
+  border-inline: 0 !important;
+  padding-inline: clamp(1rem, 4vw, 2rem);
+}
+@media (min-width: 72rem) {
+  html.reading-focus .main-pane {
+    --sl-content-margin-inline: auto !important;
+  }
+}
+
+/* 阅读进度条（顶部，紧贴 header 下方） */
+.reading-progress {
+  position: fixed;
+  top: var(--sl-nav-height, 3.5rem);
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: calc(var(--sl-z-index-navbar, 60) - 1);
+  background: color-mix(in srgb, var(--sl-color-white) 8%, transparent);
+  pointer-events: none;
+}
+.reading-progress-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--color-primary-gradient);
+  transition: width 0.08s linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress-fill {
+    transition: none;
+  }
+}
+
+/* 快捷键提示条 */
+.kbd-hint {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: calc(var(--sl-z-index-navbar, 60) + 2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--sl-color-hairline);
+  background: color-mix(in srgb, var(--sl-color-black) 82%, transparent);
+  color: var(--sl-color-gray-3);
+  font-size: 0.76rem;
+  line-height: 1;
+  backdrop-filter: blur(10px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+:root[data-theme="light"] .kbd-hint {
+  background: color-mix(in srgb, var(--sl-color-white) 86%, transparent);
+  color: var(--sl-color-gray-4);
+}
+.kbd-hint kbd {
+  font-family: var(--sl-font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  padding: 0.08rem 0.36rem;
+  border-radius: 6px;
+  border: 1px solid var(--sl-color-hairline);
+  color: var(--sl-color-white);
+  background: color-mix(in srgb, var(--sl-color-white) 10%, transparent);
+}
+:root[data-theme="light"] .kbd-hint kbd {
+  color: var(--sl-color-black);
+  background: color-mix(in srgb, var(--sl-color-black) 8%, transparent);
+}
+.kbd-hint .kbd-sep {
+  opacity: 0.5;
+}
+.kbd-hint.dismissed {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}

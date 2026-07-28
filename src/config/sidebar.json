@@ -45,11 +45,6 @@
           "slug": "content/release-notes"
         },
         {
-          "label": "instinct-envolve 团队指南",
-          "translations": { "en": "instinct-envolve Team Guide" },
-          "slug": "content/instinct-envolve-team-guide"
-        },
-        {
           "label": "部署方案",
           "translations": { "en": "Deployment" },
           "slug": "operations/deployment-options"

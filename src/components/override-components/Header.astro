@@ -74,6 +74,16 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
     {!hasSidebar && <LanguageSelect />}
     {settings.theme_switcher && <ThemeSwitch className="mx-2" />}
     {
+      hasSidebar && (
+        <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" title="专注阅读模式 (f)" aria-label="切换专注阅读模式">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 6c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V6c-2-1.5-5-1.5-7 0Z" />
+            <path d="M12 6v12" />
+          </svg>
+        </button>
+      )
+    }
+    {
       navigation_button.enable && (
         <a class="btn btn-primary nav-desktop-cta" href={navButtonLink}>
           {navButtonLabel}
@@ -100,4 +110,42 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
       menu.classList.toggle("open", trigger.checked);
     });
   }
+</script>
+
+<script is:inline>
+  (function () {
+    function init() {
+      var htmlEl = document.documentElement;
+      var focusBtn = document.getElementById("focus-toggle");
+      if (!focusBtn) return;
+      focusBtn.setAttribute("aria-pressed", String(htmlEl.classList.contains("reading-focus")));
+      if (window.__focusBtnBound === focusBtn) return;
+      window.__focusBtnBound = focusBtn;
+      focusBtn.addEventListener("click", function () {
+        var on = !htmlEl.classList.contains("reading-focus");
+        htmlEl.classList.toggle("reading-focus", on);
+        try { localStorage.setItem("reading-focus", on ? "on" : "off"); } catch (e) {}
+        focusBtn.setAttribute("aria-pressed", String(on));
+      });
+    }
+    if (!window.__focusKeyBound) {
+      window.__focusKeyBound = true;
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        if (e.key === "f" && document.getElementById("focus-toggle")) {
+          e.preventDefault();
+          var htmlEl = document.documentElement;
+          var on = !htmlEl.classList.contains("reading-focus");
+          htmlEl.classList.toggle("reading-focus", on);
+          try { localStorage.setItem("reading-focus", on ? "on" : "off"); } catch (err) {}
+          var b = document.getElementById("focus-toggle");
+          if (b) b.setAttribute("aria-pressed", String(on));
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", init);
+    init();
+  })();
 </script>

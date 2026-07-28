@@ -17,4 +17,4 @@ lastUpdated: 2026-06-15
 
 ## 相关文档
 
-- [instinct-envolve 团队使用指南](/content/instinct-envolve-team-guide/)
+- [instinct-envolve 团队使用指南](/personal-projects/instinct-envolve-team-guide/)
