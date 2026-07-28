@@ -66,3 +66,9 @@
 - Starlight 明暗是手动 `data-theme` 切换（非 prefers-color-scheme），故 EC 须 `useDarkModeMediaQuery:false` + `themeCssSelector` 返回 `[data-theme="dark"]`（暗）/ `:root,[data-theme='light']`（亮）作用域，否则 EC 主题不跟随站点切换。
 - Shiki 原生无 `oc` 别名（只 objc/objective-c），用 `shiki:{langAlias:{oc:"objective-c"}}` 注册，使 ```oc 与 ```objc 都高亮。
 - EC 样式变量 `--ec-*` 须用 `!important` 覆盖（customCss 加载顺序不确定），暗色严格挂 `[data-theme="dark"]`。
+
+## 范式：代码块统一为「品牌渐变描边深色卡」
+- 视觉约定（2026-07-28 定）：全站代码块 = 深色面板（恒深色，亮/暗站主题下都走 github-dark 单主题）+ 品牌青渐变描边（`.frame`/`Hero` 用 `::before` mask-composite exclude 技法，背景 `var(--color-primary-gradient)`）+ 角落微光（`::after` radial-gradient `color-mix(sl-color-accent 22%, transparent)`）。radius 统一 14px，深色面板色 = `color-mix(in srgb, var(--sl-color-white) 7%, var(--sl-color-black))`（与 hero `--surface-1` 相同）。
+- EC 配置（astro.config.mjs）：`themes:["github-dark"]` 单主题 + `useDarkModeMediaQuery:false` + `themeCssSelector:()=>":root"`（不再双主题跟随站主题，代码块永远深色）。改样式只动 `src/styles/code-block.css`（全 `!important` 覆盖 `--ec-*`）。
+- 首页 Hero 的 `.code-card` 与 `#showcase .showcase` 复用同一套 frame（深色面板 + 渐变描边 + 微光），`.tok-*` 用 github-dark 调色板（#ff7b72/#a5d6ff/#d2a8ff/#79c0ff/#ffa657/#7ee787）与 EC 一致——保证全站代码块同一语言。
+- 铁律：新增任何代码展示务必沿用此风格，勿引入第三种卡片样式。需要第 N 种语言高亮时，优先走 EC（`shiki.langAlias` 注册别名），而非手写新 chrome。

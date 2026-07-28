@@ -33,14 +33,10 @@ export default defineConfig({
   integrations: [
     // 必须排在 mdx()/starlight() 之前，否则 MDX 代码块无法使用 EC
     astroExpressiveCode({
-      // 明暗双主题，贴合 antd 观感
-      themes: ["github-light", "github-dark"],
-      // 跟随 Starlight 的手动主题切换（data-theme），而非系统偏好
+      // 代码块恒为深色面板（亮/暗站主题下都走 github-dark），与首页 Hero 的暗色代码卡统一
+      themes: ["github-dark"],
       useDarkModeMediaQuery: false,
-      themeCssSelector: (theme) =>
-        theme.type === "dark"
-          ? '[data-theme="dark"]'
-          : ":root, [data-theme='light']",
+      themeCssSelector: () => ":root",
       // antd 极简风默认不显示行号；作者可用 `showLineNumbers` 元信息开启
       defaultProps: { showLineNumbers: false },
       // 注册 oc 作为 Objective-C 的别名（Shiki 自带 objc/objective-c）
