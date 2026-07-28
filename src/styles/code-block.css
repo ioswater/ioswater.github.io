@@ -1,0 +1,160 @@
+/* ============================================================
+ * Expressive Code — antd 极简代码块样式 (LiuLuit Tech Blog)
+ * ------------------------------------------------------------
+ * 实现方式：覆盖 EC 的 --ec-* 变量（全部加 !important，以战胜
+ * 加载顺序不确定的 dist/_astro/ec.*.css）+ 少量直接属性兜底。
+ *
+ * 作用域：
+ *   - 亮色  : :root / [data-theme="light"]
+ *   - 暗色  : [data-theme="dark"]   （跟随 Starlight 手动切换，
+ *             不依赖 prefers-color-scheme）
+ *
+ * 实测 DOM/选择器（来自 dist 真实渲染）：
+ *   .expressive-code > figure.frame > figcaption.header(可选) + pre[data-language] + div.copy > button
+ *   - 边框/背景实际落在 pre 上（.frame 只负责 border-radius + box-shadow）
+ *   - 复制按钮 .copy 绝对定位于 .frame 右上角，图标用 mask 取自 --ec-frm-copyIcon
+ *   - has-title 时 EC 会把 pre 顶边抹平（border-top:none; 顶角为 0），故
+ *     不对通用 pre 强写 border-radius，避免破坏带标题布局。
+ *
+ * 品牌色：var(--color-primary) 在本项目解析为 #22d3ee（青色）。
+ * ============================================================ */
+
+/* ===================== 亮色 :root / [data-theme="light"] ===================== */
+:root .expressive-code,
+[data-theme="light"] .expressive-code {
+  /* —— 几何（与主题无关，但按任务要求在两作用域都声明）—— */
+  --ec-brdWd: 1px !important;            /* antd 细边框 */
+  --ec-brdRad: 9px !important;           /* 可见圆角 = brdRad + brdWd = 10px */
+
+  /* —— 颜色 —— */
+  --ec-frm-edBg: #fafafa !important;     /* 代码区背景（--code-background 的来源） */
+  --ec-codeBg: #fafafa !important;       /* pre 兜底背景 */
+  --ec-codeFg: #24292f !important;       /* 基础代码文字（保留 Shiki 语法 token 颜色） */
+  --ec-brdCol: #eaecef !important;       /* 边框 */
+  --ec-gtrFg: #8c8c8c !important;        /* 行号 */
+  --ec-gtrBrdCol: #ececec !important;    /* gutter 分隔线 */
+
+  /* —— 滚动条（极简灰）—— */
+  --ec-sbThumbCol: rgba(0, 0, 0, 0.15) !important;
+  --ec-sbThumbHoverCol: rgba(0, 0, 0, 0.28) !important;
+
+  /* —— 阴影：极轻 —— */
+  --ec-frm-frameBoxShdCssVal: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+
+  /* —— 复制按钮静默态：沿用 EC（背景=代码背景、图标=文字色、低透明度）—— */
+  --ec-frm-inlBtnFg: #24292f !important;
+
+  /* —— 行高亮：antd 品牌青微染（替代 EC 默认霓虹蓝）—— */
+  --ec-tm-markBg: rgba(34, 211, 238, 0.10) !important;
+  --ec-tm-markBrdCol: rgba(34, 211, 238, 0.45) !important;
+
+  /* —— 显式标题栏：去编辑器 tab chrome，改为安静 caption —— */
+  --ec-frm-edTabBarBg: #fafafa !important;
+  --ec-frm-edTabBarBrdBtmCol: #eaecef !important;
+  --ec-frm-edActTabFg: #6b7280 !important;
+  --ec-frm-edActTabBg: #fafafa !important;
+  --ec-frm-edActTabBrdCol: transparent !important;
+}
+
+/* 亮色：直接属性兜底（.frame 圆角/阴影、.frame pre 背景，无 has-title 冲突） */
+:root .expressive-code .frame,
+[data-theme="light"] .expressive-code .frame {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+}
+:root .expressive-code .frame pre,
+[data-theme="light"] .expressive-code .frame pre {
+  background: #fafafa !important;
+}
+
+/* 亮色：显式 title 的 caption 化（去 tab pill 样式） */
+:root .expressive-code .frame.has-title:not(.is-terminal) .header,
+[data-theme="light"] .expressive-code .frame.has-title:not(.is-terminal) .header {
+  background: #fafafa !important;
+  background-image: none !important;
+  border-bottom: 1px solid #eaecef !important;
+  border-top-left-radius: 9px !important;   /* 贴齐 frame 内沿 */
+  border-top-right-radius: 9px !important;
+}
+:root .expressive-code .frame.has-title:not(.is-terminal) .title,
+[data-theme="light"] .expressive-code .frame.has-title:not(.is-terminal) .title {
+  color: #6b7280 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 8px 16px !important;
+  font-size: 0.8rem !important;
+}
+
+/* ===================== 暗色 [data-theme="dark"] ===================== */
+[data-theme="dark"] .expressive-code {
+  --ec-brdWd: 1px !important;
+  --ec-brdRad: 9px !important;
+
+  --ec-frm-edBg: #1e1e1e !important;
+  --ec-codeBg: #1e1e1e !important;
+  --ec-codeFg: #c9d1d9 !important;
+  --ec-brdCol: #2a2a2a !important;
+  --ec-gtrFg: #6e7681 !important;
+  --ec-gtrBrdCol: #2a2a2a !important;
+
+  --ec-sbThumbCol: rgba(255, 255, 255, 0.18) !important;
+  --ec-sbThumbHoverCol: rgba(255, 255, 255, 0.30) !important;
+
+  --ec-frm-frameBoxShdCssVal: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+
+  --ec-frm-inlBtnFg: #c9d1d9 !important;
+
+  --ec-tm-markBg: rgba(34, 211, 238, 0.14) !important;
+  --ec-tm-markBrdCol: rgba(34, 211, 238, 0.50) !important;
+
+  --ec-frm-edTabBarBg: #1e1e1e !important;
+  --ec-frm-edTabBarBrdBtmCol: #2a2a2a !important;
+  --ec-frm-edActTabFg: #8b949e !important;
+  --ec-frm-edActTabBg: #1e1e1e !important;
+  --ec-frm-edActTabBrdCol: transparent !important;
+}
+
+[data-theme="dark"] .expressive-code .frame {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+[data-theme="dark"] .expressive-code .frame pre {
+  background: #1e1e1e !important;
+}
+[data-theme="dark"] .expressive-code .frame.has-title:not(.is-terminal) .header {
+  background: #1e1e1e !important;
+  background-image: none !important;
+  border-bottom: 1px solid #2a2a2a !important;
+  border-top-left-radius: 9px !important;
+  border-top-right-radius: 9px !important;
+}
+[data-theme="dark"] .expressive-code .frame.has-title:not(.is-terminal) .title {
+  color: #8b949e !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 8px 16px !important;
+  font-size: 0.8rem !important;
+}
+
+/* ===================== 复制按钮：悬停/聚焦 → 品牌色填充 + 白色图标 ===================== */
+/* 静默态沿用 EC（背景=代码背景、图标=文字色、opacity:.75），仅强化「显现态」。 */
+.expressive-code .copy button:hover,
+.expressive-code .copy button:focus-visible,
+.expressive-code .copy button:focus {
+  background: var(--color-primary, #1677ff) !important;  /* 品牌青 #22d3ee */
+  opacity: 1 !important;
+}
+.expressive-code .copy button:hover::after,
+.expressive-code .copy button:focus-visible::after,
+.expressive-code .copy button:focus::after {
+  background-color: #fff !important;                     /* 图标变白 */
+}
+.expressive-code .copy button:hover::before,
+.expressive-code .copy button:focus-visible::before,
+.expressive-code .copy button:focus::before {
+  border-color: transparent !important;                  /* 去掉静默态细边框 */
+}

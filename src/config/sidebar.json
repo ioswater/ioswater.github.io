@@ -26,6 +26,11 @@
       "autogenerate": { "directory": "profile" }
     },
     {
+      "label": "代码块示例",
+      "translations": { "en": "Code Blocks" },
+      "slug": "code-blocks/showcase"
+    },
+    {
       "label": "站点维护",
       "translations": { "en": "Site Operations" },
       "items": [

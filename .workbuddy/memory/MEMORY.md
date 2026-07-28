@@ -42,3 +42,27 @@
 - 在 `.astro` 模板的**文本/HTML 里直接写 `{` 或 `}`**（如 Swift 代码的 `struct Foo {`、CSS 的 `:root {`）会触发 Astro 的表达式解析，构建报 `Expected "}" but found ...`。
 - 修复：把含花括号的代码段放进 frontmatter 的字符串变量（模板字符串），再用 `set:html={codeVar}` 渲染。花括号在 JS 字符串里安全，且 `set:html` 原样输出 HTML（含 `<span class="tok-...">` 高亮标签）。
 - 同理：Hero 等组件里若要在前端作用域用函数生成 HTML，必须定义在 frontmatter（服务端），不能在客户端 `<script>` 里定义后用于模板（模板在服务端渲染时找不到该函数）。
+
+## 范式：Starlight 栏目落地页必须存在 index.md（否则 404）
+- 站点用 `sidebar.json` 的 `autogenerate: { directory: "ios-basics" }` 自动列文章，但**目录 URL `/ios-basics/` 本身需要该目录下有 `index.md`（或 `index.mdx`）才解析**；只有文章 `.md` 没有 index 时，点进栏目目录会 404。
+- 2026-07-27 设计巡检发现：首页四个分类卡片指向 `/ios-basics/`、`/ai-project-architecture/`、`/personal-projects/`、`/migration/`，全部 404（这些目录只有文章、无 index）。修复：为每个栏目建 `index.md`（含本栏目文章内链）。en 版同样需要 `src/content/docs/en/<dir>/index.md`，否则 `/en/<dir>/` 也 404。
+- 加 `index.md` 后 Starlight 会把它作为该 group 的首个侧栏项 + 目录落地页，不会重复列出。
+
+## 范式：自定义组件里的站内链接必须手动加语言前缀
+- Starlight 只对**内容 markdown 里的相对链接**做 i18n 改写；**自定义 Astro 组件里硬编码的绝对路径（如 `/ios-basics/`）不会自动加 `/en` 前缀**。在 `/en/` 首页若写死 `/ios-basics/`，会把用户从英文区带回首语言，造成"路由不统一"。
+- 修复范式：在组件 frontmatter 里用 `const base = locale === "en" ? "/en" : ""; const withLocale = (p) => base + p;`（`locale = Astro.currentLocale || "root"`），所有站内链接套 `withLocale()`。注意：`/blog/`、`/en/blog/` 这类**已含语言前缀**的链接（如 `blogLink`）不要再套 withLocale，否则会变成 `/en/en/blog/` 双重前缀。
+
+## 技法：主题切换平滑过渡（不触发首次加载闪动）
+- 在 `ThemeSwitch.astro` 的 change 处理里给 `document.documentElement` 临时加 `.theme-transition` 类，切换后 `setTimeout(..., 400)` 移除。
+- 在 global.css 写 `.theme-transition, .theme-transition * { transition: background-color/border-color/color/fill/box-shadow .35s ease !important }`，并用 `@media (prefers-reduced-motion: reduce)` 关掉。这样只在切换瞬间有颜色交叉淡入，首次加载（Starlight head 脚本已前置设主题）不会闪。
+- 全站平滑锚点滚动：`html { scroll-behavior: smooth }`（同样在 reduced-motion 下改 auto）。自定义区块加 `scroll-margin-top: 5.5rem` 避免被 sticky header 遮住标题。
+
+## 技法：首页"本页目录"TOC 滚动高亮（scrollspy）
+- 用 `IntersectionObserver`（rootMargin 如 `-30% 0px -60% 0px`）观察各 section，进入视口中部时给对应 TOC `<a>` 加 `.active`（样式：`color/ border-left-color: var(--accent)`）。整段 `<script>` 放在 Hero.astro 末尾即可（首页才加载）。
+
+## 坑：Starlight 0.38.1 接入 Expressive Code 须独立集成且排在 starlight() 前
+- Starlight 0.38.1 无内置 Expressive Code，需独立 `astro-expressive-code` 集成（不是 starlight 的 `expressiveCode` 配置项）。
+- `astroExpressiveCode({...})` 必须在 `integrations` 数组首位、`starlight()` 之前，否则 MDX 代码块报 "Incorrect integration order: ...move astroExpressiveCode() before mdx()"。
+- Starlight 明暗是手动 `data-theme` 切换（非 prefers-color-scheme），故 EC 须 `useDarkModeMediaQuery:false` + `themeCssSelector` 返回 `[data-theme="dark"]`（暗）/ `:root,[data-theme='light']`（亮）作用域，否则 EC 主题不跟随站点切换。
+- Shiki 原生无 `oc` 别名（只 objc/objective-c），用 `shiki:{langAlias:{oc:"objective-c"}}` 注册，使 ```oc 与 ```objc 都高亮。
+- EC 样式变量 `--ec-*` 须用 `!important` 覆盖（customCss 加载顺序不确定），暗色严格挂 `[data-theme="dark"]`。
