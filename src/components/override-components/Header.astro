@@ -71,7 +71,17 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
 
   <div class="nav-actions">
     {settings.search && <Search />}
-    {!hasSidebar && <LanguageSelect />}
+    {<LanguageSelect />}
+    {
+      hasSidebar && (
+        <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-pressed="false" title="折叠 / 展开导航 (b)" aria-label="切换侧栏导航">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <line x1="9" y1="4" x2="9" y2="20" />
+          </svg>
+        </button>
+      )
+    }
     {settings.theme_switcher && <ThemeSwitch className="mx-2" />}
     {
       hasSidebar && (
@@ -142,6 +152,44 @@ const isActive = (url: string) => pathname === url || pathname === `${url}`;
           try { localStorage.setItem("reading-focus", on ? "on" : "off"); } catch (err) {}
           var b = document.getElementById("focus-toggle");
           if (b) b.setAttribute("aria-pressed", String(on));
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", init);
+    init();
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    function init() {
+      var htmlEl = document.documentElement;
+      var btn = document.getElementById("sidebar-toggle");
+      if (!btn) return;
+      btn.setAttribute("aria-pressed", String(!htmlEl.classList.contains("sidebar-collapsed")));
+      if (window.__sidebarBtnBound === btn) return;
+      window.__sidebarBtnBound = btn;
+      btn.addEventListener("click", function () {
+        var collapsed = !htmlEl.classList.contains("sidebar-collapsed");
+        htmlEl.classList.toggle("sidebar-collapsed", collapsed);
+        try { localStorage.setItem("sidebar-collapsed", collapsed ? "true" : "false"); } catch (e) {}
+        btn.setAttribute("aria-pressed", String(!collapsed));
+      });
+    }
+    if (!window.__sidebarKeyBound) {
+      window.__sidebarKeyBound = true;
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        if (e.key === "b" && document.getElementById("sidebar-toggle")) {
+          e.preventDefault();
+          var htmlEl = document.documentElement;
+          var collapsed = !htmlEl.classList.contains("sidebar-collapsed");
+          htmlEl.classList.toggle("sidebar-collapsed", collapsed);
+          try { localStorage.setItem("sidebar-collapsed", collapsed ? "true" : "false"); } catch (err) {}
+          var b = document.getElementById("sidebar-toggle");
+          if (b) b.setAttribute("aria-pressed", String(!collapsed));
         }
       });
     }

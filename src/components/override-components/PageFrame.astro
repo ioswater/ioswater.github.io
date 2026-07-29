@@ -1,6 +1,5 @@
 ---
 import MobileMenuToggle from "./MobileMenuToggle.astro";
-import SidebarNav from "../SidebarNav.astro";
 
 const { hasSidebar } = Astro.locals.starlightRoute;
 ---
@@ -9,8 +8,6 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   <header class={"header" + (hasSidebar ? " has-sidebar" : " no-sidebar")}>
     <slot name="header" />
   </header>
-
-  {hasSidebar && <SidebarNav />}
 
   <div class="main-frame">
     <div class="container flex relative">

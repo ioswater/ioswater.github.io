@@ -10,6 +10,10 @@ const { head } = Astro.locals.starlightRoute;
     if (localStorage.getItem("reading-focus") === "on") {
       document.documentElement.classList.add("reading-focus");
     }
+    // 默认折叠左侧导航（仅当用户显式展开过才展开），避免首屏正文被挤压
+    if (localStorage.getItem("sidebar-collapsed") !== "false") {
+      document.documentElement.classList.add("sidebar-collapsed");
+    }
   } catch (e) {}
 </script>
 

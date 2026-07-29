@@ -173,6 +173,56 @@ html { scroll-behavior: smooth; }
   height: 18px;
 }
 
+/* 侧栏折叠开关（Header 内，仅桌面端文章页渲染，默认折叠） */
+.sidebar-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--sl-color-black) 78%, transparent);
+  color: var(--sl-color-white);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease,
+    transform 0.2s ease;
+}
+:root[data-theme="light"] .sidebar-toggle {
+  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
+  color: var(--sl-color-black);
+}
+.sidebar-toggle:hover {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+  color: var(--sl-color-accent);
+}
+.sidebar-toggle[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
+  color: var(--sl-color-accent);
+  background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+}
+.sidebar-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+@media (min-width: 50rem) {
+  .sidebar-toggle {
+    display: inline-flex;
+  }
+}
+
+/* 侧栏折叠态：宽度归零 + 隐藏侧栏，正文自动撑满；移除内容区左侧多余分隔线 */
+html.sidebar-collapsed {
+  --sl-sidebar-width: 0px;
+}
+html.sidebar-collapsed .sidebar {
+  display: none !important;
+}
+html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
+  border-left: 0 !important;
+}
+
 /* 专注态：隐藏左右侧栏与面包屑，正文限宽居中 */
 html.reading-focus .sidebar,
 html.reading-focus .right-sidebar-container {
