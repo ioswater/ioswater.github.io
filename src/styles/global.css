@@ -43,6 +43,56 @@
   --sl-color-black: var(--color-lightmode-dark) !important;
 }
 
+/* ============================================================
+   设计系统 token — 取自设计稿《LiuLuit 技术文档站界面方案》（OKLCH 冷调中性色）
+   品牌色取自 favicon 渐变：青 #22d3ee → 蓝绿 #0ea5a1 → 蓝 #1d4ed8
+   中性色全部冷调着色（tinted neutrals），背景非纯黑
+   ============================================================ */
+:root, [data-theme="dark"] {
+  --bg: oklch(15% 0.028 255);
+  --bg-grid: oklch(100% 0 0 / 0.022);
+  --surface-1: oklch(18.5% 0.026 255);
+  --surface-2: oklch(22% 0.030 255);
+  --surface-3: oklch(26% 0.033 255);
+  --border: oklch(82% 0.02 255 / 0.12);
+  --border-strong: oklch(82% 0.02 255 / 0.22);
+  --text-strong: oklch(98% 0.01 250);
+  --text-muted: oklch(72% 0.02 250);
+  --text-faint: oklch(58% 0.02 250);
+  --accent-contrast: oklch(16% 0.03 255);
+  --accent-soft: oklch(74% 0.14 195 / 0.14);
+  --glow: oklch(74% 0.14 195 / 0.22);
+  --success: oklch(76% 0.15 155);
+  --warning: oklch(82% 0.14 85);
+  --error: oklch(66% 0.18 25);
+  --info: var(--color-primary);
+  --grid-line: oklch(82% 0.02 255 / 0.06);
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.4);
+  --shadow-card: 0 1px 2px oklch(0% 0 0 / 0.4), 0 10px 30px oklch(0% 0 0 / 0.35);
+}
+[data-theme="light"] {
+  --bg: oklch(98.5% 0.004 250);
+  --bg-grid: oklch(20% 0.02 250 / 0.03);
+  --surface-1: oklch(100% 0 0);
+  --surface-2: oklch(97% 0.005 250);
+  --surface-3: oklch(94% 0.008 250);
+  --border: oklch(20% 0.02 250 / 0.10);
+  --border-strong: oklch(20% 0.02 250 / 0.18);
+  --text-strong: oklch(20% 0.03 250);
+  --text-muted: oklch(46% 0.02 250);
+  --text-faint: oklch(60% 0.02 250);
+  --accent-contrast: oklch(99% 0 0);
+  --accent-soft: oklch(54% 0.13 195 / 0.12);
+  --glow: oklch(54% 0.13 195 / 0.16);
+  --success: oklch(54% 0.14 155);
+  --warning: oklch(62% 0.13 85);
+  --error: oklch(54% 0.18 25);
+  --info: var(--color-lightmode-primary);
+  --grid-line: oklch(20% 0.02 250 / 0.05);
+  --shadow-sm: 0 1px 2px oklch(20% 0.02 250 / 0.06);
+  --shadow-card: 0 1px 2px oklch(20% 0.02 250 / 0.06), 0 10px 30px oklch(20% 0.02 250 / 0.09);
+}
+
 /* 主题切换时的平滑过渡：仅在切换瞬间启用，避免首次加载闪动 */
 html { scroll-behavior: smooth; }
 .theme-transition,
@@ -68,7 +118,7 @@ html { scroll-behavior: smooth; }
 }
 
 @theme {
-  --color-primary-gradient: linear-gradient(135deg, #22d3ee 0%, #0ea5a1 56%, #1d4ed8 100%);
+  --color-primary-gradient: linear-gradient(135deg, oklch(85% 0.13 195), oklch(65% 0.12 185) 56%, oklch(52% 0.20 258));
 }
 
 @import "./base.css";
