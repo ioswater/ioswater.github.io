@@ -72,3 +72,12 @@
 - EC 配置（astro.config.mjs）：`themes:["github-dark"]` 单主题 + `useDarkModeMediaQuery:false` + `themeCssSelector:()=>":root"`（不再双主题跟随站主题，代码块永远深色）。改样式只动 `src/styles/code-block.css`（全 `!important` 覆盖 `--ec-*`）。
 - 首页 Hero 的 `.code-card` 与 `#showcase .showcase` 复用同一套 frame（深色面板 + 渐变描边 + 微光），`.tok-*` 用 github-dark 调色板（#ff7b72/#a5d6ff/#d2a8ff/#79c0ff/#ffa657/#7ee787）与 EC 一致——保证全站代码块同一语言。
 - 铁律：新增任何代码展示务必沿用此风格，勿引入第三种卡片样式。需要第 N 种语言高亮时，优先走 EC（`shiki.langAlias` 注册别名），而非手写新 chrome。
+
+## 色板：唯一真源与落地路径（重要）
+- **色板唯一真源 = `src/config/theme.json`**（经 `src/tailwind-plugin/tw-theme.js` 注入为 `--color-*` 变量）。改全局配色只动这个文件，不要散改 CSS。
+  - 键：`default.theme_color{primary,body,light,dark}` + `default.text_color{text}`；亮色在 `lightmode.*` 同名键（前缀 `lightmode-`）。
+  - 映射（global.css 覆盖 `--sl-color-*`）：暗 `--sl-color-accent←--color-primary`、`--sl-color-white←--color-light`、`--sl-color-black←--color-dark`、grays=`color-mix(dark,light)`；亮对应 `--color-lightmode-*`。`base.css` 用 `dark:bg-body`/`dark:text-text` 驱动页面背景与正文色。
+- 设计稿色板（2026-07-29 落地，OKLCH 冷调）：暗 `--color-primary:oklch(74% .14 195)`、`body/dark:oklch(15% .028 255)`、`light:oklch(98% .01 250)`、`text:oklch(90% .015 250)`；亮 `--color-lightmode-primary:oklch(54% .13 195)`、`body/light:oklch(98.5% .004 250)`、`dark:oklch(20% .03 250)`、`text:oklch(31% .02 250)`。
+- 设计系统 token 全集（surface-1/2/3、border、border-strong、text-strong/muted/faint、accent-soft、glow、success/warning/error、shadow-sm/card、grid-line、accent-contrast）写在 `src/styles/global.css` 的 `:root,[data-theme=dark]` 与 `[data-theme=light]` 两块；`--color-primary-gradient` 也在此（OKLCH 品牌渐变 `135deg oklch(85% .13 195)→oklch(65% .12 185) 56%→oklch(52% .2 258)`）。Hero.astro 内联用 `color-mix` 派生 `--surface-1` 等，逻辑一致。
+- **坑：Lightning CSS 归一化**。写 `oklch(74% 0.14 195)` 会被序列化为 `oklch(74% .14 195)`（去前导零、空格分隔），构建后 grep 要用归一化形态，勿用 `0.14`/`0.028` 精确匹配。
+- `theme-color` meta（Head.astro / blog.astro / en/blog.astro）用 hex `#040b17`（=oklch(15% .028 255) 的 sRGB，因部分浏览器 meta 不支持 oklch）。

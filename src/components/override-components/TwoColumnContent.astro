@@ -52,8 +52,12 @@ import Breadcrumb from "../Breadcrumb.astro";
     @media (min-width: 72rem) {
       :global([data-has-sidebar][data-has-toc]) .content-container {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: minmax(0, 1fr) var(--sl-table-of-contents-width, 15rem);
         overflow: visible;
+      }
+      .breadcrumb-container {
+        max-width: var(--sl-content-width);
+        margin-inline: auto;
       }
       .right-sidebar-container {
         order: 2;
@@ -62,17 +66,15 @@ import Breadcrumb from "../Breadcrumb.astro";
 
       .right-sidebar {
         position: sticky;
-        inset-block: calc(var(--sl-nav-height) + 110px) 0;
-        /* border-inline-start: 1px solid var(--sl-color-hairline); */
-        /* padding-top: var(--sl-nav-height); */
+        inset-block: calc(var(--sl-nav-height) + 2rem) 0;
         width: 100%;
-        height: 80vh;
+        height: calc(100dvh - var(--sl-nav-height) - 4rem);
         overflow-y: auto;
         scrollbar-width: none;
       }
 
       :global([data-has-sidebar][data-has-toc]) .main-pane {
-        --sl-content-margin-inline: auto 0;
+        --sl-content-margin-inline: auto;
 
         order: 1;
         overflow: hidden;
