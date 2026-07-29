@@ -22,9 +22,9 @@
   --sl-color-gray-5: color-mix(in srgb, var(--color-dark) 79%, var(--color-light) 21%) !important;
   --sl-color-gray-6: color-mix(in srgb, var(--color-dark) 88%, var(--color-light) 12%) !important;
   --sl-color-black: var(--color-dark) !important;
-  --sl-sidebar-width: 224px;
-  --sl-content-width: 56rem;
-  --sl-table-of-contents-width: 15rem;
+  --sl-sidebar-width: 224px !important;
+  --sl-content-width: 56rem !important;
+  --sl-table-of-contents-width: 16rem !important;
   --sl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
   --sl-font: "Instrument Sans", system-ui, -apple-system, Segoe UI, sans-serif !important;
   --sl-color-hairline: color-mix(in srgb, var(--sl-color-white) 12%, transparent) !important;
@@ -221,6 +221,85 @@ html.sidebar-collapsed .sidebar {
 }
 html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
   border-left: 0 !important;
+}
+
+/* 右侧目录列宽修正：显式给 grid item 设宽，并覆盖 Starlight .sl-container 的 max-width 计算 */
+.right-sidebar-container {
+  width: var(--sl-table-of-contents-width, 16rem);
+  min-width: var(--sl-table-of-contents-width, 16rem);
+}
+.right-sidebar-panel .sl-container {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* 目录折叠面板（仅桌面端生效；移动端保留 Starlight 自带下拉） */
+.toc-panel {
+  width: 100%;
+}
+.toc-toggle {
+  display: none;
+}
+.toc-body {
+  max-height: none;
+  opacity: 1;
+  overflow: visible;
+  padding-top: 0;
+}
+.toc-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.toc-caret {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+@media (min-width: 72rem) {
+  .toc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--sl-color-white);
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  :root[data-theme="light"] .toc-toggle {
+    color: var(--sl-color-black);
+  }
+  .toc-toggle:hover {
+    color: var(--sl-color-accent);
+    background: color-mix(in srgb, var(--sl-color-white) 5%, transparent);
+  }
+  :root[data-theme="light"] .toc-toggle:hover {
+    background: color-mix(in srgb, var(--sl-color-black) 5%, transparent);
+  }
+  .toc-body {
+    max-height: 80vh;
+    overflow: hidden;
+    padding-top: 0.5rem;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+  }
+  .toc-panel.toc-collapsed .toc-body {
+    max-height: 0;
+    opacity: 0;
+  }
+  .toc-panel.toc-collapsed .toc-caret {
+    transform: rotate(-90deg);
+  }
+  /* 隐藏 Starlight 自带目录标题，避免与自定义 toggle 重复 */
+  .toc-panel .right-sidebar-panel h2#starlight__on-this-page {
+    display: none;
+  }
 }
 
 /* 专注态：隐藏左右侧栏与面包屑，正文限宽居中 */

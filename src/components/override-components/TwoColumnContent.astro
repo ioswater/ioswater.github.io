@@ -25,7 +25,54 @@ import Breadcrumb from "../Breadcrumb.astro";
     Astro.locals.starlightRoute.toc && (
       <aside class="right-sidebar-container print:hidden">
         <div class="right-sidebar">
-          <slot name="right-sidebar" />
+          <div class="toc-panel" id="toc-panel">
+            <button
+              class="toc-toggle"
+              id="toc-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="toc-body"
+            >
+              <span class="toc-toggle-label">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+                本页目录
+              </span>
+              <svg
+                class="toc-caret"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div class="toc-body" id="toc-body">
+              <slot name="right-sidebar" />
+            </div>
+          </div>
         </div>
       </aside>
     )
@@ -52,7 +99,7 @@ import Breadcrumb from "../Breadcrumb.astro";
     @media (min-width: 72rem) {
       :global([data-has-sidebar][data-has-toc]) .content-container {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) var(--sl-table-of-contents-width, 15rem);
+        grid-template-columns: minmax(0, 1fr) var(--sl-table-of-contents-width, 16rem);
         overflow: visible;
       }
       .breadcrumb-container {
@@ -62,6 +109,8 @@ import Breadcrumb from "../Breadcrumb.astro";
       .right-sidebar-container {
         order: 2;
         position: relative;
+        width: var(--sl-table-of-contents-width, 16rem);
+        min-width: var(--sl-table-of-contents-width, 16rem);
       }
 
       .right-sidebar {
@@ -170,5 +219,35 @@ import Breadcrumb from "../Breadcrumb.astro";
     }
     document.addEventListener("astro:page-load", init);
     init();
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    // 目录折叠：恢复上次状态，避免首屏闪烁
+    try {
+      var panel = document.getElementById("toc-panel");
+      if (panel && localStorage.getItem("toc-collapsed") === "true") {
+        panel.classList.add("toc-collapsed");
+      }
+    } catch (e) {}
+
+    function initToc() {
+      var panel = document.getElementById("toc-panel");
+      var btn = document.getElementById("toc-toggle");
+      if (!panel || !btn || panel.__tocBound === btn) return;
+      panel.__tocBound = btn;
+      btn.setAttribute("aria-expanded", String(!panel.classList.contains("toc-collapsed")));
+      btn.addEventListener("click", function () {
+        var collapsed = panel.classList.toggle("toc-collapsed");
+        btn.setAttribute("aria-expanded", String(!collapsed));
+        try {
+          localStorage.setItem("toc-collapsed", collapsed ? "true" : "false");
+        } catch (e) {}
+      });
+    }
+
+    document.addEventListener("astro:page-load", initToc);
+    initToc();
   })();
 </script>
