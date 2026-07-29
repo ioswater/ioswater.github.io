@@ -233,9 +233,9 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
   width: 100% !important;
 }
 
-/* 目录折叠面板（仅桌面端生效；移动端保留 Starlight 自带下拉） */
+/* 目录抽屉面板（仅桌面端生效；移动端保留 Starlight 自带下拉） */
 .toc-panel {
-  width: 100%;
+  width: var(--sl-table-of-contents-width, 16rem);
 }
 .toc-toggle {
   display: none;
@@ -258,53 +258,94 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
   transition: transform 0.25s ease;
 }
 @media (min-width: 72rem) {
-  .toc-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  /* 抽屉轨道：容器跟随网格列宽（收于 0 时正文占满让出空间），并由 .right-sidebar 裁剪滑出内容 */
+  .right-sidebar-container {
     width: 100%;
-    padding: 0.35rem 0.5rem;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
+    min-width: 0;
+  }
+
+  /* 目录整体作为面板从右侧滑出/收回 */
+  .toc-panel {
+    transform: translateX(0);
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .content-container.toc-collapsed .toc-panel {
+    transform: translateX(100%);
+  }
+
+  /* 抽屉把手：常驻右上角，展开/收起皆可点击（用 position:fixed 脱离滑出上下文，始终可见） */
+  .toc-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    position: fixed;
+    top: calc(var(--sl-nav-height, 3.5rem) + 0.4rem);
+    right: 1.25rem;
+    z-index: calc(var(--sl-z-index-navbar, 60) + 5);
+    width: auto;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--sl-color-bg) 82%, transparent);
+    backdrop-filter: blur(8px);
     color: var(--sl-color-white);
     font-size: var(--sl-text-sm);
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
+      width 0.25s ease, height 0.25s ease, padding 0.25s ease;
   }
   :root[data-theme="light"] .toc-toggle {
     color: var(--sl-color-black);
   }
   .toc-toggle:hover {
     color: var(--sl-color-accent);
-    background: color-mix(in srgb, var(--sl-color-white) 5%, transparent);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
+    background: color-mix(in srgb, var(--sl-color-white) 8%, transparent);
   }
   :root[data-theme="light"] .toc-toggle:hover {
-    background: color-mix(in srgb, var(--sl-color-black) 5%, transparent);
+    background: color-mix(in srgb, var(--sl-color-black) 6%, transparent);
   }
+
   .toc-body {
-    max-height: 80vh;
-    overflow: hidden;
-    padding-top: 0.5rem;
-    transition: max-height 0.3s ease, opacity 0.25s ease;
+    max-height: none;
+    overflow: visible;
+    padding-top: 0.6rem;
   }
-  .toc-panel.toc-collapsed .toc-body {
-    max-height: 0;
-    opacity: 0;
-  }
-  .toc-panel.toc-collapsed .toc-caret {
+
+  .content-container.toc-collapsed .toc-caret {
     transform: rotate(-90deg);
   }
+
+  /* 收起态：toggle 变为紧凑圆形箭头按钮，隐藏列表图标与「本页目录」文字 */
+  .content-container.toc-collapsed .toc-toggle-label {
+    display: none;
+  }
+  .content-container.toc-collapsed .toc-toggle {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    gap: 0;
+  }
+
   /* 隐藏 Starlight 自带目录标题，避免与自定义 toggle 重复 */
   .toc-panel .right-sidebar-panel h2#starlight__on-this-page {
     display: none;
   }
 }
 
+/* 移动端（<72rem）：不展示目录抽屉，仅显示正文（自定义 aside 即目录，隐藏即隐藏目录） */
+@media (max-width: 71.9375rem) {
+  .right-sidebar-container {
+    display: none;
+  }
+}
+
 /* 专注态：隐藏左右侧栏与面包屑，正文限宽居中 */
 html.reading-focus .sidebar,
-html.reading-focus .right-sidebar-container {
+html.reading-focus .right-sidebar-container,
+html.reading-focus .toc-toggle {
   display: none !important;
 }
 html.reading-focus .content-container {
@@ -346,6 +387,11 @@ html.reading-focus .main-pane {
 @media (prefers-reduced-motion: reduce) {
   .reading-progress-fill {
     transition: none;
+  }
+  /* 目录抽屉：关闭过渡动画，直接开合 */
+  .content-container,
+  .toc-panel {
+    transition: none !important;
   }
 }
 

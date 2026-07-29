@@ -24,51 +24,51 @@ import Breadcrumb from "../Breadcrumb.astro";
   {
     Astro.locals.starlightRoute.toc && (
       <aside class="right-sidebar-container print:hidden">
+        <button
+          class="toc-toggle"
+          id="toc-toggle"
+          type="button"
+          aria-expanded="true"
+          aria-controls="toc-body"
+        >
+          <span class="toc-toggle-label">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
+            </svg>
+            本页目录
+          </span>
+          <svg
+            class="toc-caret"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
         <div class="right-sidebar">
           <div class="toc-panel" id="toc-panel">
-            <button
-              class="toc-toggle"
-              id="toc-toggle"
-              type="button"
-              aria-expanded="true"
-              aria-controls="toc-body"
-            >
-              <span class="toc-toggle-label">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6" />
-                  <line x1="8" y1="12" x2="21" y2="12" />
-                  <line x1="8" y1="18" x2="21" y2="18" />
-                  <line x1="3" y1="6" x2="3.01" y2="6" />
-                  <line x1="3" y1="12" x2="3.01" y2="12" />
-                  <line x1="3" y1="18" x2="3.01" y2="18" />
-                </svg>
-                本页目录
-              </span>
-              <svg
-                class="toc-caret"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
             <div class="toc-body" id="toc-body">
               <slot name="right-sidebar" />
             </div>
@@ -98,9 +98,17 @@ import Breadcrumb from "../Breadcrumb.astro";
 
     @media (min-width: 72rem) {
       :global([data-has-sidebar][data-has-toc]) .content-container {
+        --toc-track: var(--sl-table-of-contents-width, 16rem);
         display: grid;
-        grid-template-columns: minmax(0, 1fr) var(--sl-table-of-contents-width, 16rem);
+        grid-template-columns: minmax(0, 1fr) var(--toc-track);
         overflow: visible;
+        transition:
+          opacity 0.3s ease-in-out,
+          grid-template-columns 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      /* 抽屉收起：右侧列宽收到 0，正文占满让出的空间 */
+      :global([data-has-sidebar][data-has-toc]) .content-container.toc-collapsed {
+        --toc-track: 0px;
       }
       .breadcrumb-container {
         max-width: var(--sl-content-width);
@@ -109,8 +117,8 @@ import Breadcrumb from "../Breadcrumb.astro";
       .right-sidebar-container {
         order: 2;
         position: relative;
-        width: var(--sl-table-of-contents-width, 16rem);
-        min-width: var(--sl-table-of-contents-width, 16rem);
+        width: 100%;
+        min-width: 0;
       }
 
       .right-sidebar {
@@ -119,6 +127,7 @@ import Breadcrumb from "../Breadcrumb.astro";
         width: 100%;
         height: calc(100dvh - var(--sl-nav-height) - 4rem);
         overflow-y: auto;
+        overflow-x: hidden;
         scrollbar-width: none;
       }
 
@@ -224,22 +233,22 @@ import Breadcrumb from "../Breadcrumb.astro";
 
 <script is:inline>
   (function () {
-    // 目录折叠：恢复上次状态，避免首屏闪烁
+    // 目录抽屉：恢复上次状态，避免首屏闪烁
     try {
-      var panel = document.getElementById("toc-panel");
-      if (panel && localStorage.getItem("toc-collapsed") === "true") {
-        panel.classList.add("toc-collapsed");
+      var cc = document.querySelector(".content-container");
+      if (cc && localStorage.getItem("toc-collapsed") === "true") {
+        cc.classList.add("toc-collapsed");
       }
     } catch (e) {}
 
     function initToc() {
-      var panel = document.getElementById("toc-panel");
+      var cc = document.querySelector(".content-container");
       var btn = document.getElementById("toc-toggle");
-      if (!panel || !btn || panel.__tocBound === btn) return;
-      panel.__tocBound = btn;
-      btn.setAttribute("aria-expanded", String(!panel.classList.contains("toc-collapsed")));
+      if (!cc || !btn || btn.__tocBound) return;
+      btn.__tocBound = true;
+      btn.setAttribute("aria-expanded", String(!cc.classList.contains("toc-collapsed")));
       btn.addEventListener("click", function () {
-        var collapsed = panel.classList.toggle("toc-collapsed");
+        var collapsed = cc.classList.toggle("toc-collapsed");
         btn.setAttribute("aria-expanded", String(!collapsed));
         try {
           localStorage.setItem("toc-collapsed", collapsed ? "true" : "false");
