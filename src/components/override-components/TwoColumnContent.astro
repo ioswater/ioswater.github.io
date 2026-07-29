@@ -112,7 +112,9 @@ import Breadcrumb from "../Breadcrumb.astro";
       }
       .breadcrumb-container {
         max-width: var(--sl-content-width);
-        margin-inline: auto;
+        /* 居左固定：抽屉开合时标题区左边缘不动；左内边距与正文 .content-panel 对齐 */
+        margin-inline: 0;
+        padding-inline: var(--sl-content-pad-x);
       }
       .right-sidebar-container {
         order: 2;
@@ -132,7 +134,9 @@ import Breadcrumb from "../Breadcrumb.astro";
       }
 
       :global([data-has-sidebar][data-has-toc]) .main-pane {
-        --sl-content-margin-inline: auto;
+        /* 正文内容列左对齐（align-start），左边缘在抽屉开合时保持固定；
+           focus 模式已由 global.css 的 !important 规则恢复居中。 */
+        --sl-content-margin-inline: 0;
 
         order: 1;
         overflow: hidden;
