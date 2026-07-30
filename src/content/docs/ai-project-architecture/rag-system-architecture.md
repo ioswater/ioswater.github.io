@@ -2,6 +2,7 @@
 title: RAG 系统分层架构实战
 description: 检索、重排、生成、评估四段式落地方案。
 lastUpdated: 2026-06-14
+order: 1
 ---
 
 ## 四段式流水线

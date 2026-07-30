@@ -1,6 +1,7 @@
 ---
 title: instinct-envolve 团队使用指南
 description: 团队如何使用 instinct-envolve 自我进化系统的完整说明。
+order: 1
 ---
 
 # instinct-envolve 自我进化系统（团队使用指南）

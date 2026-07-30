@@ -2,6 +2,7 @@
 title: 个人简介
 description: 关注方向、技术栈与写作边界。
 lastUpdated: 2026-06-15
+order: 1
 ---
 
 ## 我在写什么

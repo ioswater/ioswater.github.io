@@ -2,6 +2,7 @@
 title: Swift Concurrency 基础模型
 description: 从 async/await 到 TaskGroup 的最小可用认知框架。
 lastUpdated: 2026-06-15
+order: 2
 ---
 
 ## 你需要先建立的心智模型

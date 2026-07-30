@@ -7,5 +7,6 @@ description: 真实产品从 0 到 1 的技术选型、踩坑与复盘。
 
 ## 本栏目文章
 
-- [LiuLuit 站点重构日志](./liuluit-docs-evolution/)
+- [instinct-envolve 团队使用指南](./instinct-envolve-team-guide/)
 - [instinct-envolve 集成笔记](./instinct-envolve-integration-notes/)
+- [LiuLuit 站点重构日志](./liuluit-docs-evolution/)

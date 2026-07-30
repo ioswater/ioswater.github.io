@@ -2,6 +2,7 @@
 title: 知识库与向量检索工具对比
 description: 横向对比 Qdrant / Notion / Confluence / pgvector / Obsidian / Elasticsearch，并解析「少 token 查整套体系」的 RAG + 子代理 + 缓存机制，以及在 Claude Code 与 Codex 上的落地形态。
 lastUpdated: 2026-07-30
+order: 2
 ---
 
 > 生成日期：2026-07-30

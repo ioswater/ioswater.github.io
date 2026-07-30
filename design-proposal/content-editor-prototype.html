@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>liuluit 内容编辑器 · 原型 v2</title>
+<style>
+  :root{
+    --bg:#0a0f1c; --bg-2:#0f1626; --panel:#121b2e; --panel-2:#16203454;
+    --line:#243049; --line-soft:#1c2740;
+    --text:#e6edf6; --muted:#8a98b0; --muted-2:#5e6c85;
+    --primary:#34d3e0; --primary-2:#3aa0ff;
+    --grad:linear-gradient(120deg,#34d3e0,#3aa0ff);
+    --ok:#3ddc97; --warn:#ffb454; --bad:#ff6b81;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#13233f 0%,var(--bg) 55%);
+    color:var(--text); font-size:14px; display:flex; flex-direction:column;
+  }
+  button{font-family:inherit}
+  .topbar{display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); background:#0c1322cc; backdrop-filter:blur(8px); position:sticky; top:0; z-index:30;}
+  .brand{font-weight:700; display:flex; align-items:center; gap:8px}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--grad);box-shadow:0 0 12px #34d3e0aa}
+  .search{flex:1; max-width:380px; margin-left:8px; position:relative}
+  .search input{width:100%; padding:8px 12px 8px 32px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--text); outline:none}
+  .search input:focus{border-color:var(--primary)}
+  .search svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.5}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--line); background:var(--panel); color:var(--text); padding:7px 12px; border-radius:9px; cursor:pointer; font-size:13px; display:inline-flex; gap:6px; align-items:center; transition:.15s}
+  .btn:hover{border-color:var(--primary); color:var(--primary)}
+  .btn.primary{background:var(--grad); color:#04121a; border:0; font-weight:700}
+  .btn.primary:hover{filter:brightness(1.08)}
+  .btn.danger:hover{border-color:var(--bad); color:var(--bad)}
+  .layout{flex:1; display:grid; grid-template-columns:320px 1fr 360px; min-height:0}
+  .col{min-height:0; overflow:auto; border-right:1px solid var(--line)}
+  .col:last-child{border-right:0}
+  .col-head{padding:12px 14px; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); position:sticky; top:0; background:var(--bg); z-index:5}
+  /* 导入区 */
+  .dropzone{margin:10px; padding:14px; border:1.5px dashed var(--line); border-radius:10px; text-align:center; color:var(--muted); font-size:12.5px; transition:.15s}
+  .dropzone.hot{border-color:var(--primary); color:var(--primary); background:#0e1c2b}
+  /* 树 */
+  .tree{padding:0 4px 24px}
+  .section{border:1px solid var(--line-soft); border-radius:10px; margin:8px; background:var(--panel-2); overflow:hidden}
+  .section.collapsed .articles{display:none}
+  .sec-row{display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; user-select:none}
+  .sec-row:hover{background:#16213a}
+  .sec-row.active{background:#16233d; box-shadow:inset 3px 0 0 var(--primary)}
+  .sec-row.dragging{opacity:.4}
+  .sec-row.drop{box-shadow:inset 0 3px 0 var(--primary)}
+  .caret{transition:transform .2s; opacity:.6}
+  .section.collapsed .caret{transform:rotate(-90deg)}
+  .sec-label{font-weight:600; flex:1}
+  .sec-en{font-size:11px; color:var(--muted-2)}
+  .badge{font-size:10px; padding:1px 6px; border-radius:999px; border:1px solid var(--line)}
+  .badge.warn{color:var(--warn); border-color:#5a4420; background:#2a200e}
+  .articles{list-style:none; margin:0; padding:4px 6px 8px}
+  .article{display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:8px; cursor:pointer; user-select:none}
+  .article:hover{background:#16213a}
+  .article.active{background:#16233d; box-shadow:inset 3px 0 0 var(--primary)}
+  .article.dragging{opacity:.4}
+  .article.drop{box-shadow:0 -2px 0 var(--primary)}
+  .handle{cursor:grab; opacity:.35; font-size:13px}
+  .a-title{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .a-order{font-size:10px; color:var(--muted-2); background:#0e1626; border:1px solid var(--line); border-radius:6px; padding:1px 5px}
+  .a-flag{font-size:10px}
+  .flag-draft{color:var(--warn)} .flag-noen{color:var(--bad)} .flag-pending{color:var(--primary)}
+  .xbtn{opacity:.3; cursor:pointer; border:0; background:none; color:var(--muted); font-size:13px; padding:2px 4px; border-radius:6px}
+  .xbtn:hover{opacity:1; color:var(--bad); background:#2a1118}
+  /* 表单 */
+  .form{padding:16px 20px 40px; max-width:680px}
+  .form h2{margin:0 0 4px; font-size:18px}
+  .form .sub{color:var(--muted); font-size:12px; margin-bottom:18px}
+  .field{margin-bottom:16px}
+  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600}
+  .field label .req{color:var(--bad)}
+  .field input[type=text],.field input[type=date],.field textarea{width:100%; padding:9px 11px; border-radius:9px; border:1px solid var(--line); background:var(--panel); color:var(--text); outline:none; font-family:inherit; font-size:13px}
+  .field input:focus,.field textarea:focus{border-color:var(--primary)}
+  .field textarea{resize:vertical; min-height:74px; line-height:1.5}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  .count{float:right; font-size:11px; color:var(--muted-2); font-weight:400}
+  .count.over{color:var(--warn)}
+  .chk{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text)}
+  .seg{display:flex; gap:8px}
+  .seg .btn{flex:1; justify-content:center}
+  .seg .btn.on{background:#16233d; border-color:var(--primary); color:var(--primary)}
+  .hint{font-size:11px; color:var(--muted-2); margin-top:5px}
+  .pending-note{border:1px solid #1f4a45; background:#0e221f; color:#7fe3d6; font-size:12px; padding:8px 10px; border-radius:8px; margin-bottom:14px}
+  /* 右栏 */
+  .tabs{display:flex; gap:6px; padding:10px 12px; position:sticky; top:0; background:var(--bg); z-index:5}
+  .tab{padding:5px 10px; border-radius:8px; border:1px solid var(--line); font-size:12px; cursor:pointer; color:var(--muted)}
+  .tab.on{color:var(--primary); border-color:var(--primary); background:#0e1c2b}
+  pre.code{margin:8px 12px; padding:12px; background:#0a1120; border:1px solid var(--line-soft); border-radius:10px; font-size:12px; line-height:1.55; overflow:auto; color:#cfe3f2; font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace; white-space:pre}
+  .k{color:#7fd1ff} .s{color:#9be7a0} .n{color:#ffcf6b}
+  .validate{padding:8px 12px}
+  .v-item{display:flex; gap:8px; padding:8px 10px; border-radius:9px; margin-bottom:8px; font-size:12.5px; align-items:flex-start}
+  .v-item.ok{background:#0e241b; color:var(--ok)}
+  .v-item.warn{background:#2a200e; color:var(--warn)}
+  .v-item.bad{background:#2a1118; color:var(--bad)}
+  .en-box{padding:10px 12px}
+  .en-card{border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:10px; background:var(--panel-2)}
+  /* toast */
+  .toast{position:fixed; right:20px; bottom:20px; background:#0e1c2b; border:1px solid var(--primary); color:var(--text); padding:12px 16px; border-radius:10px; box-shadow:0 10px 30px #0008; transform:translateY(120%); transition:.35s; z-index:60; max-width:360px}
+  .toast.show{transform:translateY(0)}
+  .toast b{color:var(--primary)}
+  .mini{font-size:11px;color:var(--muted-2)}
+  /* modal */
+  .mask{position:fixed; inset:0; background:#04070ecc; backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:70}
+  .mask.show{display:flex}
+  .modal{width:min(560px,92vw); max-height:82vh; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px}
+  .modal h3{margin:0 0 4px}
+  .modal .sub{color:var(--muted); font-size:12px; margin-bottom:14px}
+  .chg{border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px; margin-bottom:14px; font-size:13px}
+  .chg .grp{margin-bottom:10px}
+  .chg .grp:last-child{margin-bottom:0}
+  .chg .gh{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px}
+  .chg .li{display:flex; gap:8px; padding:2px 0; align-items:baseline}
+  .tag{font-size:10px; padding:1px 6px; border-radius:6px; border:1px solid var(--line); flex-shrink:0}
+  .tag.add{color:var(--ok); border-color:#1f4a37} .tag.del{color:var(--bad); border-color:#5a2330} .tag.mod{color:var(--warn); border-color:#5a4420} .tag.imp{color:var(--primary); border-color:#1f4a45}
+  .modal .acts{display:flex; gap:10px; justify-content:flex-end}
+  .cmd{background:#0a1120; border:1px solid var(--line-soft); border-radius:8px; padding:8px 10px; font-family:ui-monospace,monospace; font-size:11.5px; color:#9be7a0; margin-top:6px; white-space:pre-wrap}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>liuluit 内容编辑器</div>
+    <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" placeholder="搜索文章 / 栏目…" /></div>
+    <div class="spacer"></div>
+    <button class="btn" id="addArticle">＋ 新增文章</button>
+    <button class="btn" id="addSection">＋ 新增栏目</button>
+    <button class="btn" id="theme">🌙</button>
+    <button class="btn primary" id="apply">应用变更</button>
+  </div>
+
+  <div class="layout">
+    <div class="col">
+      <div class="col-head">侧边栏结构</div>
+      <div class="dropzone" id="dropzone">⬇ 拖拽 .md 文章到此 → 导入为「待加入」文章</div>
+      <div class="tree" id="tree"></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">编辑</div>
+      <div class="form" id="form"></div>
+    </div>
+
+    <div class="col">
+      <div class="col-head">预览 / 校验</div>
+      <div class="tabs">
+        <div class="tab on" data-tab="fm">frontmatter</div>
+        <div class="tab" data-tab="sb">sidebar.json</div>
+        <div class="tab" data-tab="en">EN 镜像</div>
+      </div>
+      <div id="tab-fm"><pre class="code" id="fmCode"></pre></div>
+      <div id="tab-sb" style="display:none"><pre class="code" id="sbCode"></pre></div>
+      <div id="tab-en" style="display:none"><div class="validate" id="enBox"></div></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- 应用变更弹框 -->
+  <div class="mask" id="mask">
+    <div class="modal">
+      <h3>确认应用变更</h3>
+      <div class="sub">以下改动将在你确认后写入本地文件并推送到线上。</div>
+      <div class="chg" id="chgList"></div>
+      <div class="cmd"># 确认后将执行（真实版）：
+git add src/content/docs/ src/config/sidebar.json
+git commit -m "content: 应用编辑器变更"
+npm run deploy:github-pages   # 构建并推 master 上线</div>
+      <div class="acts">
+        <button class="btn" id="cancelApply">取消</button>
+        <button class="btn primary" id="confirmApply">确认并执行（改文件 → 提交 → 部署）</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- 真实栏目顺序（镜像 sidebar.json） ---------- */
+const data = {
+  sections: [
+    { id:'s-portal', label:'博客总览', en:'Blog Hub', mode:'slug', dir:'', slug:'content/blog-portal', hasIndex:false, articles:[] },
+    { id:'s-ios', label:'iOS 基础知识', en:'iOS Fundamentals', mode:'autogenerate', dir:'ios-basics', hasIndex:true, articles:[
+      { id:'a1', title:'UIView 渲染原理', description:'从 RunLoop 到 CADisplayLink 的渲染管线拆解。', lastUpdated:'2026-03-12', order:1, slug:'', draft:false, prev:'', next:'', en:true },
+      { id:'a2', title:'多线程与 GCD', description:'串行/并发队列、死锁与优先级翻转实战。', lastUpdated:'2026-04-02', order:2, slug:'', draft:false, prev:'', next:'', en:false },
+    ]},
+    { id:'s-ai', label:'AI 项目实战架构', en:'AI Project Architecture', mode:'autogenerate', dir:'ai-project-architecture', hasIndex:true, articles:[
+      { id:'a3', title:'RAG 系统分层架构实战', description:'检索→重排→生成的工程化拆分。', lastUpdated:'2026-06-18', order:1, slug:'', draft:false, prev:'', next:'agent-observability-stack', en:true },
+      { id:'a4', title:'Agent 可观测性栈设计', description:'trace/metric/log 三件套如何接入 Agent。', lastUpdated:'2026-07-01', order:2, slug:'', draft:false, prev:'rag-system-architecture', next:'knowledge-tools-comparison', en:false },
+      { id:'a5', title:'知识库与向量检索工具对比', description:'Qdrant / Notion / pgvector 横向对比与省 token 机制。', lastUpdated:'2026-07-30', order:3, slug:'', draft:false, prev:'agent-observability-stack', next:'', en:false },
+    ]},
+    { id:'s-per', label:'个人项目', en:'Personal Projects', mode:'autogenerate', dir:'personal-projects', hasIndex:true, articles:[
+      { id:'a6', title:'liuluit 文档站演进', description:'从 Hexo 到 Astro+Starlight 的迁移笔记。', lastUpdated:'2026-05-09', order:1, slug:'', draft:false, prev:'', next:'', en:true },
+    ]},
+    { id:'s-profile', label:'个人简介', en:'About Me', mode:'autogenerate', dir:'profile', hasIndex:true, articles:[
+      { id:'a9', title:'关于我', description:'我是谁、在做什么、联系方式。', lastUpdated:'2026-01-15', order:1, slug:'', draft:false, prev:'', next:'', en:true },
+    ]},
+    { id:'s-code', label:'代码块示例', en:'Code Blocks', mode:'slug', dir:'', slug:'code-blocks/showcase', hasIndex:false, articles:[] },
+    { id:'s-ops', label:'站点维护', en:'Site Operations', mode:'items', dir:'', hasIndex:false, articles:[
+      { id:'a7', title:'内容发布流程', description:'撰写→校验→构建→部署的标准动作。', lastUpdated:'2026-02-20', order:1, slug:'content/authoring-and-review', draft:false, prev:'', next:'', en:true },
+      { id:'a8', title:'部署方案', description:'GitHub Pages / Netlify / Cloudflare 取舍。', lastUpdated:'2026-02-22', order:2, slug:'operations/deployment-options', draft:true, prev:'', next:'', en:false },
+      { id:'a10', title:'发布记录', description:'历次发布要点。', lastUpdated:'2026-02-23', order:3, slug:'content/release-notes', draft:false, prev:'', next:'', en:false },
+      { id:'a11', title:'CI/CD', description:'自动化构建与部署流水线。', lastUpdated:'2026-02-24', order:4, slug:'operations/ci-cd', draft:false, prev:'', next:'', en:false },
+    ]},
+  ]
+};
+
+let selected = { type:'article', id:'a5' };
+const ops = { addArt:[], impArt:[], delArt:[], delSec:[], addSec:[], reorders:0 };
+
+/* ---------- 工具 ---------- */
+const $ = s => document.querySelector(s);
+function findArticle(id){ for(const s of data.sections){ const a=s.articles.find(x=>x.id===id); if(a) return {sec:s,a}; } return null; }
+function secOf(id){ return data.sections.find(s=>s.id===id); }
+function toast(msg){ const t=$('#toast'); t.innerHTML=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),3400); }
+function confirm2(msg){ return window.confirm(msg); }
+
+/* ---------- 渲染树 ---------- */
+function renderTree(){
+  const q=($('#search').value||'').toLowerCase();
+  const tree=$('#tree'); tree.innerHTML='';
+  data.sections.forEach(sec=>{
+    const visA=sec.articles.filter(a=>!q||a.title.toLowerCase().includes(q)||sec.label.toLowerCase().includes(q));
+    if(q && !sec.label.toLowerCase().includes(q) && visA.length===0) return;
+    const el=document.createElement('div');
+    el.className='section'+(sec._collapsed?' collapsed':'');
+    el.innerHTML=`
+      <div class="sec-row ${selected.type==='section'&&selected.id===sec.id?'active':''}" data-sec="${sec.id}" draggable="true">
+        <span class="caret">▾</span>
+        <span class="sec-label">${sec.label}</span>
+        <span class="sec-en">${sec.en}</span>
+        ${sec.hasIndex?'':'<span class="badge warn" title="autogenerate 缺 index.md，会 404">缺index</span>'}
+        <button class="xbtn" data-delsec="${sec.id}" title="删除栏目">✕</button>
+      </div>`;
+    const ul=document.createElement('ul'); ul.className='articles';
+    sec.articles.forEach(a=>{
+      if(q && !a.title.toLowerCase().includes(q) && !sec.label.toLowerCase().includes(q)) return;
+      const li=document.createElement('li');
+      li.className='article'+(selected.type==='article'&&selected.id===a.id?' active':'')+(a._drag?' dragging':'');
+      li.draggable=true; li.dataset.id=a.id; li.dataset.sec=sec.id;
+      li.innerHTML=`<span class="handle">⠿</span>
+        <span class="a-title">${a.title}</span>
+        ${a.pending?'<span class="a-flag flag-pending">待加入</span>':''}
+        ${a.draft?'<span class="a-flag flag-draft">草稿</span>':''}
+        ${!a.en&&!a.pending?'<span class="a-flag flag-noen">无EN</span>':''}
+        <span class="a-order">${a.order}</span>
+        <button class="xbtn" data-delart="${a.id}" title="删除文章">✕</button>`;
+      ul.appendChild(li);
+    });
+    el.appendChild(ul); tree.appendChild(el);
+  });
+  bindTree();
+}
+
+function bindTree(){
+  document.querySelectorAll('.sec-row').forEach(r=>{
+    r.onclick=e=>{
+      if(e.target.classList.contains('xbtn')) return;
+      if(e.target.classList.contains('caret')){ const s=secOf(r.dataset.sec); s._collapsed=!s._collapsed; renderTree(); return; }
+      selected={type:'section',id:r.dataset.sec}; renderTree(); renderForm(); renderPreview();
+    };
+    r.ondragstart=e=>{ e.dataTransfer.setData('text/plain','sec:'+r.dataset.sec); };
+    r.ondragover=e=>{ e.preventDefault(); r.classList.add('drop'); };
+    r.ondragleave=()=>r.classList.remove('drop');
+    r.ondrop=e=>{ e.preventDefault(); r.classList.remove('drop');
+      const d=e.dataTransfer.getData('text/plain');
+      if(!d.startsWith('sec:')) return;
+      const from=d.slice(4), to=r.dataset.sec; if(from===to) return;
+      const fromI=data.sections.findIndex(x=>x.id===from), toI=data.sections.findIndex(x=>x.id===to);
+      data.sections.splice(toI,0,data.sections.splice(fromI,1)[0]);
+      ops.reorders++; renderTree(); renderPreview(); toast('已调整栏目顺序（sidebar.json 顶层顺序）');
+    };
+  });
+  document.querySelectorAll('[data-delsec]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation(); const s=secOf(b.dataset.delsec);
+    if(!confirm2('确认删除栏目「'+s.label+'」？\n真实版将移除 sidebar.json 该项，并删除本地 '+s.dir+'/ 目录。')) return;
+    ops.delSec.push(s.label); data.sections=data.sections.filter(x=>x.id!==s.id);
+    if(selected.type==='section'&&selected.id===s.id) selected={type:'article',id:data.sections[0].articles[0]?.id||data.sections[0].id};
+    renderTree(); renderForm(); renderPreview(); toast('已删除栏目 <b>'+s.label+'</b>');
+  });
+  document.querySelectorAll('.article').forEach(li=>{
+    li.onclick=e=>{ if(e.target.classList.contains('xbtn')) return; selected={type:'article',id:li.dataset.id}; renderTree(); renderForm(); renderPreview(); };
+    li.ondragstart=e=>{ li.classList.add('dragging'); e.dataTransfer.setData('text/plain','art:'+li.dataset.id); };
+    li.ondragend=()=>li.classList.remove('dragging');
+    li.ondragover=e=>{ e.preventDefault(); li.classList.add('drop'); };
+    li.ondragleave=()=>li.classList.remove('drop');
+    li.ondrop=e=>{ e.preventDefault(); li.classList.remove('drop');
+      const d=e.dataTransfer.getData('text/plain'); if(!d.startsWith('art:')) return;
+      const fromId=d.slice(4), toId=li.dataset.id; if(fromId===toId) return;
+      const {sec}=findArticle(toId); const arr=sec.articles;
+      const from=arr.findIndex(x=>x.id===fromId), to=arr.findIndex(x=>x.id===toId);
+      arr.splice(to,0,arr.splice(from,1)[0]); renumber(sec); ops.reorders++;
+      renderTree(); renderForm(); renderPreview(); toast('已重排 <b>'+sec.label+'</b> 内文章顺序');
+    };
+  });
+  document.querySelectorAll('[data-delart]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation(); const {sec,a}=findArticle(b.dataset.delart);
+    if(!confirm2('确认删除文章《'+(a.title||a.id)+'》？\n真实版将删除本地 '+sec.dir+'/'+a.id+'.md。')) return;
+    ops.delArt.push(a.title||a.id); sec.articles=sec.articles.filter(x=>x.id!==a.id);
+    if(selected.type==='article'&&selected.id===a.id) selected={type:'article',id:sec.articles[0]?.id||sec.id};
+    renderTree(); renderForm(); renderPreview(); toast('已删除文章 <b>'+(a.title||a.id)+'</b>');
+  });
+}
+function renumber(sec){ sec.articles.forEach((a,i)=>a.order=i+1); }
+
+/* ---------- 表单 ---------- */
+function renderForm(){
+  const f=$('#form');
+  if(selected.type==='section'){
+    const s=secOf(selected.id);
+    f.innerHTML=`<h2>${s.label}</h2><div class="sub">栏目配置 · sidebar.json 顶层分组</div>
+      <div class="field"><label>中文标题 <span class="req">*</span></label><input id="f-label" type="text" value="${s.label}"></div>
+      <div class="field"><label>英文标题 (translations.en)</label><input id="f-en" type="text" value="${s.en}"></div>
+      <div class="field"><label>模式</label>
+        <div class="seg" id="f-mode">
+          <button class="btn ${s.mode==='autogenerate'?'on':''}" data-m="autogenerate">autogenerate 目录</button>
+          <button class="btn ${s.mode==='slug'?'on':''}" data-m="slug">单页 slug</button>
+          <button class="btn ${s.mode==='items'?'on':''}" data-m="items">手动 items</button>
+        </div>
+        <div class="hint">autogenerate：自动列目录文章（需 index.md）；slug：单个页面；items：手动链接。</div></div>
+      <div class="field"><label>目录 / slug</label><input id="f-dir" type="text" value="${s.dir||s.slug||''}" ${s.mode==='autogenerate'?'':'disabled'}></div>
+      <div class="field"><label>约束检查</label>
+        <div class="hint">${s.mode==='autogenerate'?(s.hasIndex?'✅ 已存在 index.md':'⚠️ 缺少 index.md，会 404'):(s.mode==='slug'?'单页模式，无需 index.md':'手动模式')}</div></div>`;
+    $('#f-label').oninput=e=>{s.label=e.target.value; renderTree(); renderPreview();};
+    $('#f-en').oninput=e=>{s.en=e.target.value; renderTree(); renderPreview();};
+    $('#f-dir').oninput=e=>{ if(s.mode==='autogenerate')s.dir=e.target.value; else s.slug=e.target.value; renderPreview();};
+    document.querySelectorAll('#f-mode .btn').forEach(b=>b.onclick=()=>{ s.mode=b.dataset.m; if(s.mode==='autogenerate')s.dir=s.dir||'new-section'; else s.dir=''; renderForm(); renderTree(); renderPreview(); });
+    return;
+  }
+  const {sec,a}=findArticle(selected.id);
+  f.innerHTML=`
+    ${a.pending?'<div class="pending-note">📥 待加入文章（来自导入：'+a.source+'）。确认应用后，将正式写入 '+sec.dir+'/ 目录。</div>':''}
+    <h2>${a.title||'未命名文章'}</h2>
+    <div class="sub">所在栏目：${sec.label} · 路径：${sec.dir||sec.slug||'—'}/${a.id}.md</div>
+    <div class="field"><label>标题 title <span class="req">*</span></label><input id="f-title" type="text" value="${a.title||''}"></div>
+    <div class="field"><label>简介 description <span class="req">*</span><span class="count" id="c-desc"></span></label>
+      <textarea id="f-desc">${a.description||''}</textarea>
+      <div class="hint">卡片 / 搜索 / 社交摘要；建议 ≤160 字符。</div></div>
+    <div class="row2">
+      <div class="field"><label>末次更新 lastUpdated</label><input id="f-lu" type="date" value="${a.lastUpdated||''}"></div>
+      <div class="field"><label>排序 order</label><input id="f-order" type="number" value="${a.order}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>自定义 URL slug</label><input id="f-slug" type="text" value="${a.slug||''}" placeholder="留空=默认"></div>
+      <div class="field"><label>草稿 draft</label><label class="chk"><input id="f-draft" type="checkbox" ${a.draft?'checked':''}> 隐藏于生产环境</label></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>上篇 prev (slug)</label><input id="f-prev" type="text" value="${a.prev||''}"></div>
+      <div class="field"><label>下篇 next (slug)</label><input id="f-next" type="text" value="${a.next||''}"></div>
+    </div>`;
+  const desc=$('#f-desc'), cnt=$('#c-desc'); const upd=()=>{cnt.textContent=desc.value.length+' 字'+(desc.value.length>160?' ⚠超':'');}; upd();
+  $('#f-title').oninput=e=>{a.title=e.target.value; renderTree(); renderPreview();};
+  desc.oninput=e=>{a.description=e.target.value; upd(); renderPreview();};
+  $('#f-lu').oninput=e=>{a.lastUpdated=e.target.value; renderPreview();};
+  $('#f-order').oninput=e=>{a.order=+e.target.value||0; renderTree(); renderPreview();};
+  $('#f-slug').oninput=e=>{a.slug=e.target.value; renderPreview();};
+  $('#f-draft').onchange=e=>{a.draft=e.target.checked; renderTree(); renderPreview();};
+  $('#f-prev').oninput=e=>{a.prev=e.target.value; renderPreview();};
+  $('#f-next').oninput=e=>{a.next=e.target.value; renderPreview();};
+}
+
+/* ---------- 预览 ---------- */
+function renderPreview(){
+  if(selected.type==='article'){
+    const {a}=findArticle(selected.id); const lines=['---'];
+    lines.push(`title: ${a.title||'（必填）'}`); lines.push(`description: ${a.description||'（必填）'}`);
+    if(a.lastUpdated) lines.push(`lastUpdated: ${a.lastUpdated}`);
+    lines.push(`order: ${a.order}`); if(a.slug) lines.push(`slug: ${a.slug}`);
+    if(a.draft) lines.push(`draft: true`); if(a.prev) lines.push(`prev: ${a.prev}`); if(a.next) lines.push(`next: ${a.next}`);
+    lines.push('---'); $('#fmCode').innerHTML=hl(lines.join('\n'));
+  } else { const s=secOf(selected.id); $('#fmCode').innerHTML=hl('# 栏目无 frontmatter\n# 元数据存于 sidebar.json'); }
+  const sb={ main: data.sections.map(s=>({ label:s.label, translations:{en:s.en},
+    ...(s.mode==='autogenerate'?{autogenerate:{directory:s.dir}}:s.mode==='slug'?{slug:s.slug}:{items:[{label:'…',slug:'…'}]}) })) };
+  $('#sbCode').innerHTML=hlj(JSON.stringify(sb,null,2));
+  renderValidate(); renderEn();
+}
+function hl(y){ return y.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/^(title|description|lastUpdated|order|slug|draft|prev|next):/gm,'<span class="k">$1</span>:').replace(/: (.+)$/gm,'<span class="c">:</span> <span class="s">$1</span>'); }
+function hlj(j){ return j.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"([^"]+)":/g,'<span class="k">"$1"</span>:').replace(/: "(.*?)"/g,': <span class="s">"$1"</span>').replace(/: (\d+)/g,': <span class="n">$1</span>'); }
+function renderValidate(){
+  const box=$('#tab-fm'); let html='<div class="validate" style="padding-top:0">'; let issues=0;
+  data.sections.forEach(s=>{
+    if(s.mode==='autogenerate'&&!s.hasIndex){ html+=v('warn','栏目「'+s.label+'」缺少 index.md，构建会 404'); issues++; }
+    s.articles.forEach(a=>{ if(!a.title){html+=v('bad','文章 '+a.id+' 缺少 title'); issues++;} if(!a.description){html+=v('bad','《'+(a.title||a.id)+'》缺少 description'); issues++;} });
+  });
+  const noEn=data.sections.flatMap(s=>s.articles).filter(a=>!a.en).length;
+  if(noEn){ html+=v('warn',noEn+' 篇文章缺英文镜像（线上「未翻译」回退页）'); issues++; }
+  if(issues===0) html+=v('ok','必填完整，栏目 index.md 齐备');
+  html+='</div>'; const old=box.querySelector('.validate'); if(old) old.remove(); box.insertAdjacentHTML('afterbegin',html);
+}
+function v(t,m){ const i={ok:'✓',warn:'⚠',bad:'✕'}[t]; return `<div class="v-item ${t}"><span>${i}</span><span>${m}</span></div>`; }
+function renderEn(){
+  const box=$('#enBox'); box.innerHTML=''; const all=data.sections.flatMap(s=>s.articles.map(a=>({s,a})));
+  const miss=all.filter(x=>!x.a.en);
+  box.innerHTML=`<div style="padding:4px 0 10px;color:var(--muted);font-size:12px">英文镜像：${all.length-miss.length}/${all.length} 已存在。点击为缺失项生成 EN stub（仅 frontmatter + 待翻译注释）。</div>`;
+  miss.forEach(({s,a})=>{ const c=document.createElement('div'); c.className='en-card';
+    c.innerHTML=`<h4>《${a.title}》 <span class="mini">→ en/${s.dir}/${a.id}.md</span></h4><div class="hint" style="margin-bottom:8px">当前无 EN，线上为「未翻译」回退页。</div><button class="btn" data-gen="${a.id}">＋ 生成 EN stub</button>`;
+    box.appendChild(c); });
+  if(miss.length===0) box.innerHTML+='<div class="v-item ok"><span>✓</span><span>全部文章已配置英文镜像</span></div>';
+  box.querySelectorAll('[data-gen]').forEach(b=>b.onclick=()=>{ const {a}=findArticle(b.dataset.gen); a.en=true; renderTree(); renderPreview(); toast('已生成 EN stub：<b>'+a.title+'</b>（请本地补 EN 正文）'); });
+}
+
+/* ---------- 拖拽导入 ---------- */
+const dz=$('#dropzone');
+dz.ondragover=e=>{ e.preventDefault(); dz.classList.add('hot'); };
+dz.ondragleave=()=>dz.classList.remove('hot');
+dz.ondrop=e=>{
+  e.preventDefault(); dz.classList.remove('hot');
+  const files=e.dataTransfer.files; if(!files||!files.length){ toast('请拖入 .md 文件'); return; }
+  const file=files[0]; if(!/\.md$/i.test(file.name)){ toast('仅支持 .md 文件'); return; }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const txt=reader.result; const fm=(txt.match(/^---\s*\n([\s\S]*?)\n---/)||[])[1]||'';
+    const gt=k=>((fm.match(new RegExp('^'+k+':\\s*(.+)$','m'))||[])[1]||'').trim();
+    const title=gt('title')||file.name.replace(/\.md$/,'');
+    const desc=gt('description')||'';
+    const target=selected.type==='section'&&secOf(selected.id).mode!=='slug'?secOf(selected.id):data.sections.find(s=>s.mode==='autogenerate');
+    if(!target){ toast('没有可接收的 autogenerate 栏目'); return; }
+    const id='imp'+(Date.now()%100000);
+    target.articles.push({id,title,description:desc,lastUpdated:new Date().toISOString().slice(0,10),order:target.articles.length+1,slug:'',draft:false,prev:'',next:'',en:false,pending:true,source:file.name});
+    ops.impArt.push(file.name); selected={type:'article',id};
+    renderTree(); renderForm(); renderPreview(); toast('已导入 <b>'+file.name+'</b> 为「待加入」→ '+target.label);
+  };
+  reader.readAsText(file);
+};
+
+/* ---------- 应用变更弹框 ---------- */
+function openApply(){
+  const added=(ops.addArt.length+ops.impArt.length);
+  let h='';
+  if(ops.addArt.length) h+=grp('新增文章', ops.addArt.map(t=>['add',t]));
+  if(ops.impArt.length) h+=grp('导入待加入', ops.impArt.map(t=>['imp',t]));
+  if(ops.delArt.length) h+=grp('删除文章', ops.delArt.map(t=>['del',t]));
+  if(ops.addSec.length) h+=grp('新增栏目', ops.addSec.map(t=>['add',t]));
+  if(ops.delSec.length) h+=grp('删除栏目', ops.delSec.map(t=>['del',t]));
+  if(ops.reorders) h+=grp('顺序调整', [['mod', ops.reorders+' 处拖拽排序']]);
+  if(!h) h='<div class="mini">本次没有检测到变更。</div>';
+  $('#chgList').innerHTML=h; $('#mask').classList.add('show');
+}
+function grp(name, items){ return `<div class="grp"><div class="gh">${name}</div>`+items.map(([t,x])=>`<div class="li"><span class="tag ${t}">${t}</span><span>${x}</span></div>`).join('')+'</div>'; }
+$('#apply').onclick=openApply;
+$('#cancelApply').onclick=()=>$('#mask').classList.remove('show');
+$('#confirmApply').onclick=()=>{
+  $('#mask').classList.remove('show');
+  // 提交后清空待加入标记
+  data.sections.forEach(s=>s.articles.forEach(a=>a.pending=false));
+  toast('✅ 已修改本地文件并提交，正在部署线上（<b>git commit</b> + <b>npm run deploy:github-pages</b>，模拟）。<br><span class="mini">真实版将实际写入 sidebar.json / frontmatter 并推送 master。</span>');
+  // 原型演示：重置操作日志
+  ops.addArt=[]; ops.impArt=[]; ops.delArt=[]; ops.delSec=[]; ops.addSec=[]; ops.reorders=0;
+  renderTree();
+};
+
+/* ---------- 顶栏 ---------- */
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+  const m={fm:'tab-fm',sb:'tab-sb',en:'tab-en'}; Object.values(m).forEach(id=>$('#'+id).style.display='none'); $('#'+m[t.dataset.tab]).style.display='block';
+});
+$('#search').oninput=renderTree;
+$('#theme').onclick=()=>{ document.body.classList.toggle('light'); $('#theme').textContent=document.body.classList.contains('light')?'☀️':'🌙'; };
+$('#addArticle').onclick=()=>{
+  const sec=data.sections.find(s=>s.mode==='autogenerate')||data.sections[0];
+  const id='a'+(Date.now()%100000);
+  sec.articles.push({id,title:'',description:'',lastUpdated:new Date().toISOString().slice(0,10),order:sec.articles.length+1,slug:'',draft:false,prev:'',next:'',en:false});
+  ops.addArt.push('（未命名）'); selected={type:'article',id}; renderTree(); renderForm(); renderPreview(); toast('已新建文章脚手架');
+};
+$('#addSection').onclick=()=>{
+  const id='s'+(Date.now()%100000);
+  data.sections.push({id,label:'新栏目',en:'New Section',mode:'autogenerate',dir:'new-section',hasIndex:false,articles:[]});
+  ops.addSec.push('新栏目'); selected={type:'section',id}; renderTree(); renderForm(); renderPreview(); toast('已新建栏目（记得补 index.md，否则 404）');
+};
+
+renderTree(); renderForm(); renderPreview();
+</script>
+</body>
+</html>

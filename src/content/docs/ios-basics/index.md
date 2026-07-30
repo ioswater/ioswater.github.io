@@ -7,5 +7,5 @@ description: 从 Swift 语法到 SwiftUI 布局，打牢工程基本功。
 
 ## 本栏目文章
 
-- [Swift Concurrency 基础模型](./swift-concurrency-basics/)
 - [iOS 网络层分层设计](./ios-networking-layer/)
+- [Swift Concurrency 基础模型](./swift-concurrency-basics/)

@@ -2,6 +2,7 @@
 title: instinct-envolve 集成笔记
 description: 在项目中落地 observer/share/evolve 的关键经验。
 lastUpdated: 2026-06-15
+order: 2
 ---
 
 ## 集成目标

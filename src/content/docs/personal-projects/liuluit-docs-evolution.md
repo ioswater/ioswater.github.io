@@ -2,6 +2,7 @@
 title: LiuLuit 站点重构日志
 description: 从 Hexo 导出站到 Starlight 博客门户的演进记录。
 lastUpdated: 2026-06-15
+order: 3
 ---
 
 ## 版本节点
