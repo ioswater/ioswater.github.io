@@ -9,3 +9,4 @@ description: RAG、Agent 与推理服务的系统设计与落地经验。
 
 - [RAG 系统分层架构实战](./rag-system-architecture/)
 - [Agent 可观测性栈设计](./agent-observability-stack/)
+- [知识库与向量检索工具对比](./knowledge-tools-comparison/)
