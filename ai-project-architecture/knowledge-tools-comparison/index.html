@@ -1,0 +1,804 @@
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta name="theme-color" content="#040b17"><link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any"><script>
+  try {
+    if (localStorage.getItem("reading-focus") === "on") {
+      document.documentElement.classList.add("reading-focus");
+    }
+    // 默认折叠左侧导航（仅当用户显式展开过才展开），避免首屏正文被挤压
+    if (localStorage.getItem("sidebar-collapsed") !== "false") {
+      document.documentElement.classList.add("sidebar-collapsed");
+    }
+  } catch (e) {}
+</script><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>知识库与向量检索工具对比 | LiuLuit Tech Blog</title><link rel="canonical" href="https://liuluit.com/ai-project-architecture/knowledge-tools-comparison/"/><link rel="alternate" hreflang="zh-CN" href="https://liuluit.com/ai-project-architecture/knowledge-tools-comparison/"/><link rel="alternate" hreflang="en" href="https://liuluit.com/en/ai-project-architecture/knowledge-tools-comparison/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.4"/><meta name="generator" content="Starlight v0.38.1"/><meta property="og:title" content="知识库与向量检索工具对比"/><meta property="og:type" content="article"/><meta property="og:url" content="https://liuluit.com/ai-project-architecture/knowledge-tools-comparison/"/><meta property="og:locale" content="zh-CN"/><meta property="og:description" content="横向对比 Qdrant / Notion / Confluence / pgvector / Obsidian / Elasticsearch，并解析「少 token 查整套体系」的 RAG + 子代理 + 缓存机制，以及在 Claude Code 与 Codex 上的落地形态。"/><meta property="og:site_name" content="LiuLuit Tech Blog"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="横向对比 Qdrant / Notion / Confluence / pgvector / Obsidian / Elasticsearch，并解析「少 token 查整套体系」的 RAG + 子代理 + 缓存机制，以及在 Claude Code 与 Codex 上的落地形态。"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/ThemeSwitch.DoeUXVE4.css">
+<link rel="stylesheet" href="/_astro/common.rLqaGlOJ.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">跳转到内容</a> <div class="site-shell sl-flex astro-cqnilpoy"> <header class="header has-sidebar astro-cqnilpoy"> <nav class="top-nav container"> <div class="brand-wrap"> <a href="/" class="navbar-brand inline-block"> <span class="site-title-with-mark"> <img src="/favicon.svg" alt="" width="22" height="22" aria-hidden="true"> <span>LiuLuit</span> </span></a> <span class="brand-dot" aria-hidden="true"></span> </div> <input id="nav-toggle" type="checkbox" class="hidden"> <label for="nav-toggle" class="nav-toggle" aria-label="Toggle menu"> <span></span><span></span><span></span> </label> <ul id="nav-menu" class="nav-menu"> <li class="nav-item"> <a class="nav-link " href="/"> 首页 </a> </li><li class="nav-item"> <a class="nav-link " href="/blog/"> 博客 </a> </li><li class="nav-item nav-dropdown"> <button class="nav-link "> 分类 </button> <ul class="nav-dropdown-list"> <li> <a class="nav-dropdown-link " href="/ios-basics/swift-concurrency-basics/"> iOS 基础知识 </a> </li><li> <a class="nav-dropdown-link " href="/ai-project-architecture/rag-system-architecture/"> AI 项目实战架构 </a> </li><li> <a class="nav-dropdown-link " href="/personal-projects/liuluit-docs-evolution/"> 个人项目 </a> </li><li> <a class="nav-dropdown-link " href="/profile/about-me/"> 个人简介 </a> </li> </ul> </li> <li class="nav-item nav-mobile-cta"> <a class="btn btn-primary" href="/blog/"> 进入博客 </a> </li> </ul> <div class="nav-actions"> <site-search class=" astro-jpvz53k3" data-translations="{&#34;placeholder&#34;:&#34;搜索&#34;}"> <button data-open-modal disabled aria-label="搜索" aria-keyshortcuts="Control+K" class="astro-jpvz53k3"> <svg aria-hidden="true" class="astro-jpvz53k3 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.3rem;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-block astro-jpvz53k3" aria-hidden="true">搜索</span> <kbd class="sl-flex astro-jpvz53k3"> <kbd class="astro-jpvz53k3">Ctrl</kbd><kbd class="astro-jpvz53k3">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="搜索" class="astro-jpvz53k3"> <div class="dialog-frame sl-flex astro-jpvz53k3">  <button data-close-modal class="sl-flex md:sl-hidden astro-jpvz53k3"> 取消 </button> <div class="search-container astro-jpvz53k3"> <div id="starlight__search" class="astro-jpvz53k3"></div> </div> </div> </dialog> </site-search>  <script>
+  (() => {
+    const openBtn = document.querySelector("button[data-open-modal]");
+    const shortcut = openBtn?.querySelector("kbd");
+    if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+    const platformKey = shortcut.querySelector("kbd");
+    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgentData?.platform ?? navigator.userAgent)) {
+      platformKey.textContent = "⌘";
+      openBtn.setAttribute("aria-keyshortcuts", "Meta+K");
+    }
+
+    shortcut.style.display = "";
+  })();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">选择语言</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/ai-project-architecture/knowledge-tools-comparison/" class="astro-4yphtoen">简体中文</option><option value="/en/ai-project-architecture/knowledge-tools-comparison/" class="astro-4yphtoen">English</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-pressed="false" title="折叠 / 展开导航 (b)" aria-label="切换侧栏导航"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"> <rect x="3" y="4" width="18" height="16" rx="2"></rect> <line x1="9" y1="4" x2="9" y2="20"></line> </svg> </button> <div class="theme-switcher mx-2 astro-vke6obp2"><input id="theme-switcher" data-theme-switcher type="checkbox" class="astro-vke6obp2"><label for="theme-switcher" class="astro-vke6obp2"><span class="sr-only astro-vke6obp2">theme switcher</span><svg class="dark:opacity-40 opacity-0 size-4 ml-1 astro-vke6obp2" viewBox="0 0 56 56" fill="#fff" height="16" width="16"><path d="M30 4.6c0-1-.9-2-2-2a2 2 0 0 0-2 2v5c0 1 .9 2 2 2s2-1 2-2Zm9.6 9a2 2 0 0 0 0 2.8c.8.8 2 .8 2.9 0L46 13a2 2 0 0 0 0-2.9 2 2 0 0 0-3 0Zm-26 2.8c.7.8 2 .8 2.8 0 .8-.7.8-2 0-2.9L13 10c-.7-.7-2-.8-2.9 0-.7.8-.7 2.1 0 3ZM28 16a12 12 0 0 0-12 12 12 12 0 0 0 12 12 12 12 0 0 0 12-12 12 12 0 0 0-12-12Zm23.3 14c1.1 0 2-.9 2-2s-.9-2-2-2h-4.9a2 2 0 0 0-2 2c0 1.1 1 2 2 2ZM4.7 26a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4.9c1 0 2-.9 2-2s-1-2-2-2Zm37.8 13.6a2 2 0 0 0-3 0 2 2 0 0 0 0 2.9l3.6 3.5a2 2 0 0 0 2.9 0c.8-.8.8-2.1 0-3ZM10 43.1a2 2 0 0 0 0 2.9c.8.7 2.1.8 3 0l3.4-3.5c.8-.8.8-2.1 0-2.9-.8-.8-2-.8-2.9 0Zm20 3.4c0-1.1-.9-2-2-2a2 2 0 0 0-2 2v4.9c0 1 .9 2 2 2s2-1 2-2Z" class="astro-vke6obp2"></path></svg><span class="astro-vke6obp2"><svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-100 dark:opacity-0 astro-vke6obp2" viewBox="0 0 56 56" fill="#fff" height="16" width="16"><path d="M30 4.6c0-1-.9-2-2-2a2 2 0 0 0-2 2v5c0 1 .9 2 2 2s2-1 2-2Zm9.6 9a2 2 0 0 0 0 2.8c.8.8 2 .8 2.9 0L46 13a2 2 0 0 0 0-2.9 2 2 0 0 0-3 0Zm-26 2.8c.7.8 2 .8 2.8 0 .8-.7.8-2 0-2.9L13 10c-.7-.7-2-.8-2.9 0-.7.8-.7 2.1 0 3ZM28 16a12 12 0 0 0-12 12 12 12 0 0 0 12 12 12 12 0 0 0 12-12 12 12 0 0 0-12-12Zm23.3 14c1.1 0 2-.9 2-2s-.9-2-2-2h-4.9a2 2 0 0 0-2 2c0 1.1 1 2 2 2ZM4.7 26a2 2 0 0 0-2 2c0 1.1.9 2 2 2h4.9c1 0 2-.9 2-2s-1-2-2-2Zm37.8 13.6a2 2 0 0 0-3 0 2 2 0 0 0 0 2.9l3.6 3.5a2 2 0 0 0 2.9 0c.8-.8.8-2.1 0-3ZM10 43.1a2 2 0 0 0 0 2.9c.8.7 2.1.8 3 0l3.4-3.5c.8-.8.8-2.1 0-2.9-.8-.8-2-.8-2.9 0Zm20 3.4c0-1.1-.9-2-2-2a2 2 0 0 0-2 2v4.9c0 1 .9 2 2 2s2-1 2-2Z" class="astro-vke6obp2"></path></svg><svg class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-0 dark:opacity-100 astro-vke6obp2" viewBox="0 0 24 24" fill="none" height="16" width="16"><path fill="#000" fill-rule="evenodd" clip-rule="evenodd" d="M8.2 2.2c1-.4 2 .6 1.6 1.5-1 3-.4 6.4 1.8 8.7a8.4 8.4 0 0 0 8.7 1.8c1-.3 2 .5 1.5 1.5v.1a10.3 10.3 0 0 1-9.4 6.2A10.3 10.3 0 0 1 3.2 6.7c1-2 2.9-3.5 4.9-4.4Z" class="astro-vke6obp2"></path></svg></span><svg class="opacity-40 size-4 dark:opacity-0 mr-1 astro-vke6obp2" viewBox="0 0 24 24" fill="none" height="16" width="16"><path fill="#000" fill-rule="evenodd" clip-rule="evenodd" d="M8.2 2.2c1-.4 2 .6 1.6 1.5-1 3-.4 6.4 1.8 8.7a8.4 8.4 0 0 0 8.7 1.8c1-.3 2 .5 1.5 1.5v.1a10.3 10.3 0 0 1-9.4 6.2A10.3 10.3 0 0 1 3.2 6.7c1-2 2.9-3.5 4.9-4.4Z" class="astro-vke6obp2"></path></svg></label></div><script type="module">const t=document.querySelector("input[data-theme-switcher]");t?.addEventListener("change",a=>{const e=document.documentElement;e.classList.add("theme-transition"),a.currentTarget.checked?(e.dataset.theme="dark",localStorage.setItem("starlight-theme","dark")):(e.dataset.theme="light",localStorage.setItem("starlight-theme","light")),window.setTimeout(()=>e.classList.remove("theme-transition"),400)});document.addEventListener("DOMContentLoaded",()=>{localStorage.getItem("starlight-theme")==="light"?(t.checked=!1,document.documentElement.dataset.theme="light"):(t.checked=!0,document.documentElement.dataset.theme="dark")});</script> <button id="focus-toggle" class="focus-toggle" type="button" aria-pressed="false" title="专注阅读模式 (f)" aria-label="切换专注阅读模式"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"> <path d="M12 6c-2-1.5-5-1.5-7 0v12c2-1.5 5-1.5 7 0 2-1.5 5-1.5 7 0V6c-2-1.5-5-1.5-7 0Z"></path> <path d="M12 6v12"></path> </svg> </button> <a class="btn btn-primary nav-desktop-cta" href="/blog/"> 进入博客 </a> </div> </nav> <script type="module">const e=document.querySelector("#nav-toggle"),o=document.querySelector("#nav-menu"),t=document.querySelectorAll(".nav-dropdown > .nav-link");t.forEach(n=>{n.addEventListener("click",()=>{n.closest(".nav-dropdown")?.classList.toggle("open")})});e&&o&&e.addEventListener("change",()=>{o.classList.toggle("open",e.checked)});</script> <script>
+  (function () {
+    function init() {
+      var htmlEl = document.documentElement;
+      var focusBtn = document.getElementById("focus-toggle");
+      if (!focusBtn) return;
+      focusBtn.setAttribute("aria-pressed", String(htmlEl.classList.contains("reading-focus")));
+      if (window.__focusBtnBound === focusBtn) return;
+      window.__focusBtnBound = focusBtn;
+      focusBtn.addEventListener("click", function () {
+        var on = !htmlEl.classList.contains("reading-focus");
+        htmlEl.classList.toggle("reading-focus", on);
+        try { localStorage.setItem("reading-focus", on ? "on" : "off"); } catch (e) {}
+        focusBtn.setAttribute("aria-pressed", String(on));
+      });
+    }
+    if (!window.__focusKeyBound) {
+      window.__focusKeyBound = true;
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        if (e.key === "f" && document.getElementById("focus-toggle")) {
+          e.preventDefault();
+          var htmlEl = document.documentElement;
+          var on = !htmlEl.classList.contains("reading-focus");
+          htmlEl.classList.toggle("reading-focus", on);
+          try { localStorage.setItem("reading-focus", on ? "on" : "off"); } catch (err) {}
+          var b = document.getElementById("focus-toggle");
+          if (b) b.setAttribute("aria-pressed", String(on));
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", init);
+    init();
+  })();
+</script> <script>
+  (function () {
+    function init() {
+      var htmlEl = document.documentElement;
+      var btn = document.getElementById("sidebar-toggle");
+      if (!btn) return;
+      btn.setAttribute("aria-pressed", String(!htmlEl.classList.contains("sidebar-collapsed")));
+      if (window.__sidebarBtnBound === btn) return;
+      window.__sidebarBtnBound = btn;
+      btn.addEventListener("click", function () {
+        var collapsed = !htmlEl.classList.contains("sidebar-collapsed");
+        htmlEl.classList.toggle("sidebar-collapsed", collapsed);
+        try { localStorage.setItem("sidebar-collapsed", collapsed ? "true" : "false"); } catch (e) {}
+        btn.setAttribute("aria-pressed", String(!collapsed));
+      });
+    }
+    if (!window.__sidebarKeyBound) {
+      window.__sidebarKeyBound = true;
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        if (e.key === "b" && document.getElementById("sidebar-toggle")) {
+          e.preventDefault();
+          var htmlEl = document.documentElement;
+          var collapsed = !htmlEl.classList.contains("sidebar-collapsed");
+          htmlEl.classList.toggle("sidebar-collapsed", collapsed);
+          try { localStorage.setItem("sidebar-collapsed", collapsed ? "true" : "false"); } catch (err) {}
+          var b = document.getElementById("sidebar-toggle");
+          if (b) b.setAttribute("aria-pressed", String(!collapsed));
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", init);
+    init();
+  })();
+</script> </header> <div class="main-frame astro-cqnilpoy"> <div class="container flex relative astro-cqnilpoy"> <nav class="sidebar print:hidden astro-cqnilpoy" aria-label="主要"> <starlight-menu-button class="print:hidden astro-36e7ehj6"> <button aria-expanded="false" aria-label="菜单" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-36e7ehj6"> <svg aria-hidden="true" class="open-menu astro-36e7ehj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-36e7ehj6 astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{btn=this.querySelector("button");constructor(){super(),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-cqnilpoy"> <div class="sidebar-content sl-flex astro-cqnilpoy"> <script type="module">function n(){document.querySelectorAll(".sidebar-content .top-level > li").forEach(o=>{const e=o.querySelector("details");if(e){e.open=!0;const t=e.querySelector("summary");t&&t.addEventListener("click",l=>{l.preventDefault()}),e.addEventListener("toggle",()=>{e.open||(e.open=!0)})}})}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",n):n();</script><sl-sidebar-state-persist data-hash="18cnhhp" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/content/blog-portal/" aria-current="false" class="large astro-bw5pq3tv">  <span class="astro-bw5pq3tv">博客总览</span>  </a> </li><li class="astro-bw5pq3tv"> <details open class="astro-bw5pq3tv"> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <summary class="astro-bw5pq3tv"> <span class="group-label astro-bw5pq3tv">  <span class="large astro-bw5pq3tv">iOS 基础知识</span>  </span> <svg aria-hidden="true" class="caret astro-bw5pq3tv astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <ul class="astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/ios-basics/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">iOS 基础知识</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/ios-basics/ios-networking-layer/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">iOS 网络层分层设计</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/ios-basics/swift-concurrency-basics/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">Swift Concurrency 基础模型</span>  </a> </li> </ul>   </details> </li><li class="astro-bw5pq3tv"> <details open class="astro-bw5pq3tv"> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <summary class="astro-bw5pq3tv"> <span class="group-label astro-bw5pq3tv">  <span class="large astro-bw5pq3tv">AI 项目实战架构</span>  </span> <svg aria-hidden="true" class="caret astro-bw5pq3tv astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <ul class="astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/ai-project-architecture/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">AI 项目实战架构</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/ai-project-architecture/agent-observability-stack/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">Agent 可观测性栈设计</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/ai-project-architecture/knowledge-tools-comparison/" aria-current="page" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">知识库与向量检索工具对比</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/ai-project-architecture/rag-system-architecture/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">RAG 系统分层架构实战</span>  </a> </li> </ul>   </details> </li><li class="astro-bw5pq3tv"> <details open class="astro-bw5pq3tv"> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <summary class="astro-bw5pq3tv"> <span class="group-label astro-bw5pq3tv">  <span class="large astro-bw5pq3tv">个人项目</span>  </span> <svg aria-hidden="true" class="caret astro-bw5pq3tv astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <ul class="astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/personal-projects/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">个人项目</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/personal-projects/instinct-envolve-integration-notes/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">instinct-envolve 集成笔记</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/personal-projects/instinct-envolve-team-guide/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">instinct-envolve 团队使用指南</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/personal-projects/liuluit-docs-evolution/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">LiuLuit 站点重构日志</span>  </a> </li> </ul>   </details> </li><li class="astro-bw5pq3tv"> <details open class="astro-bw5pq3tv"> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <summary class="astro-bw5pq3tv"> <span class="group-label astro-bw5pq3tv">  <span class="large astro-bw5pq3tv">个人简介</span>  </span> <svg aria-hidden="true" class="caret astro-bw5pq3tv astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <ul class="astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/profile/about-me/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">个人简介</span>  </a> </li> </ul>   </details> </li><li class="astro-bw5pq3tv"> <a href="/code-blocks/showcase/" aria-current="false" class="large astro-bw5pq3tv">  <span class="astro-bw5pq3tv">代码块示例</span>  </a> </li><li class="astro-bw5pq3tv"> <details open class="astro-bw5pq3tv"> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <summary class="astro-bw5pq3tv"> <span class="group-label astro-bw5pq3tv">  <span class="large astro-bw5pq3tv">站点维护</span>  </span> <svg aria-hidden="true" class="caret astro-bw5pq3tv astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <ul class="astro-bw5pq3tv"> <li class="astro-bw5pq3tv"> <a href="/content/authoring-and-review/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">内容发布流程</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/content/release-notes/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">发布记录</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/operations/deployment-options/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">部署方案</span>  </a> </li><li class="astro-bw5pq3tv"> <a href="/operations/ci-cd/" aria-current="false" class="astro-bw5pq3tv">  <span class="astro-bw5pq3tv">CI/CD</span>  </a> </li> </ul>   </details> </li> </ul>    <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://github.com/ioswater" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">GitHub</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.08 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">选择主题</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">深色</option><option value="light" class="astro-4yphtoen">浅色</option><option value="auto" selected class="astro-4yphtoen">自动</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">选择语言</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/ai-project-architecture/knowledge-tools-comparison/" class="astro-4yphtoen">简体中文</option><option value="/en/ai-project-architecture/knowledge-tools-comparison/" class="astro-4yphtoen">English</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav>   <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="content-container astro-ik4k6pip"> <div class="reading-progress astro-ik4k6pip" aria-hidden="true"><span class="reading-progress-fill astro-ik4k6pip"></span></div> <div class="kbd-hint astro-ik4k6pip" id="kbd-hint" role="status"> <kbd class="astro-ik4k6pip">f</kbd><span class="kbd-sep astro-ik4k6pip">·</span>专注
+<span class="kbd-sep astro-ik4k6pip">·</span><kbd class="astro-ik4k6pip">j</kbd>/<kbd class="astro-ik4k6pip">k</kbd> 章节
+<span class="kbd-sep astro-ik4k6pip">·</span><kbd class="astro-ik4k6pip">[</kbd>/<kbd class="astro-ik4k6pip">]</kbd> 翻页
+<span class="kbd-sep astro-ik4k6pip">·</span><kbd class="astro-ik4k6pip">?</kbd> 帮助
+</div> <div class="main-pane astro-ik4k6pip"> <div class="breadcrumb-container astro-ik4k6pip"> <div class="breadcrumb astro-qaanghzh"> <ul class="astro-qaanghzh"> <li class="astro-qaanghzh">ai project architecture</li><li class="astro-qaanghzh">knowledge tools comparison</li> </ul> </div> </div>   <main data-pagefind-body class="astro-bguv2lll" lang="zh-CN" dir="ltr">    <div class="content-panel astro-p5qdsdza"> <div class="sl-container astro-p5qdsdza"> <h1 id="_top" class="astro-j6tvhyss">知识库与向量检索工具对比</h1> </div> </div> <div class="content-panel astro-p5qdsdza"> <div class="sl-container astro-p5qdsdza"> <div class="sl-markdown-content"> <blockquote>
+<p>生成日期：2026-07-30
+范围：先回答「为什么查询一整套体系（如逆向拆包全流程）却能消耗很少 token」的核心问题，再横向对比 Qdrant / Notion / Confluence / PostgreSQL(pgvector) / Obsidian / Elasticsearch。</p>
+</blockquote>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="一核心问题为什么查整套体系却只要很少-token">一、核心问题：为什么查「整套体系」却只要很少 token？</h2><a class="sl-anchor-link" href="#一核心问题为什么查整套体系却只要很少-token"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “一、核心问题：为什么查「整套体系」却只要很少 token？”</span></a></div>
+<p>先纠正一个常见误解：<strong>没有工具能真正做到「输出不算输入/输出 token」</strong>。任何返回给模型看的内容，都会以 input token 形式计费。真正的省 token 来自两点：</p>
+<ol>
+<li><strong>不把整个语料塞进上下文</strong>（按需检索，而非全量加载）</li>
+<li><strong>检索/阅读发生在「隔离的上下文」里</strong>（子代理模式），主流程只收到一个短摘要</li>
+</ol>
+<p>下面按「省 token 力度」从大到小拆解可行手段：</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-rag检索增强生成主力手段">1. RAG（检索增强生成）——主力手段</h3><a class="sl-anchor-link" href="#1-rag检索增强生成主力手段"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. RAG（检索增强生成）——主力手段”</span></a></div>
+<ul>
+<li>语料提前切 chunk → 向量化 → 存入向量库。</li>
+<li>查询时只把「query 的向量」去检索，取 <strong>top-k 个最相关 chunk</strong>（如 5~20 段）注入模型。</li>
+<li>Token 成本 ≈ <code dir="auto">query + k 个 chunk + 回答</code>，<strong>与语料总大小无关</strong>。</li>
+<li>这是「查逆向拆包整套流程但只花少量 token」的最标准答案：你不是把几百篇文档都读给模型，而是只喂最相关的几段。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-子代理--agent-委派上下文隔离最容易被忽略的省-token-技巧">2. 子代理 / Agent 委派（上下文隔离）——最容易被忽略的省 token 技巧</h3><a class="sl-anchor-link" href="#2-子代理--agent-委派上下文隔离最容易被忽略的省-token-技巧"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. 子代理 / Agent 委派（上下文隔离）——最容易被忽略的省 token 技巧”</span></a></div>
+<ul>
+<li>在 WorkBuddy 这类架构里，<code dir="auto">Agent</code> 工具启动的子代理<strong>拥有独立的上下文窗口</strong>。</li>
+<li>主代理把「去把拆包流程、常用工具、疑难问题整理出来」交给子代理；子代理自己读文件、做检索，最后<strong>只把一段短摘要返回主代理</strong>。</li>
+<li>效果：原始文档的 token 消耗发生在子代理账上，主流程上下文保持很小。这正是「过程消耗很少 token」的真实来源之一。</li>
+<li>注意：子代理的 token 依然计费（只是不在主流程），属于「上下文分桶」，不是「免费」。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-mcp-服务器按需取数解耦检索与消费">3. MCP 服务器（按需取数，解耦检索与消费）</h3><a class="sl-anchor-link" href="#3-mcp-服务器按需取数解耦检索与消费"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. MCP 服务器（按需取数，解耦检索与消费）”</span></a></div>
+<ul>
+<li>MCP 把知识库暴露成标准化工具（<code dir="auto">search_docs</code>、<code dir="auto">list_collections</code> 等）。模型<strong>需要时</strong>才调用，拿到格式化的检索结果。</li>
+<li>省 token 点：<strong>整个知识库不用作为静态 system prompt 预加载</strong>；切换 AI 宿主（Claude/Cursor/自研）无需重写检索代码（build once, connect everywhere）。</li>
+<li>局限：MCP 工具返回的文本<strong>仍然进入调用方上下文并计费</strong>。它省的是「全量预加载」和「重复集成的成本」，不是「返回内容免费」。</li>
+<li>可叠加：hybrid search（向量+关键词）、contextual chunking（带章节标题/前后文的 chunk）、多源 RAG（docs+Slack+Jira+代码）。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-skill-文件流程编码不是数据仓库">4. Skill 文件（流程编码，不是数据仓库）</h3><a class="sl-anchor-link" href="#4-skill-文件流程编码不是数据仓库"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Skill 文件（流程编码，不是数据仓库）”</span></a></div>
+<ul>
+<li><code dir="auto">SKILL.md</code> 加载进上下文<strong>会</strong>消耗 token，但它把「如何检索/如何调用外部工具」的流程固化下来，避免每轮对话重复解释。</li>
+<li>它本身不存数据；真正的数据在它指向的外部系统（向量库 / 文件 / MCP）。所以 skill 是「省说明 token + 规范流程」，不是「省数据 token」。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-缓存cache">5. 缓存（Cache）</h3><a class="sl-anchor-link" href="#5-缓存cache"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. 缓存（Cache）”</span></a></div>
+<ul>
+<li>Prompt Cache：把固定的系统提示 / 常用检索片段缓存，重复命中只收缓存价（远低于全价）。</li>
+<li>语义缓存：相同/相近问题直接复用上一次检索结果，跳过 embedding+检索。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-细粒度返回--重排rerank">6. 细粒度返回 + 重排（rerank）</h3><a class="sl-anchor-link" href="#6-细粒度返回--重排rerank"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. 细粒度返回 + 重排（rerank）”</span></a></div>
+<ul>
+<li>chunk 大小、top-k、是否带元数据都可调；先粗召回再 rerank（交叉编码器 / ColBERT  late interaction），只把最终最相关的少量内容给模型。</li>
+<li>例：Qdrant 支持 score boosting、MMR 去冗余、ColBERT 级 token 级精度。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="结论速记">结论速记</h3><a class="sl-anchor-link" href="#结论速记"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “结论速记”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>手段</th><th>省 token 的本质</th><th>返回内容是否计费</th></tr></thead><tbody><tr><td>RAG + 向量库</td><td>只检索 top-k chunk，不全量加载</td><td>是（但量很小）</td></tr><tr><td>子代理委派</td><td>检索发生在隔离上下文，主流程只见摘要</td><td>是（在子代理账上）</td></tr><tr><td>MCP</td><td>按需取数，不预加载全库</td><td>是（返回文本计费）</td></tr><tr><td>Skill</td><td>固化流程，省重复说明</td><td>是（加载时计费）</td></tr><tr><td>缓存</td><td>复用命中，跳过重复计算</td><td>部分（缓存价更低）</td></tr></tbody></table>
+<blockquote>
+<p>一句话：别人「查整套体系却很少 token」= <strong>RAG 只取相关片段 + 子代理隔离上下文 + 按需 MCP 调用 + 缓存</strong>，而不是某个工具「白送 token」。</p>
+</blockquote>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="二六个工具横向对比">二、六个工具横向对比</h2><a class="sl-anchor-link" href="#二六个工具横向对比"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “二、六个工具横向对比”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="速查表">速查表</h3><a class="sl-anchor-link" href="#速查表"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “速查表”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>维度</th><th>Qdrant</th><th>Notion</th><th>Confluence</th><th>pgvector</th><th>Obsidian</th><th>Elasticsearch</th></tr></thead><tbody><tr><td>本质</td><td>专用向量数据库</td><td>云笔记+数据库</td><td>企业 Wiki</td><td>Postgres 向量扩展</td><td>本地 Markdown 笔记</td><td>搜索/分析引擎</td></tr><tr><td>团队共享知识图谱</td><td>❌ 非图谱（可作 GraphRAG 后端）</td><td>🟡 关系库+双向链接，非真图</td><td>❌ 页面树，非图</td><td>❌ 仅向量列</td><td>🟡 真·个人图谱，但<strong>团队弱</strong></td><td>🟡 有关联发现，非核心图谱</td></tr><tr><td>团队实时协作</td><td>✅（服务端多租户）</td><td>✅ 强</td><td>✅ 强</td><td>✅（靠应用层）</td><td>❌ 无原生（Git/网盘同步）</td><td>✅ 强</td></tr><tr><td>集成难度</td><td>中</td><td>低-中</td><td>中</td><td>低（有 PG 则极易）</td><td>中-高（无官方 API）</td><td>高（集群运维重）</td></tr><tr><td>返回粒度</td><td>极细（top-k chunk 可控）</td><td>页/块级</td><td>页/块级（CQL）</td><td>极细（SQL 行级）</td><td>文件级 / Dataview 查询</td><td>极细（top-k + 过滤）</td></tr><tr><td>主要场景</td><td>RAG、语义检索、Agent 记忆</td><td>团队 wiki、项目管理</td><td>企业技术文档、Jira 绑定</td><td>轻量向量检索（已有 PG）</td><td>个人 PKM、第二大脑</td><td>大规模混合检索、企业搜索</td></tr><tr><td>自托管/隐私</td><td>✅ 完全自托管</td><td>☁️ 云端为主</td><td>☁️/Data Center</td><td>✅ 自托管</td><td>✅ 纯本地</td><td>✅ 自托管</td></tr><tr><td><strong>实时写入/写回省 token</strong></td><td>✅ <code dir="auto">upsert_points</code> 随时写回片段</td><td>✅ 官方 MCP 写页/块</td><td>✅ REST/MCP 写页</td><td>✅ SQL 随时写回行</td><td>✅ filesystem MCP 写 <code dir="auto">.md</code></td><td>✅ 索引 API 随时写回</td></tr></tbody></table>
+<hr>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-qdrant专用向量数据库">1. Qdrant（专用向量数据库）</h3><a class="sl-anchor-link" href="#1-qdrant专用向量数据库"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Qdrant（专用向量数据库）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：Rust 编写，HNSW 近似检索 + 原生混合检索（dense + sparse，BM25/SPLADE++/miniCOIL）；一阶段过滤（filter 在 HNSW 遍历中执行，非后置）；量化（scalar/product/binary，内存可降 64x）；多向量（multi-vector）、rerank（MMR、ColBERT late interaction）；multitenancy + RBAC；可 on-prem / hybrid / edge / cloud。</li>
+<li><strong>优点</strong>：性能与扩展性顶级（官方称最高 4x RPS）；检索粒度极细；与 RAG/Agent 场景天然契合；有 <code dir="auto">mcp-server-qdrant</code>。</li>
+<li><strong>缺点</strong>：是「零件」不是「成品」——你还要自己写 ingestion、chunking、embedding 管线；运维一个服务。</li>
+<li><strong>团队共享知识图谱</strong>：不是知识图谱本体，无原生图遍历。可作为 GraphRAG 的向量存储后端。</li>
+<li><strong>集成难度</strong>：中（Docker 起服务 + 官方 client/REST/gRPC）。</li>
+<li><strong>返回粒度</strong>：极细，top-k 与 payload 完全可控。</li>
+<li><strong>典型场景</strong>：RAG、语义搜索、推荐、AI Agent 持久记忆。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-notion云笔记--数据库">2. Notion（云笔记 + 数据库）</h3><a class="sl-anchor-link" href="#2-notion云笔记--数据库"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Notion（云笔记 + 数据库）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：block 编辑器，内联数据库（relation/rollup/formula，多视图 table/board/calendar/gallery）；Notion AI 做写作/摘要/跨工作区问答；模板生态丰富。</li>
+<li><strong>优点</strong>：上手快、灵活度极高、团队实时协作体验好；API + SDK + 社区 MCP 易集成；适合「文档即数据库」。</li>
+<li><strong>缺点</strong>：规模大（5000+ 页）会变慢、搜索变弱；权限模型在大组织易混乱；无原生 Jira 深度集成；合规/审计要到 Enterprise。</li>
+<li><strong>团队共享知识图谱</strong>：页面双向链接 + 数据库 relation 能形成关联网络，但<strong>不是图数据库</strong>，无图遍历算法；团队共享是强项。</li>
+<li><strong>集成难度</strong>：低-中（REST API + OAuth + MCP）。</li>
+<li><strong>返回粒度</strong>：页/块（block）级，API 可取单 block。</li>
+<li><strong>典型场景</strong>：团队 wiki、轻量项目管理、产品规格/路线图、客户 FAQ。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-confluence企业-wiki">3. Confluence（企业 Wiki）</h3><a class="sl-anchor-link" href="#3-confluence企业-wiki"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Confluence（企业 Wiki）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：Space → Page 树状层级，模板面向技术文档/SOP/决策记录；宏（macro）、与 Jira 原生双向联动（inline issue、smart link）；Atlassian Intelligence（Rovo）做 AI 搜索/摘要；Data Center 可自托管。</li>
+<li><strong>优点</strong>：结构化、可治理、页面级权限 + 审批流 + 审计轨迹，适合合规与大组织；Jira 用户几乎必选。</li>
+<li><strong>缺点</strong>：灵活度低于 Notion；配置/上手更重；无原生图；单价虽低但需配套 Atlassian 栈。</li>
+<li><strong>团队共享知识图谱</strong>：无原生图谱；靠页面树 + 链接组织。团队共享强。</li>
+<li><strong>集成难度</strong>：中（REST + CQL + Forge，有社区 MCP）。</li>
+<li><strong>返回粒度</strong>：页/块级，CQL 过滤能力强。</li>
+<li><strong>典型场景</strong>：中大型企业的技术文档、研发知识库、与 Jira 绑定的工程协作。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="4-postgresql--pgvector向量扩展">4. PostgreSQL / pgvector（向量扩展）</h3><a class="sl-anchor-link" href="#4-postgresql--pgvector向量扩展"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. PostgreSQL / pgvector（向量扩展）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：在 Postgres 里加 <code dir="auto">vector</code> 类型 + 距离算子；支持 exact / 近似（HNSW、IVFFlat）、L2/IP/cosine/L1/Hamming/Jaccard；halfvec、binary quantization、sparsevec；与 ACID、JOIN、行级权限天然一体。</li>
+<li><strong>优点</strong>：<strong>已在用 PG 的团队几乎零额外组件</strong>；过滤/联表/租户就是普通 SQL；免费、无厂商锁定；Supabase/Neon/RDS 都自带。</li>
+<li><strong>缺点</strong>：超大规模（数亿~十亿向量）或纯向量负载时，不如专用向量库；HNSW 调参需懂 PG；不是图谱。</li>
+<li><strong>团队共享知识图谱</strong>：无原生图（可叠 Apache AGE 等图扩展）；团队共享靠 PG 本身的多连接/权限。</li>
+<li><strong>集成难度</strong>：低（有 PG 则装扩展 + 写 SQL 即可）。</li>
+<li><strong>返回粒度</strong>：极细（SQL 行级 + WHERE 过滤）。</li>
+<li><strong>典型场景</strong>：已有 Postgres 的团队做轻量向量检索；希望「向量 + 关系数据」统一存储，避免双写同步。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="5-obsidian本地-markdown-笔记">5. Obsidian（本地 Markdown 笔记）</h3><a class="sl-anchor-link" href="#5-obsidian本地-markdown-笔记"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Obsidian（本地 Markdown 笔记）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：本地优先，笔记即 <code dir="auto">.md</code> 文件，永久拥有、可 Git 版本化；双向链接 + 图谱视图（graph view）是灵魂；1700+ 社区插件（Dataview 把 vault 当数据库查、Templater、Canvas、Excalidraw）。</li>
+<li><strong>优点</strong>：<strong>真正的个人知识图谱</strong>（节点+边可视化）；极快、极隐私（不上云除非主动 Sync/Publish）；个人免费、可高度定制；适合「第二大脑」。</li>
+<li><strong>缺点</strong>：<strong>无原生团队实时协作</strong>（同笔记并发编辑会冲突，只能 Git/Dropbox/网盘同步）；对 AI Agent 集成不友好——无官方 API/云端，需直接读本地 <code dir="auto">.md</code> 或用 Local REST API 等社区插件；学习曲线陡。</li>
+<li><strong>团队共享知识图谱</strong>：个人图谱极强，但「团队共享」弱（单用户本地优先）。小技术团队用 Git 共享 vault 做文档可以，但不是协作工具。</li>
+<li><strong>集成难度</strong>：中-高（对 AI 而言）；本质是文件系统，最适合直接 <code dir="auto">Read</code> 本地 md 或接 MCP filesystem。</li>
+<li><strong>返回粒度</strong>：文件级（读整篇 .md）或 Dataview 查询结果。</li>
+<li><strong>典型场景</strong>：个人 PKM、研究者文献网络、开发者本地文档库、隐私敏感笔记。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="6-elasticsearch搜索--分析引擎">6. Elasticsearch（搜索 / 分析引擎）</h3><a class="sl-anchor-link" href="#6-elasticsearch搜索--分析引擎"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. Elasticsearch（搜索 / 分析引擎）”</span></a></div>
+<ul>
+<li><strong>特点</strong>：<code dir="auto">dense_vector</code> + <code dir="auto">sparse_vector</code> + <code dir="auto">semantic_text</code>；retriever 多阶段管线（keyword knn + sparse + rerank，RRF/线性融合）；BBQ/int8/int4 量化；内置 ELSER/E5/Jina 等嵌入模型与推理 API；ES|QL 用 FORK/FUSE/RERANK 组合检索；9.4 起 <code dir="auto">query_vector_builder.lookup</code> 单次请求完成「类此文档」检索。</li>
+<li><strong>优点</strong>：大规模混合检索（关键词+向量）王者；水平扩展、企业级；可被 MCP/客户端接入；适合「全文 + 语义」同时要的场景。</li>
+<li><strong>缺点</strong>：JVM/集群运维重、资源占用大；对非搜索团队过重；不是知识图谱（虽有历史 Graph 功能，但现代图谱非核心）。</li>
+<li><strong>团队共享知识图谱</strong>：无原生图谱；关联发现能力一般。团队共享强（服务端多租户）。</li>
+<li><strong>集成难度</strong>：高（集群运维成本）。</li>
+<li><strong>返回粒度</strong>：极细（top-k + 丰富过滤 + 重排）。</li>
+<li><strong>典型场景</strong>：企业级搜索、日志/全文 + 语义混合检索、大规模 RAG（百万~十亿级文档）、多媒体相似检索。</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="三怎么选决策建议">三、怎么选（决策建议）</h2><a class="sl-anchor-link" href="#三怎么选决策建议"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “三、怎么选（决策建议）”</span></a></div>
+<ul>
+<li><strong>想要「查整套技术体系却省 token」</strong> → 优先 <strong>RAG + 向量库</strong>，再叠加<strong>子代理隔离</strong>与<strong>缓存</strong>。
+<ul>
+<li>轻量 / 已有 Postgres → <strong>pgvector</strong></li>
+<li>性能/规模/混合检索优先 → <strong>Qdrant</strong>（或 <strong>Elasticsearch</strong> 若还需全文）</li>
+<li>完全托管不想运维 → Pinecone / Qdrant Cloud（不在你列表内，但值得知道）</li>
+</ul>
+</li>
+<li><strong>团队共享知识库（人要写、要协作）</strong> → <strong>Notion</strong>（灵活、快）或 <strong>Confluence</strong>（已在用 Jira、要合规）。</li>
+<li><strong>个人「第二大脑」+ 真图谱</strong> → <strong>Obsidian</strong>（但团队共享弱）。</li>
+<li><strong>真正要「团队共享知识图谱」</strong>（图遍历、实体关系推理，如 GraphRAG）→ 上述六个都不是最佳本体；应看 <strong>Neo4j / NebulaGraph</strong> 或在向量库之上跑 <strong>Microsoft GraphRAG</strong>。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="针对你的逆向拆包知识库的具体建议">针对你的「逆向拆包知识库」的具体建议</h3><a class="sl-anchor-link" href="#针对你的逆向拆包知识库的具体建议"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “针对你的「逆向拆包知识库」的具体建议”</span></a></div>
+<ol>
+<li>文档（流程、工具清单、疑难排查）落地为 Markdown/PDF，用 <strong>Qdrant 或 pgvector</strong> 做 chunk 嵌入。</li>
+<li>写一个小 <strong>MCP server</strong>（或复用社区版）暴露 <code dir="auto">search_unpack_docs(query, top_k)</code>，模型按需调用，只返回 top-k 片段。</li>
+<li>复杂「全流程整理」类问题交给<strong>子代理</strong>跑检索并回摘要，主流程保持轻量。</li>
+<li>若要人和 AI 都能浏览，把精华沉淀进 <strong>Notion/Confluence</strong> 作为「人读层」，向量库作为「机读检索层」——双层结构最稳。</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="四在-claude-code-与-codex-上的场景">四、在 Claude Code 与 Codex 上的场景</h2><a class="sl-anchor-link" href="#四在-claude-code-与-codex-上的场景"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “四、在 Claude Code 与 Codex 上的场景”</span></a></div>
+<p>你点名的这两个 agent 正是「查整套体系却很少 token」的主战场。下面把它们的底层能力和六个工具的接入方式对齐。</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="41-两个-agent-的底层能力对比">4.1 两个 agent 的底层能力对比</h3><a class="sl-anchor-link" href="#41-两个-agent-的底层能力对比"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.1 两个 agent 的底层能力对比”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>能力</th><th>Claude Code</th><th>Codex（OpenAI）</th></tr></thead><tbody><tr><td>上下文窗口</td><td>货真价实 200K，不会静默截断</td><td>与所用模型/配置相关（o 系列推理模型 + 大窗口）</td></tr><tr><td>子代理隔离上下文</td><td>✅ 原生（内置 Explore / Plan / General-purpose + 自定义 <code dir="auto">.claude/agents/*.md</code>）</td><td>✅（MultiAgentV2，多 agent 可并行）</td></tr><tr><td><strong>子代理内联 MCP（父对话不加载工具描述）</strong></td><td>✅ 支持：子代理 frontmatter 的 <code dir="auto">mcpServers</code> 可内联定义，<strong>专属于该子代理</strong>，主会话根本看不到工具描述、也不载入检索结果</td><td>❌ MCP 在 <code dir="auto">~/.codex/config.toml</code> <strong>全局共享</strong>，连上后工具描述进入主会话（v0.143 起默认用 tool search 缓解）</td></tr><tr><td>MCP 接入</td><td>✅ stdio / http / sse；<code dir="auto">claude mcp add</code>；官方连接器（Notion <code dir="auto">mcp.notion.com/mcp</code>、GitHub、Context7）</td><td>✅ stdio + Streamable HTTP（OAuth / bearer）；<code dir="auto">codex mcp add</code>；ChatGPT 桌面/CLI/IDE 共享配置</td></tr><tr><td>Skill 渐进加载</td><td>✅ 启动只预载名称+描述（约 100 token），全文与参考资料按需读取</td><td>🟡 有 memory（记偏好/修正/耗时信息）+ 插件，但无等价「按需渐进加载」机制</td></tr><tr><td>记忆/指令</td><td>CLAUDE.md 分层 + <code dir="auto">.claude/rules/</code></td><td>✅ memory 预览版 + Goals + 自动化线程</td></tr></tbody></table>
+<p><strong>最关键的省 token 差异</strong>：</p>
+<ul>
+<li><strong>Claude Code 的杀手锏 = 子代理 + 内联 MCP + Skill 渐进加载三者叠加</strong>。把重型检索 MCP（如 Qdrant/ES）「内联」定义在子代理 frontmatter 里，主对话既看不到它的工具描述，也不会被检索结果污染；子代理在自己独立的上下文窗口里做检索，只回一段精简摘要。这是「查整套体系却很少 token」当下最干净的实现形态。</li>
+<li><strong>Codex</strong> 同样支持 MCP + 子代理隔离，但 MCP 是全局共享，工具描述会进主会话（tool search 默认减轻）；主要靠子代理隔离 + memory 缓存来省。Codex 还有 computer use，能直接操作无 API 的工具界面（例如打开 Obsidian 或浏览器查资料）。</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="42-六个工具--两个-agent-的接入矩阵">4.2 六个工具 × 两个 agent 的接入矩阵</h3><a class="sl-anchor-link" href="#42-六个工具--两个-agent-的接入矩阵"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.2 六个工具 × 两个 agent 的接入矩阵”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>工具</th><th>Claude Code 接入</th><th>Codex 接入</th><th>省 token 建议</th></tr></thead><tbody><tr><td><strong>Qdrant</strong></td><td><code dir="auto">mcp-server-qdrant</code>（或自建）；<strong>内联进子代理</strong>最佳</td><td><code dir="auto">codex mcp add</code>（stdio/http），Qdrant 自带 MCP server</td><td>检索 MCP 内联到子代理，主流程零负担</td></tr><tr><td><strong>Notion</strong></td><td>官方连接器 <code dir="auto">https://mcp.notion.com/mcp</code></td><td>Notion MCP / 插件（Codex 已原生集成 Notion）</td><td>作为人读层；检索走 API 取 block 级</td></tr><tr><td><strong>Confluence</strong></td><td>社区 MCP（Atlassian）</td><td>Atlassian Rovo 插件 / Confluence MCP</td><td>与 Jira 联动时最优</td></tr><tr><td><strong>pgvector</strong></td><td>Postgres MCP（<code dir="auto">server-postgres</code>），用 SQL 查向量列</td><td>Postgres MCP，<code dir="auto">codex mcp add</code></td><td>已有 PG 直接查，零新组件</td></tr><tr><td><strong>Obsidian</strong></td><td>filesystem MCP 读本地 <code dir="auto">.md</code> / 社区 <code dir="auto">obsidian-mcp</code></td><td>本地文件原生可读（Codex 直接读 vault）</td><td>仅文件系统级，<strong>无语义检索</strong>；要语义需额外向量层</td></tr><tr><td><strong>Elasticsearch</strong></td><td>ES 官方 MCP server，knn 查询</td><td>ES MCP，<code dir="auto">codex mcp add</code></td><td>大规模混合检索，chunk 可控</td></tr></tbody></table>
+<blockquote>
+<p>注意：Obsidian 在两个 agent 里都只是「本地 Markdown 文件」——Claude Code 用 filesystem MCP、Codex 直接读盘。没有向量层时它<strong>不会做语义检索</strong>，只能靠文件名/全文 grep。要保留 Obsidian 的图谱体验又想语义检索，得在它之上另接 Qdrant/pgvector 做嵌入。</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="43-推荐落地形态以逆向拆包知识库为例">4.3 推荐落地形态（以逆向拆包知识库为例）</h3><a class="sl-anchor-link" href="#43-推荐落地形态以逆向拆包知识库为例"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.3 推荐落地形态（以逆向拆包知识库为例）”</span></a></div>
+<p><strong>Claude Code（最省 token 范式）</strong></p>
+<ol>
+<li>文档 chunk 嵌入进 <strong>Qdrant</strong>（或 pgvector / ES）。</li>
+<li>写自定义子代理 <code dir="auto">~/.claude/agents/unpack-researcher.md</code>：
+<ul>
+<li>frontmatter 内联 Qdrant MCP（<code dir="auto">mcpServers</code> 字段），并 <code dir="auto">tools: Read</code> + 该 MCP 工具，<strong>只读</strong>；</li>
+<li>规定输出格式为「精简摘要 + 引用来源」。</li>
+</ul>
+</li>
+<li>配一个 Skill 描述「何时委派该子代理」。</li>
+<li>主代理收到「拆包全流程/疑难问题」类问题 → 委派 → 子代理在自己的上下文里检索 top-k → 只回摘要。<strong>主对话上下文几乎不变</strong>。</li>
+</ol>
+<p><strong>Codex</strong></p>
+<ol>
+<li>全局 <code dir="auto">codex mcp add</code> 连一个检索 MCP（如 Qdrant）。</li>
+<li>用子代理 / MultiAgent 隔离检索上下文；或用 memory 记住「拆包知识库在 X」，配合 tool search 自动定位工具。</li>
+<li>若没有合适 MCP，可用 computer use 直接打开 Obsidian / 浏览器查（代价是屏幕内容会进上下文，不如 MCP 干净）。</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="44-一句话选型">4.4 一句话选型</h3><a class="sl-anchor-link" href="#44-一句话选型"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4.4 一句话选型”</span></a></div>
+<ul>
+<li>想要「<strong>主流程极致省 token</strong>」→ Claude Code 的<strong>内联 MCP 子代理</strong>是当下最干净的实现（父会话完全不沾工具描述与检索结果）。</li>
+<li>Codex 胜在<strong>生态广</strong>（90+ 插件、computer use、memory），但 MCP 全局共享，省 token 主要依赖子代理隔离 + memory，而非工具描述隔离。</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="五实时写入使用知识库write-back-loop以省-token">五、实时写入/使用知识库（write-back loop）以省 token</h2><a class="sl-anchor-link" href="#五实时写入使用知识库write-back-loop以省-token"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “五、实时写入/使用知识库（write-back loop）以省 token”</span></a></div>
+<p>你这个问题点到了「省 token」更深的一层：<strong>与其每次都重新推导/重新检索，不如让 agent 在会话过程中把结论「外置」进知识库，下次（或同会话后续）直接读回</strong>。这就是 2026 年热议的 <strong>write-back loop（写回闭环）</strong> 思想——把 token 从「消耗品（opex）」变成「资产（capex）」。</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="51-核心机制检索比生成便宜-1050">5.1 核心机制：检索比生成便宜 10–50×</h3><a class="sl-anchor-link" href="#51-核心机制检索比生成便宜-1050"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.1 核心机制：检索比生成便宜 10–50×”</span></a></div>
+<ul>
+<li>标准做法：agent 每遇到一个没答案的问题，就现场去查、去推导、把大段原文塞进上下文 → 每次都「从零生成」。</li>
+<li>写回闭环：agent 推导出结论后，<strong>立刻把结论写回持久知识库</strong>（一条结构化笔记 / 一个向量 chunk / 一页 wiki）。下一次相关问题出现时，<strong>先命中知识库（检索）而非重新生成</strong>。检索成本约为生成的 1/10 ~ 1/50。</li>
+<li>已公布的对照实验（LinkedIn 转发的一篇 arxiv 论文，编号 2604.11243，<strong>属单一报告、领域相关，非独立验证</strong>）：同一领域连续提问，写回闭环累计 token 47K vs 标准 RAG 基线 305K → <strong>标称省 84.6%</strong>；到第 4 次提问，同样一道题从 28K 降到 4K。30 天投影：高集中度领域省 81%、中等 54%、最差（分散低频）仍省 26%。
+<ul>
+<li>⚠️ 这是「领域集中度」高度相关的乐观数据，不能当成所有场景的保证值；但「写回比不复用省得多」的方向是稳的。</li>
+</ul>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="52-两种写回范式关键区分">5.2 两种写回范式（关键区分）</h3><a class="sl-anchor-link" href="#52-两种写回范式关键区分"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.2 两种写回范式（关键区分）”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>范式</th><th>写入形态</th><th>代表工具</th><th>适合解决什么</th><th>局限</th></tr></thead><tbody><tr><td><strong>语义写回（机读层）</strong></td><td>把结论/片段 <code dir="auto">embedding</code> 后 upsert 进向量库</td><td>Qdrant / pgvector / Elasticsearch</td><td>海量语料里按语义召回，未来 query 命中 top-k 即走</td><td>纯 RAG「每次从零重发现」，<strong>不累积连接</strong>（片段之间无关联，体系性知识易丢链路）</td></tr><tr><td><strong>编译型 wiki 写回（人读+累积层）</strong></td><td>把原始材料「编译」成结构化 Markdown wiki（摘要+反向链接+索引页）</td><td>Obsidian / Notion / Confluence</td><td>「iOS 逆向怎么操作」这类<strong>体系化、强关联</strong>知识，跨会话累积、自动加载</td><td>自身无语义检索（除非叠向量层）；Obsidian 团队弱</td></tr></tbody></table>
+<blockquote>
+<p>Karpathy 2026-04 提出的 LLM Knowledge Base 模式即后者：<strong>Raw → Compile → Lint → Query</strong> 循环。agent 把架构决策、踩坑、约束编译成带反链的 wiki，下一次会话直接读文件即可，不必重新让你解释——既省 token 又避免「重新解释必有损」。他明确指出：纯 RAG 是「每道题都从头重新发现知识，没有积累」；而编译型 wiki 会复利式增长。</p>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="53-六个工具实时写入使用能力对齐">5.3 六个工具「实时写入/使用」能力对齐</h3><a class="sl-anchor-link" href="#53-六个工具实时写入使用能力对齐"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.3 六个工具「实时写入/使用」能力对齐”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>工具</th><th>会话中实时写入</th><th>会话中实时使用</th><th>写回形态 / 省 token 要点</th><th>注意点</th></tr></thead><tbody><tr><td><strong>Qdrant</strong></td><td>✅ <code dir="auto">upsert_points</code>（向量+metadata payload 随时增改）</td><td>✅ <code dir="auto">search</code> 随时取 top-k</td><td>把「结论 chunk」嵌好写回；未来命中即走，机读层首选</td><td>写回前需 embed（少量 token/延迟）；要做「写入校验」防记忆投毒</td></tr><tr><td><strong>pgvector</strong></td><td>✅ <code dir="auto">INSERT/UPDATE</code> 带 vector 列（Postgres MCP）</td><td>✅ SQL 相似度查询</td><td>与 Qdrant 同机制，外加 SQL 元数据过滤/联表</td><td>同 Qdrant 的 embed 成本</td></tr><tr><td><strong>Elasticsearch</strong></td><td>✅ 索引 API 随时写 doc</td><td>✅ knn + 关键词混合</td><td>海量语料里写回 + 混合召回</td><td>集群运维重</td></tr><tr><td><strong>Notion</strong></td><td>✅ <strong>官方 MCP</strong>：<code dir="auto">create-a-page</code> / <code dir="auto">append-blocks</code> / <code dir="auto">update-a-page</code>（读+写齐全）</td><td>✅ <code dir="auto">search</code> / 读 block</td><td>写回 = 一页「人读 playbook」，未来会话/你本人直接读</td><td><strong>限频 3 req/s</strong>；适合写「精炼产物」，不适合高频碎写</td></tr><tr><td><strong>Confluence</strong></td><td>✅ REST API / MCP 建页改页</td><td>✅ 读页（CQL）</td><td>企业版「人读 playbook」，与 Jira 联动最佳</td><td>灵活度低于 Notion</td></tr><tr><td><strong>Obsidian</strong></td><td>✅ filesystem MCP：<code dir="auto">obsidian_write</code> / <code dir="auto">append</code> / <code dir="auto">update</code>（直接写 <code dir="auto">.md</code>）；社区 <code dir="auto">native-mcp</code> 插件支持 hash 安全编辑+审计日志</td><td>✅ 读 <code dir="auto">.md</code> / grep / Dataview</td><td><strong>就是 Karpathy 编译型 wiki 本体</strong>：写 Markdown 落盘、可 Git 版本化、会话启动自动加载</td><td>自身<strong>无语义检索</strong>，要知道路径或靠全文 grep；团队并发弱</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="54-在-claude-code--codex-里的写回落地">5.4 在 Claude Code / Codex 里的「写回」落地</h3><a class="sl-anchor-link" href="#54-在-claude-code--codex-里的写回落地"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.4 在 Claude Code / Codex 里的「写回」落地”</span></a></div>
+<ul>
+<li><strong>Claude Code（最顺）</strong>：
+<ol>
+<li>子代理在前述「内联 MCP」里检索后，不仅回摘要，还<strong>把结论写回 KB</strong>（如 <code dir="auto">upsert</code> 进 Qdrant，或 <code dir="auto">create-a-page</code> 进 Notion，或 <code dir="auto">obsidian_write</code> 落盘）。主会话仍不被污染。</li>
+<li><code dir="auto">CLAUDE.md</code> / <code dir="auto">.claude/rules/</code> / memory 文件<strong>在每次会话启动自动加载</strong>——这本身就是「编译型 wiki 自动注入」，等于零成本复用上次沉淀。</li>
+<li>模式：原始语料 → 子代理编译成 wiki/向量 → 下次会话自动读回。<strong>成本随使用复利下降</strong>。</li>
+</ol>
+</li>
+<li><strong>Codex</strong>：
+<ol>
+<li>子代理 / MultiAgent 隔离检索，写回走全局 MCP（Qdrant/Notion/Obsidian 均可）。</li>
+<li><code dir="auto">memory</code> 预览版可记住「拆包知识库在 X、结论摘要是 Y」，配合 tool search 自动定位。</li>
+<li>无合适 MCP 时，computer use 可直接开 Obsidian 写笔记（但屏幕内容进上下文，不如 MCP 干净）。</li>
+</ol>
+</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="55-落地建议结合你的逆向拆包">5.5 落地建议（结合你的「逆向拆包」）</h3><a class="sl-anchor-link" href="#55-落地建议结合你的逆向拆包"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5.5 落地建议（结合你的「逆向拆包」）”</span></a></div>
+<ul>
+<li><strong>双层写回最稳</strong>：机读层（Qdrant/pgvector 存结论 chunk，供语义召回）+ 人读层（Notion/Confluence/Obsidian 存一页精炼 playbook，供你和 AI 直接读）。一次推导，两种资产。</li>
+<li><strong>写入校验必做</strong>：agent 自己写记忆会引入「记忆投毒」风险（prompt injection 可污染 KB）。写回前过滤含指令/URL/代码式样的内容（mem0 的守护实践）。</li>
+<li><strong>不是所有内容都值得写回</strong>：只沉淀「可复用结论 + 链接 + 约束」，别把一次性的原始原文全灌进去，否则 KB 膨胀反而拉高检索噪声。</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="六参考来源">六、参考来源</h2><a class="sl-anchor-link" href="#六参考来源"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “六、参考来源”</span></a></div>
+<ul>
+<li>Qdrant 官网 / 特性页：<a href="https://qdrant.tech/">https://qdrant.tech/</a> 、 <a href="https://qdrant.tech/qdrant-vector-database">https://qdrant.tech/qdrant-vector-database</a></li>
+<li>pgvector README（PGXN）：<a href="https://pgxn.org/dist/vector/README.html">https://pgxn.org/dist/vector/README.html</a></li>
+<li>pgvector 2026 评测（makerstack）：<a href="https://makerstack.co/reviews/pgvector-review/">https://makerstack.co/reviews/pgvector-review/</a></li>
+<li>Obsidian 评测（toolpilot，2026-02）：<a href="https://toolpilot.dev/tools/saas/obsidian">https://toolpilot.dev/tools/saas/obsidian</a></li>
+<li>Elasticsearch 向量检索文档：<a href="https://www.elastic.co/docs/solutions/search/vector">https://www.elastic.co/docs/solutions/search/vector</a></li>
+<li>Elasticsearch 9.4 stored-vector lookup：<a href="https://www.elastic.co/search-labs/es/blog/elasticsearch-vector-search-lookup">https://www.elastic.co/search-labs/es/blog/elasticsearch-vector-search-lookup</a></li>
+<li>Notion vs Confluence 对比（2026）：<a href="https://www.mgsoftware.nl/en/vergelijking/notion-vs-confluence">https://www.mgsoftware.nl/en/vergelijking/notion-vs-confluence</a> 、 <a href="https://www.ideaplan.io/compare/notion-vs-confluence">https://www.ideaplan.io/compare/notion-vs-confluence</a></li>
+<li>MCP for RAG（aimadetools，2026-04）：<a href="https://www.aimadetools.com/blog/mcp-for-rag">https://www.aimadetools.com/blog/mcp-for-rag</a></li>
+<li>RAG with MCP 架构（mcpserverspot）：<a href="https://mcpserverspot.com/learn/use-cases/rag-applications-mcp">https://mcpserverspot.com/learn/use-cases/rag-applications-mcp</a></li>
+<li>Claude Code 子代理文档（含内联 MCP）：<a href="https://docs.anthropic.com/pt/docs/claude-code/sub-agents">https://docs.anthropic.com/pt/docs/claude-code/sub-agents</a> 、 <a href="http://code.claude.com/docs/zh-CN/sub-agents">http://code.claude.com/docs/zh-CN/sub-agents</a></li>
+<li>Claude Code 进阶（Skills/Subagents/MCP，53ai 编译）：<a href="https://www.53ai.com/news/LargeLanguageModel/2026013004176.html">https://www.53ai.com/news/LargeLanguageModel/2026013004176.html</a></li>
+<li>Codex MCP 官方文档：<a href="https://developers.openai.com/codex/mcp">https://developers.openai.com/codex/mcp</a></li>
+<li>Codex 版本更新日志（MCP tool search / 子代理）：<a href="https://developers.openai.com/codex/changelog/">https://developers.openai.com/codex/changelog/</a></li>
+<li>Codex 新增能力概览（插件/记忆/computer use）：<a href="https://openai.com/zh-Hans-CN/index/codex-for-almost-everything/">https://openai.com/zh-Hans-CN/index/codex-for-almost-everything/</a></li>
+<li>Codex MCP 接入指南（matagi）：<a href="https://matagi.ai/blog/guides/how-to-add-mcp-servers-to-codex">https://matagi.ai/blog/guides/how-to-add-mcp-servers-to-codex</a></li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="本轮新增来源第五节-write-back-loop">本轮新增来源（第五节 write-back loop）</h3><a class="sl-anchor-link" href="#本轮新增来源第五节-write-back-loop"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “本轮新增来源（第五节 write-back loop）”</span></a></div>
+<ul>
+<li>Write-back loop / Knowledge Compounding 论文解读（LinkedIn 转 arxiv 2604.11243，单一报告、含 84.6% 标称省 token 数据）：<a href="https://www.linkedin.com/posts/will-lu-9b9b972b_knowledge-compounding-an-empirical-economic-activity-7450245423711125504-jEk1">https://www.linkedin.com/posts/will-lu-9b9b972b_knowledge-compounding-an-empirical-economic-activity-7450245423711125504-jEk1</a></li>
+<li>The 2026 Token Optimization Playbook（Mem0，检索 vs 全量注入省 72%）：<a href="https://mem0.ai/blog/the-2026-token-optimization-playbook-cut-ai-agent-memory-costs-3%E2%80%934x">https://mem0.ai/blog/the-2026-token-optimization-playbook-cut-ai-agent-memory-costs-3–4x</a></li>
+<li>LLM Knowledge Base: Beyond RAG（Karpathy Raw→Compile→Lint→Query 模式，verdent）：<a href="https://www.verdent.ai/guides/llm-knowledge-base-coding-agents">https://www.verdent.ai/guides/llm-knowledge-base-coding-agents</a></li>
+<li>RAG vs Memory for AI Agents（Memori，记忆层 vs 检索层）：<a href="https://memorilabs.ai/blog/rag-vs-memory-for-ai-agents/">https://memorilabs.ai/blog/rag-vs-memory-for-ai-agents/</a></li>
+<li>Qdrant MCP（含 upsert_points 写回）：<a href="https://aerostack.dev/mcp/aerostack/mcp-qdrant">https://aerostack.dev/mcp/aerostack/mcp-qdrant</a></li>
+<li>Notion 官方 MCP Server（含 create-a-page / append-blocks 写回）：<a href="https://promptgenius.net/mcp/business-productivity/notion">https://promptgenius.net/mcp/business-productivity/notion</a></li>
+<li>Obsidian native-mcp 插件（hash 安全编辑 + 审计日志）：<a href="https://community.obsidian.md/plugins/native-mcp">https://community.obsidian.md/plugins/native-mcp</a></li>
+<li>Obsidian filesystem MCP（直接读写 .md）：<a href="https://lobehub.com/pt-BR/mcp/neveugregor-mcp-obsidian">https://lobehub.com/pt-BR/mcp/neveugregor-mcp-obsidian</a></li>
+<li>腾讯云 Agent Memory 服务（分层存储/按需加载省 token）：<a href="https://new.qq.com/rain/a/20260428A074UU00?refer=cp_1009">https://new.qq.com/rain/a/20260428A074UU00?refer=cp_1009</a></li>
+</ul> </div> <footer class="site-footer astro-73uoctsa"> <div class="wrap foot-grid astro-73uoctsa"> <p class="copyright astro-73uoctsa">&copy; 2026 LiuLuit. Notes on iOS, AI architecture, and real projects.</p> <nav class="foot-links astro-73uoctsa" aria-label="页脚导航"> <a href="/blog/" class="astro-73uoctsa">博客聚合页</a><a href="/content/release-notes/" class="astro-73uoctsa">更新记录</a><a href="https://github.com/ioswater" class="astro-73uoctsa">GitHub</a><a href="/ios-basics/swift-concurrency-basics/" class="astro-73uoctsa">iOS 基础知识</a><a href="/ai-project-architecture/rag-system-architecture/" class="astro-73uoctsa">AI 项目实战架构</a><a href="/personal-projects/liuluit-docs-evolution/" class="astro-73uoctsa">个人项目</a><a href="/profile/about-me/" class="astro-73uoctsa">个人简介</a><a href="/content/authoring-and-review/" class="astro-73uoctsa">内容发布流程</a><a href="/operations/deployment-options/" class="astro-73uoctsa">部署方案</a><a href="/operations/release-checklist/" class="astro-73uoctsa">发布清单</a> </nav> </div> </footer> </div> </div>  </main>  </div> <aside class="right-sidebar-container print:hidden astro-ik4k6pip"> <button class="toc-toggle astro-ik4k6pip" id="toc-toggle" type="button" aria-expanded="true" aria-controls="toc-body"> <span class="toc-toggle-label astro-ik4k6pip"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="astro-ik4k6pip"> <line x1="8" y1="6" x2="21" y2="6" class="astro-ik4k6pip"></line> <line x1="8" y1="12" x2="21" y2="12" class="astro-ik4k6pip"></line> <line x1="8" y1="18" x2="21" y2="18" class="astro-ik4k6pip"></line> <line x1="3" y1="6" x2="3.01" y2="6" class="astro-ik4k6pip"></line> <line x1="3" y1="12" x2="3.01" y2="12" class="astro-ik4k6pip"></line> <line x1="3" y1="18" x2="3.01" y2="18" class="astro-ik4k6pip"></line> </svg>
+本页目录
+</span> <svg class="toc-caret astro-ik4k6pip" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"> <polyline points="6 9 12 15 18 9" class="astro-ik4k6pip"></polyline> </svg> </button> <div class="right-sidebar astro-ik4k6pip"> <div class="toc-panel astro-ik4k6pip" id="toc-panel"> <div class="toc-body astro-ik4k6pip" id="toc-body"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.D3h7WmyO.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.Si0ZvO83.js"></script><div class="lg:sl-hidden astro-ipkdnmgx"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-3uzlzljp"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-3uzlzljp"><details id="starlight__mobile-toc" class="astro-3uzlzljp"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-3uzlzljp"><span class="toggle sl-flex astro-3uzlzljp">本页内容<svg aria-hidden="true" class="caret astro-3uzlzljp astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-3uzlzljp"></span></summary><div class="dropdown astro-3uzlzljp"><ul class="isMobile astro-dkgr3tcn" style="--depth: 0;"> <li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#_top" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">概述</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#一核心问题为什么查整套体系却只要很少-token" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">一、核心问题：为什么查「整套体系」却只要很少 token？</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#1-rag检索增强生成主力手段" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">1. RAG（检索增强生成）——主力手段</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#2-子代理--agent-委派上下文隔离最容易被忽略的省-token-技巧" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">2. 子代理 / Agent 委派（上下文隔离）——最容易被忽略的省 token 技巧</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#3-mcp-服务器按需取数解耦检索与消费" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">3. MCP 服务器（按需取数，解耦检索与消费）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#4-skill-文件流程编码不是数据仓库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4. Skill 文件（流程编码，不是数据仓库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#5-缓存cache" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5. 缓存（Cache）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#6-细粒度返回--重排rerank" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">6. 细粒度返回 + 重排（rerank）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#结论速记" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">结论速记</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#二六个工具横向对比" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">二、六个工具横向对比</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#速查表" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">速查表</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#1-qdrant专用向量数据库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">1. Qdrant（专用向量数据库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#2-notion云笔记--数据库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">2. Notion（云笔记 + 数据库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#3-confluence企业-wiki" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">3. Confluence（企业 Wiki）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#4-postgresql--pgvector向量扩展" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4. PostgreSQL / pgvector（向量扩展）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#5-obsidian本地-markdown-笔记" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5. Obsidian（本地 Markdown 笔记）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#6-elasticsearch搜索--分析引擎" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">6. Elasticsearch（搜索 / 分析引擎）</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#三怎么选决策建议" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">三、怎么选（决策建议）</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#针对你的逆向拆包知识库的具体建议" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">针对你的「逆向拆包知识库」的具体建议</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#四在-claude-code-与-codex-上的场景" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">四、在 Claude Code 与 Codex 上的场景</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#41-两个-agent-的底层能力对比" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.1 两个 agent 的底层能力对比</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#42-六个工具--两个-agent-的接入矩阵" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.2 六个工具 × 两个 agent 的接入矩阵</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#43-推荐落地形态以逆向拆包知识库为例" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.3 推荐落地形态（以逆向拆包知识库为例）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#44-一句话选型" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.4 一句话选型</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#五实时写入使用知识库write-back-loop以省-token" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">五、实时写入/使用知识库（write-back loop）以省 token</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#51-核心机制检索比生成便宜-1050" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.1 核心机制：检索比生成便宜 10–50×</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#52-两种写回范式关键区分" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.2 两种写回范式（关键区分）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#53-六个工具实时写入使用能力对齐" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.3 六个工具「实时写入/使用」能力对齐</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#54-在-claude-code--codex-里的写回落地" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.4 在 Claude Code / Codex 里的「写回」落地</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#55-落地建议结合你的逆向拆包" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.5 落地建议（结合你的「逆向拆包」）</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#六参考来源" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">六、参考来源</span> </a> <ul class="isMobile astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#本轮新增来源第五节-write-back-loop" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">本轮新增来源（第五节 write-back loop）</span> </a>  </li> </ul> </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-ipkdnmgx"><div class="sl-container astro-ipkdnmgx"><starlight-toc data-min-h="2" data-max-h="3" class="astro-3xdywiv3"><nav aria-labelledby="starlight__on-this-page" class="astro-3xdywiv3"><h2 id="starlight__on-this-page" class="uppercase flex gap-2 pl-6 mb-6 astro-3xdywiv3"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" class="astro-3xdywiv3"><path d="M1.375 6H10.625M1.375 2.875H10.625M1.375 9.125H5.75" stroke="#A3A3A3" stroke-linecap="round" stroke-linejoin="round" class="astro-3xdywiv3"></path></svg>本页内容</h2><ul class="astro-dkgr3tcn" style="--depth: 0;"> <li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#_top" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">概述</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#一核心问题为什么查整套体系却只要很少-token" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">一、核心问题：为什么查「整套体系」却只要很少 token？</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#1-rag检索增强生成主力手段" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">1. RAG（检索增强生成）——主力手段</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#2-子代理--agent-委派上下文隔离最容易被忽略的省-token-技巧" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">2. 子代理 / Agent 委派（上下文隔离）——最容易被忽略的省 token 技巧</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#3-mcp-服务器按需取数解耦检索与消费" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">3. MCP 服务器（按需取数，解耦检索与消费）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#4-skill-文件流程编码不是数据仓库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4. Skill 文件（流程编码，不是数据仓库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#5-缓存cache" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5. 缓存（Cache）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#6-细粒度返回--重排rerank" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">6. 细粒度返回 + 重排（rerank）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#结论速记" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">结论速记</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#二六个工具横向对比" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">二、六个工具横向对比</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#速查表" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">速查表</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#1-qdrant专用向量数据库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">1. Qdrant（专用向量数据库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#2-notion云笔记--数据库" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">2. Notion（云笔记 + 数据库）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#3-confluence企业-wiki" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">3. Confluence（企业 Wiki）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#4-postgresql--pgvector向量扩展" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4. PostgreSQL / pgvector（向量扩展）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#5-obsidian本地-markdown-笔记" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5. Obsidian（本地 Markdown 笔记）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#6-elasticsearch搜索--分析引擎" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">6. Elasticsearch（搜索 / 分析引擎）</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#三怎么选决策建议" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">三、怎么选（决策建议）</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#针对你的逆向拆包知识库的具体建议" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">针对你的「逆向拆包知识库」的具体建议</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#四在-claude-code-与-codex-上的场景" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">四、在 Claude Code 与 Codex 上的场景</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#41-两个-agent-的底层能力对比" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.1 两个 agent 的底层能力对比</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#42-六个工具--两个-agent-的接入矩阵" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.2 六个工具 × 两个 agent 的接入矩阵</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#43-推荐落地形态以逆向拆包知识库为例" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.3 推荐落地形态（以逆向拆包知识库为例）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#44-一句话选型" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">4.4 一句话选型</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#五实时写入使用知识库write-back-loop以省-token" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">五、实时写入/使用知识库（write-back loop）以省 token</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#51-核心机制检索比生成便宜-1050" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.1 核心机制：检索比生成便宜 10–50×</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#52-两种写回范式关键区分" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.2 两种写回范式（关键区分）</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#53-六个工具实时写入使用能力对齐" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.3 六个工具「实时写入/使用」能力对齐</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#54-在-claude-code--codex-里的写回落地" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.4 在 Claude Code / Codex 里的「写回」落地</span> </a>  </li><li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#55-落地建议结合你的逆向拆包" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">5.5 落地建议（结合你的「逆向拆包」）</span> </a>  </li> </ul> </li><li class="astro-dkgr3tcn" style="--depth: 0;"> <a href="#六参考来源" class="astro-dkgr3tcn" style="--depth: 0;"> <span class="astro-dkgr3tcn" style="--depth: 0;">六、参考来源</span> </a> <ul class="astro-dkgr3tcn" style="--depth: 1;"> <li class="astro-dkgr3tcn" style="--depth: 1;"> <a href="#本轮新增来源第五节-write-back-loop" class="astro-dkgr3tcn" style="--depth: 1;"> <span class="astro-dkgr3tcn" style="--depth: 1;">本轮新增来源（第五节 write-back loop）</span> </a>  </li> </ul> </li> </ul></nav></starlight-toc></div></div> </div> </div> </div> </aside> </div>  <script type="module">const t=document.querySelector(".content-container");t&&(t.style.opacity="1");</script> <script>
+  (function () {
+    var bar = null, hint = null, hintTimer = null, ticking = false;
+    function updateProgress() {
+      var docEl = document.documentElement;
+      var scrollTop = window.scrollY || docEl.scrollTop || 0;
+      var height = docEl.scrollHeight - window.innerHeight;
+      var pct = height > 0 ? Math.min(100, Math.max(0, (scrollTop / height) * 100)) : 0;
+      if (bar) bar.style.width = pct + "%";
+    }
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(function () { updateProgress(); ticking = false; });
+      }
+    }
+    function goHeading(dir) {
+      var headings = Array.prototype.slice
+        .call(document.querySelectorAll("main h2, main h3, main h4"))
+        .filter(function (h) { return h.id; });
+      if (!headings.length) return;
+      var y = window.scrollY + 80;
+      if (dir > 0) {
+        var next = headings.find(function (h) {
+          return h.getBoundingClientRect().top + window.scrollY > y + 1;
+        });
+        (next || headings[headings.length - 1]).scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        var prevs = headings.filter(function (h) {
+          return h.getBoundingClientRect().top + window.scrollY < y - 1;
+        });
+        (prevs.length ? prevs[prevs.length - 1] : headings[0]).scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+    function goArticle(sel) {
+      var a = document.querySelector(sel);
+      var href = a && a.getAttribute("href");
+      if (href) location.href = href;
+    }
+    function showHint() {
+      if (!hint) return;
+      hint.classList.remove("dismissed");
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(function () { if (hint) hint.classList.add("dismissed"); }, 6000);
+    }
+    function hideHint() { if (hint) hint.classList.add("dismissed"); }
+    function init() {
+      bar = document.querySelector(".reading-progress-fill");
+      hint = document.getElementById("kbd-hint");
+      updateProgress();
+      if (hint) {
+        hint.addEventListener("click", hideHint);
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(function () { if (hint) hint.classList.add("dismissed"); }, 6000);
+      }
+    }
+    if (!window.__readingKeyBound) {
+      window.__readingKeyBound = true;
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll);
+      document.addEventListener("keydown", function (e) {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        var t = e.target;
+        if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+        switch (e.key) {
+          case "j": e.preventDefault(); goHeading(1); break;
+          case "k": e.preventDefault(); goHeading(-1); break;
+          case "[": e.preventDefault(); goArticle('a[rel="prev"]'); break;
+          case "]": e.preventDefault(); goArticle('a[rel="next"]'); break;
+          case "?": e.preventDefault(); (hint && hint.classList.contains("dismissed")) ? showHint() : hideHint(); break;
+        }
+      });
+    }
+    document.addEventListener("astro:page-load", init);
+    init();
+  })();
+</script> <script>
+  (function () {
+    // 目录抽屉：恢复上次状态，避免首屏闪烁
+    try {
+      var cc = document.querySelector(".content-container");
+      if (cc && localStorage.getItem("toc-collapsed") === "true") {
+        cc.classList.add("toc-collapsed");
+      }
+    } catch (e) {}
+
+    function initToc() {
+      var cc = document.querySelector(".content-container");
+      var btn = document.getElementById("toc-toggle");
+      if (!cc || !btn || btn.__tocBound) return;
+      btn.__tocBound = true;
+      btn.setAttribute("aria-expanded", String(!cc.classList.contains("toc-collapsed")));
+      btn.addEventListener("click", function () {
+        var collapsed = cc.classList.toggle("toc-collapsed");
+        btn.setAttribute("aria-expanded", String(!collapsed));
+        try {
+          localStorage.setItem("toc-collapsed", collapsed ? "true" : "false");
+        } catch (e) {}
+      });
+    }
+
+    document.addEventListener("astro:page-load", initToc);
+    initToc();
+  })();
+</script>  </div> </div>  </div> </body></html>
