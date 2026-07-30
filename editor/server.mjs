@@ -170,13 +170,111 @@ function buildTree() {
   return { categories: [...publicCats, ...internalCats] };
 }
 
+/* ---------- 跨栏目移动 + 链接修正 + 落地页同步 ---------- */
+function listDocFiles() {
+  const out = [];
+  (function walk(dir, rel) {
+    for (const f of fs.readdirSync(dir)) {
+      const full = path.join(dir, f);
+      const st = fs.statSync(full);
+      if (st.isDirectory()) walk(full, path.join(rel, f));
+      else if (/\.mdx?$/.test(f)) out.push({ abs: full, rel: path.join(rel, f) });
+    }
+  })(DOCS, '');
+  return out;
+}
+
+// 把 markdown 链接 target 解析为真实文档绝对路径（兼容 ./x/ 、x.md、/dir/x/；本项目文章均为平铺 .md）
+// 注意：不依赖目标文件当前是否存在（移动后源文件已 relocate，但仍需据此改写链接）
+function linkTargetToDocPath(fromDirRel, target) {
+  const t = String(target).split('#')[0].split('?')[0];
+  if (!t) return null;
+  let abs;
+  if (t.startsWith('/')) abs = path.resolve(DOCS, '.' + t);
+  else abs = path.resolve(path.join(DOCS, fromDirRel), t);
+  abs = abs.replace(/\/$/, '');
+  if (/\.mdx?$/.test(abs)) return path.resolve(abs);
+  return path.resolve(abs + '.md');
+}
+
+// 从引用文件目录生成指向目标文档的相对链接（保留原 target 的 / 或 .md 风格；正确处理 ../ 跨目录）
+function docPathToLink(fromFileAbs, targetDocAbs, originalTarget) {
+  const fromDir = path.dirname(fromFileAbs);
+  const rel = path.relative(fromDir, targetDocAbs).split(path.sep).join('/');
+  const stem = rel.replace(/\.mdx?$/, '');
+  const withDot = stem.startsWith('.') ? stem : './' + stem;
+  if (originalTarget.endsWith('/')) return withDot + '/';
+  if (/\.mdx?$/.test(originalTarget)) return stem + path.extname(targetDocAbs);
+  return withDot + '/';
+}
+
+// 重写单个文件里所有指向 oldDocAbs 的链接为 newDocAbs
+function rewriteLinksInFile(fileAbs, oldDocAbs, newDocAbs) {
+  const raw = fs.readFileSync(fileAbs, 'utf8');
+  const LINK_RE = /(!?\[[^\]]*\]\()([^)\s]+)([^)]*\))/g;
+  let changed = false;
+  const out = raw.replace(LINK_RE, (m, open, target, close) => {
+    if (/^(https?:|mailto:|#|\/\w)/.test(target)) return m; // 外部/锚点/static 不处理
+    const fromDirRel = path.relative(DOCS, path.dirname(fileAbs));
+    const docPath = linkTargetToDocPath(fromDirRel, target);
+    if (!docPath || docPath !== oldDocAbs) return m;
+    changed = true;
+    return open + docPathToLink(fileAbs, newDocAbs, target) + close;
+  });
+  if (changed) fs.writeFileSync(fileAbs, out);
+  return changed;
+}
+
+// 在已有 index.md 中找到「本栏目文章」标题，重建其下列表；找不到返回 null
+function regenerateLandingList(raw, listBlock) {
+  const lines = raw.split(/\r?\n/);
+  let h = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^##\s+.*本栏目文章/.test(lines[i])) { h = i; break; }
+  }
+  if (h < 0) return null;
+  let nxt = lines.length;
+  for (let i = h + 1; i < lines.length; i++) {
+    if (/^##\s/.test(lines[i])) { nxt = i; break; }
+  }
+  return [...lines.slice(0, h + 1), '', listBlock, '', ...lines.slice(nxt)].join('\n');
+}
+
+// 根据编辑器中各栏目的文章顺序（landingMap）重建落地页「本栏目文章」列表
+// landingMap: { dir: [{title, slug, id}, ...] }（顺序即编辑器树中的排列）
+function syncLandingPages(publicGroups, landingMap) {
+  const synced = [];
+  for (const g of publicGroups) {
+    if (!g.autogenerate) continue;
+    const dir = g.autogenerate.directory;
+    const indexFile = path.join(DOCS, dir, 'index.md');
+    const ordered = (landingMap && landingMap[dir]) || scanDir(dir).map((a) => ({ title: a.title, slug: a.slug, id: a.id }));
+    const listBlock = ordered.map((a) => `- [${a.title}](./${a.slug || a.id}/)`).join('\n');
+    if (!fs.existsSync(indexFile)) {
+      const data = { title: g.label, description: g.description || `「${g.label}」栏目的文章列表。` };
+      const body = `\n关于「${g.label}」的内容。\n\n## 本栏目文章\n\n${listBlock}\n`;
+      fs.writeFileSync(indexFile, stringifyFrontmatter(data, body));
+      synced.push(dir + ' (新建落地页)');
+      continue;
+    }
+    const raw = fs.readFileSync(indexFile, 'utf8');
+    const content = regenerateLandingList(raw, listBlock);
+    if (content === null) continue;
+    if (content === raw) continue; // 无变化则不写，避免无谓 churn
+    backup(indexFile);
+    fs.writeFileSync(indexFile, content);
+    synced.push(dir);
+  }
+  return synced;
+}
+
 /* ---------- 应用变更 ---------- */
 function backup(file) {
   if (fs.existsSync(file)) fs.copyFileSync(file, file + '.bak');
 }
 
 function applyChanges(p) {
-  const summary = { created: [], updated: [], deleted: [], categoryDeleted: [], sidebarChanged: false };
+  const summary = { created: [], updated: [], deleted: [], categoryDeleted: [], moved: [], moveSkipped: [], landingSynced: [], sidebarChanged: false };
   backup(SIDEBAR);
   backup(INTERNAL);
 
@@ -201,6 +299,35 @@ function applyChanges(p) {
       fs.writeFileSync(indexFile, stringifyFrontmatter(data, `\n本栏目文章正在整理中。\n`));
     }
     summary.created.push(path.join(dir, 'index.md'));
+  }
+
+  // 跨栏目移动（重定位 md + en 镜像，并重写所有指向它的链接）
+  const moveMap = {};
+  for (const mv of p.moves || []) moveMap[mv.oldFile] = mv.newFile;
+  for (const mv of p.moves || []) {
+    const oldAbs = path.join(DOCS, mv.oldFile);
+    const newAbs = path.join(DOCS, mv.newFile);
+    if (!fs.existsSync(oldAbs)) { summary.moveSkipped.push(mv.oldFile); continue; }
+    fs.mkdirSync(path.dirname(newAbs), { recursive: true });
+    fs.renameSync(oldAbs, newAbs);
+    const oldEn = path.join(DOCS, 'en', mv.oldFile);
+    const newEn = path.join(DOCS, 'en', mv.newFile);
+    const hadEn = fs.existsSync(oldEn);
+    if (hadEn) { fs.mkdirSync(path.dirname(newEn), { recursive: true }); fs.renameSync(oldEn, newEn); }
+    if (typeof mv.order === 'number') {
+      const { data, content } = parseFrontmatter(fs.readFileSync(newAbs, 'utf8'));
+      data.order = mv.order;
+      fs.writeFileSync(newAbs, stringifyFrontmatter(data, content));
+    }
+    const oldDocAbs = path.resolve(oldAbs);
+    const newDocAbs = path.resolve(newAbs);
+    const oldEnAbs = path.resolve(oldEn);
+    const newEnAbs = path.resolve(newEn);
+    for (const f of listDocFiles()) {
+      rewriteLinksInFile(f.abs, oldDocAbs, newDocAbs);
+      if (hadEn) rewriteLinksInFile(f.abs, oldEnAbs, newEnAbs);
+    }
+    summary.moved.push(`${mv.oldFile} → ${mv.newFile}`);
   }
 
   // 字段更新（含因排序产生的 order 变更）
@@ -237,12 +364,13 @@ function applyChanges(p) {
     summary.created.push(path.join(dir, fname));
   }
 
-  // 删除文章
+  // 删除文章（若曾被移动，则按移动后的实际路径删除）
   for (const file of p.deleted || []) {
-    const full = path.join(DOCS, file);
+    const f = moveMap[file] || file;
+    const full = path.join(DOCS, f);
     if (fs.existsSync(full)) {
       fs.rmSync(full, { force: true });
-      summary.deleted.push(file);
+      summary.deleted.push(f);
     }
   }
   // 删除栏目（目录）
@@ -252,6 +380,10 @@ function applyChanges(p) {
       fs.rmSync(full, { recursive: true, force: true });
       summary.categoryDeleted.push(dir);
     }
+  }
+  // 同步落地页「本栏目文章」列表（顺序跟随编辑器树，仅公开 autogenerate 栏目）
+  if (p.publicGroups) {
+    summary.landingSynced = syncLandingPages(p.publicGroups, p.landing);
   }
   return summary;
 }

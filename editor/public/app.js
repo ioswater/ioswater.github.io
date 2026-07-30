@@ -8,6 +8,7 @@ const state = {
   newArticles: [], // {dir,title,description,filename?,body?,_new:true}
   deleted: [], // files
   deletedCategories: [], // dirs
+  moves: [], // {oldFile, newFile, from, to, order}
   staged: [], // staged import/article ids for display
 };
 
@@ -24,6 +25,8 @@ async function load() {
   state.newArticles = [];
   state.deleted = [];
   state.deletedCategories = [];
+  state.moves = [];
+  state.tree.forEach((c) => c.articles.forEach((a) => { a._curFile = a.file; }));
   state.selected = null;
   renderTree();
   renderFormEmpty();
@@ -88,16 +91,32 @@ function renderTree() {
     });
     head.addEventListener('dragend', () => head.classList.remove('dragging'));
     head.addEventListener('dragover', (e) => {
-      if (dragData && dragData.kind === 'cat') e.preventDefault();
+      if (!dragData) return;
+      if (dragData.kind === 'cat' || (dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal)) e.preventDefault();
     });
+    head.addEventListener('dragenter', () => {
+      if (dragData && dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal) head.classList.add('drop-target');
+    });
+    head.addEventListener('dragleave', () => head.classList.remove('drop-target'));
     head.addEventListener('drop', (e) => {
       e.preventDefault();
-      if (dragData && dragData.kind === 'cat') moveCat(dragData.id, cat.id);
+      head.classList.remove('drop-target');
+      if (!dragData) return;
+      if (dragData.kind === 'cat') moveCat(dragData.id, cat.id);
+      else if (dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal) moveArtCross(dragData.catId, dragData.artId, cat.id);
     });
     catEl.appendChild(head);
 
     const list = document.createElement('div');
     list.className = 'articles' + (cat._collapsed ? ' hidden' : '');
+    // 拖到文章列表区域 = 跨栏目移动（目标为该栏目末尾）
+    list.addEventListener('dragover', (e) => {
+      if (dragData && dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal) e.preventDefault();
+    });
+    list.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (dragData && dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal) moveArtCross(dragData.catId, dragData.artId, cat.id);
+    });
     cat.articles.forEach((art) => {
       if (q && !art.title.toLowerCase().includes(q)) return;
       const row = document.createElement('div');
@@ -119,12 +138,14 @@ function renderTree() {
         });
         row.addEventListener('dragend', () => row.classList.remove('dragging'));
         row.addEventListener('dragover', (e) => {
-          if (dragData && dragData.kind === 'art' && dragData.catId === cat.id) e.preventDefault();
+          if (dragData && dragData.kind === 'art' && !cat.internal) e.preventDefault();
         });
         row.addEventListener('drop', (e) => {
           e.preventDefault();
-          if (dragData && dragData.kind === 'art' && dragData.catId === cat.id)
-            moveArt(dragData.catId, dragData.artId, art.id);
+          if (!dragData) return;
+          if (dragData.kind === 'art' && dragData.catId === cat.id) moveArt(dragData.catId, dragData.artId, art.id);
+          else if (dragData.kind === 'art' && dragData.catId !== cat.id && !cat.internal)
+            moveArtCross(dragData.catId, dragData.artId, cat.id);
         });
       }
       list.appendChild(row);
@@ -168,6 +189,37 @@ function moveArt(catId, fromId, toId) {
   cat.articles.splice(to, 0, item);
   renderTree();
   if (state.selected?.kind === 'article') renderPreview();
+}
+function moveArtCross(fromCatId, artId, toCatId) {
+  if (fromCatId === toCatId) return;
+  const fromCat = findCat(fromCatId);
+  const toCat = findCat(toCatId);
+  if (!fromCat || !toCat || toCat.readOnly || toCat.internal) return;
+  const idx = fromCat.articles.findIndex((a) => a.id === artId);
+  if (idx < 0) return;
+  const art = fromCat.articles[idx];
+  if (art.readOnly) return;
+  const stem = art.id;
+  const curFile = art._curFile || art.file;
+  const newFile = toCat.dir + '/' + stem + '.md';
+  // 链式移动：若已存在以 curFile 为目标的移动，则只更新其目标，避免重复移动
+  const existing = state.moves.find((m) => m.newFile === curFile);
+  if (existing) {
+    existing.newFile = newFile;
+    existing.to = toCat.dir;
+    existing.order = toCat.articles.length + 1;
+  } else {
+    state.moves.push({ oldFile: curFile, newFile, from: fromCat.dir, to: toCat.dir, order: toCat.articles.length + 1 });
+  }
+  fromCat.articles.splice(idx, 1);
+  toCat.articles.push(art);
+  art._curFile = newFile;
+  if (state.selected?.kind === 'article' && state.selected.catId === fromCatId && state.selected.artId === artId) {
+    state.selected.catId = toCatId;
+  }
+  renderTree();
+  renderPreview();
+  toast(`《${art.title}》已移至「${toCat.label}」（应用变更后生效）`);
 }
 
 /* ---------------- 选择 ---------------- */
@@ -459,6 +511,8 @@ function computeChanges() {
   if (editCount) items.push(['update', `文章元数据修改 ×${editCount}`]);
   // 新增
   if (state.newArticles.length) items.push(['create', `新增文章 ×${state.newArticles.length}`]);
+  // 跨栏目移动
+  if (state.moves.length) items.push(['move', `跨栏目移动 ×${state.moves.length}`]);
   // 删除
   if (state.deleted.length) items.push(['delete', `删除文章 ×${state.deleted.length}`]);
   if (state.deletedCategories.length) items.push(['delete', `删除栏目 ×${state.deletedCategories.length}`]);
@@ -479,28 +533,42 @@ function openApply() {
   $('#modal').classList.remove('hidden');
 }
 function tagText(t) {
-  return { create: '新增', update: '修改', delete: '删除', order: '排序', sidebar: '导航' }[t] || t;
+  return { create: '新增', update: '修改', delete: '删除', order: '排序', sidebar: '导航', move: '移动' }[t] || t;
 }
 
 async function confirmApply() {
   const pub = state.tree.filter((c) => c.public);
   const pubInit = state.initial.filter((c) => c.public);
   const intNow = state.tree.filter((c) => c.internal);
-  // 注入因排序产生的 order
-  const edits = JSON.parse(JSON.stringify(state.edits));
+  // 跨栏目移动：建立 oldFile→newFile 映射，edits 与 order 注入均按移动后的实际路径
+  const moveMap = {};
+  state.moves.forEach((m) => (moveMap[m.oldFile] = m.newFile));
+  const edits = {};
+  for (const [k, v] of Object.entries(state.edits)) edits[moveMap[k] || k] = v;
+  // 注入因排序产生的 order（使用移动后的实际路径）
   pub.filter((c) => c.type === 'autogenerate').forEach((cat) => {
     cat.articles.forEach((art, i) => {
       if (art.readOnly) return;
+      const f = moveMap[art.file] || art.file;
       if (art.order !== i + 1) {
-        edits[art.file] = edits[art.file] || {};
-        edits[art.file].order = i + 1;
+        edits[f] = edits[f] || {};
+        edits[f].order = i + 1;
       }
     });
+  });
+  // 落地页「本栏目文章」顺序 = 编辑器树中各栏目文章的实际排列（用户拖拽顺序）
+  const landing = {};
+  pub.filter((c) => c.type === 'autogenerate' && c.dir).forEach((cat) => {
+    landing[cat.dir] = cat.articles
+      .filter((a) => !a.readOnly)
+      .map((a) => ({ title: a.title, slug: a.slug || null, id: a.id }));
   });
   const payload = {
     publicGroups: pub.map((c) => c._raw),
     internalGroups: intNow.map((c) => c._raw),
     edits,
+    moves: state.moves,
+    landing,
     newArticles: state.newArticles.map((n) => ({ dir: n.dir, title: n.title, description: n.description, filename: n.filename, body: n.body })),
     deleted: state.deleted,
     deletedCategories: state.deletedCategories,
@@ -515,7 +583,9 @@ async function confirmApply() {
   const dep = await d.json();
   const log = $('#deploy-log');
   log.classList.remove('hidden');
-  log.textContent = (dep.ok ? '✅ 部署成功\n' : '⚠️ 部署异常（见日志）\n') + dep.log;
+  const moved = sum.moved && sum.moved.length ? '移动:\n  ' + sum.moved.join('\n  ') + '\n' : '';
+  const land = sum.landingSynced && sum.landingSynced.length ? '落地页同步: ' + sum.landingSynced.join(', ') + '\n' : '';
+  log.textContent = (dep.ok ? '✅ 部署成功\n' : '⚠️ 部署异常\n') + moved + land + dep.log;
   $('#btn-confirm').disabled = false;
   $('#btn-confirm').textContent = '确认并部署上线';
   if (dep.ok) {
