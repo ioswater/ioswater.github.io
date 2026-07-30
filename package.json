@@ -12,6 +12,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "deploy:github-pages": "bash ./scripts/deploy-github-pages.sh",
+    "editor": "node editor/server.mjs",
     "deploy:cf-workers": "npm run build && wrangler deploy",
     "preview:cf-workers": "npm run build && wrangler dev"
   },

@@ -19,3 +19,6 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# 内容编辑器运行时备份（apply 时自动生成）
+*.bak

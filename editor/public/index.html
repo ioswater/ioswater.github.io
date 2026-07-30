@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>liuluit 内容编辑器</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">📐</span>
+        <span>liuluit <b>内容编辑器</b></span>
+      </div>
+      <div class="top-actions">
+        <input id="search" class="search" type="search" placeholder="搜索文章 / 栏目…" />
+        <button id="btn-new-article" class="btn">＋ 文章</button>
+        <button id="btn-new-cat" class="btn">＋ 栏目</button>
+        <button id="btn-theme" class="btn ghost" title="切换主题">🌙</button>
+        <button id="btn-apply" class="btn primary">应用变更</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- 左：栏目树 -->
+      <section class="col col-tree">
+        <div id="import-zone" class="import-zone">
+          拖入 .md 文件到此 → 导入为「待加入」文章
+        </div>
+        <div id="tree" class="tree"></div>
+      </section>
+
+      <!-- 中：元数据表单 -->
+      <section class="col col-form">
+        <div id="form" class="form empty">从左侧选择文章或栏目进行编辑</div>
+      </section>
+
+      <!-- 右：预览 + 校验 -->
+      <section class="col col-preview">
+        <div class="preview-block">
+          <div class="preview-head">
+            <span>frontmatter 预览</span>
+            <span id="en-badge" class="badge en">EN</span>
+          </div>
+          <pre id="fm-preview" class="code">---</pre>
+        </div>
+        <div class="preview-block">
+          <div class="preview-head"><span>校验</span></div>
+          <ul id="validation" class="validation"></ul>
+        </div>
+        <div class="preview-block">
+          <div class="preview-head"><span>sidebar.json / editor-internal.json</span></div>
+          <pre id="sb-preview" class="code">{}</pre>
+        </div>
+      </section>
+    </main>
+
+    <!-- 应用变更弹框 -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <h2>应用变更</h2>
+        <p class="muted">以下变更将在确认后写入本地文件，并提交 + 部署到线上。</p>
+        <div id="change-list" class="change-list"></div>
+        <div class="modal-actions">
+          <button id="btn-cancel" class="btn ghost">取消</button>
+          <button id="btn-confirm" class="btn primary">确认并部署上线</button>
+        </div>
+        <pre id="deploy-log" class="code hidden"></pre>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
