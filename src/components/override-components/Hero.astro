@@ -313,6 +313,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .tag {
     font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted);
     background: var(--surface-2); border: 1px solid var(--border); padding: 0.3rem 0.7rem; border-radius: var(--r-full);
+    flex: 0 0 auto; width: fit-content; max-width: 100%;
   }
 
   /* ---- code-card frame (dark panel + gradient hairline + corner glow) ---- */
@@ -443,7 +444,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .post h3 a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
   .post p { font-size: var(--fs-sm); color: var(--text-muted); margin-bottom: var(--space-3); line-height: 1.6; }
   .post .row { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
-  .chip { font-size: var(--fs-xs); color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); padding: 0.2rem 0.6rem; border-radius: var(--r-full); }
+  .chip { font-size: var(--fs-xs); color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); padding: 0.2rem 0.6rem; border-radius: var(--r-full); flex: 0 0 auto; width: fit-content; max-width: 100%; }
   .read { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); }
 
   .toc { position: sticky; top: 92px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--space-5); scroll-margin-top: 5.5rem; }

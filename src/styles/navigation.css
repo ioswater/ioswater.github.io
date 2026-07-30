@@ -5,6 +5,7 @@
 
 .brand-wrap {
   @apply flex items-center gap-2;
+  line-height: 1;
 }
 
 .navbar-brand {
@@ -38,6 +39,9 @@
 }
 
 .brand-dot {
+  display: inline-flex;
+  align-self: center;
+  flex: 0 0 auto;
   width: 8px;
   height: 8px;
   border-radius: 999px;

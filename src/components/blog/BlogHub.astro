@@ -102,6 +102,12 @@ const categories = categoryOrder.map((key) => ({
     <aside class="hub-tree">
       <h2>{labels.hierarchy}</h2>
       <ul>
+        <li>
+          <button class="tree-filter is-all" data-category="" aria-pressed="true">
+            <span>{labels.all}</span>
+            <em>{posts.length}</em>
+          </button>
+        </li>
         {categories.map((c) => (
           <li>
             <button class="tree-filter" data-category={c.key}>
@@ -156,12 +162,17 @@ const categories = categoryOrder.map((key) => ({
   } else {
     const parse = (v: string): number | null => (v ? new Date(v).getTime() : null);
 
+    const allBtn = document.querySelector<HTMLButtonElement>(".tree-filter.is-all");
     const syncTreeState = (currentCategory: string) => {
       treeButtons.forEach((btn) => {
         const isActive = currentCategory !== "" && btn.dataset.category === currentCategory;
         btn.classList.toggle("active", isActive);
         btn.setAttribute("aria-pressed", String(isActive));
       });
+      if (allBtn) {
+        allBtn.classList.toggle("active", currentCategory === "");
+        allBtn.setAttribute("aria-pressed", String(currentCategory === ""));
+      }
     };
 
     const render = () => {
@@ -395,15 +406,17 @@ const categories = categoryOrder.map((key) => ({
 
   .blog-list {
     display: grid;
-    gap: 0.8rem;
+    gap: 1.05rem;
   }
 
   .post-card {
+    position: relative;
     border: 1px solid var(--sl-color-hairline);
+    border-left: 3px solid color-mix(in srgb, var(--sl-color-accent) 55%, transparent);
     border-radius: 14px;
-    padding: 1rem;
-    background: color-mix(in srgb, var(--sl-color-gray-6) 18%, transparent);
-    backdrop-filter: blur(8px);
+    padding: 1.1rem 1.2rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 20%, transparent);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--sl-color-black) 40%, transparent);
     transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
     animation: card-rise 0.42s ease-out both;
     animation-delay: calc(var(--idx, 0) * 0.04s);
@@ -411,8 +424,9 @@ const categories = categoryOrder.map((key) => ({
 
   .post-card:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--sl-color-accent) 38%, transparent);
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--sl-color-accent) 40%, transparent);
+    border-left-color: var(--sl-color-accent);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
   }
 
   .post-head {

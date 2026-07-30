@@ -11,7 +11,6 @@ const { posts = [], locale = "zh-CN" } = Astro.props as {
 
 const isEn = locale === "en";
 const homeLink = isEn ? "/en/" : "/";
-const langSwitchLink = isEn ? "/blog/" : "/en/blog/";
 
 const copy = isEn
   ? {
@@ -57,7 +56,6 @@ const copy = isEn
 
       <div class="blog-header-actions">
         <a class="btn btn-secondary" href={homeLink}>{copy.backDocs}</a>
-        <a class="blog-lang-switch" href={langSwitchLink}>{copy.switchLang}</a>
         <ThemeSwitch />
       </div>
     </div>

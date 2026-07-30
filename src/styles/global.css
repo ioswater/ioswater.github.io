@@ -293,24 +293,21 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.4rem;
     position: fixed;
-    top: calc(var(--sl-nav-height, 3.5rem) + 0.4rem);
+    top: calc(var(--sl-nav-height, 3.5rem) + 0.9rem);
     right: 1.25rem;
     z-index: calc(var(--sl-z-index-navbar, 60) + 5);
-    width: auto;
-    padding: 0.4rem 0.7rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
     border: 1px solid var(--sl-color-hairline);
     border-radius: 999px;
     background: color-mix(in srgb, var(--sl-color-bg) 82%, transparent);
     backdrop-filter: blur(8px);
     color: var(--sl-color-white);
-    font-size: var(--sl-text-sm);
-    font-weight: 600;
     cursor: pointer;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
-      width 0.25s ease, height 0.25s ease, padding 0.25s ease, top 0.25s ease,
-      right 0.25s ease;
+      transform 0.2s ease, box-shadow 0.2s ease;
   }
   :root[data-theme="light"] .toc-toggle {
     color: var(--sl-color-black);
@@ -331,22 +328,12 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
   }
 
   .content-container.toc-collapsed .toc-caret {
-    /* 反向：指向左侧，明确示意「可向左展开抽屉」 */
-    transform: rotate(90deg);
+    /* 反向：箭头向上，明确示意「已展开 / 可收起」 */
+    transform: rotate(180deg);
   }
 
-  /* 收起态：toggle 变为紧凑圆形箭头按钮，隐藏列表图标与「本页目录」文字 */
-  .content-container.toc-collapsed .toc-toggle-label {
-    display: none;
-  }
+  /* 收起态：保持圆形箭头按钮不变位，仅以呼吸动效提示可点击重新展开 */
   .content-container.toc-collapsed .toc-toggle {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    gap: 0;
-    /* 下移并微调右距，离开最顶部，视觉更平衡 */
-    top: calc(var(--sl-nav-height, 3.5rem) + 1.5rem);
-    right: 1rem;
     animation: toc-pulse 1.8s ease-out infinite;
   }
 
