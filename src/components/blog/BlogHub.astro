@@ -34,7 +34,7 @@ const labels = isEn
       all: "All categories"
     }
   : {
-      title: "博客聚合页",
+      title: "技术博客",
       subtitle: "按左侧分类浏览全部技术笔记，或浏览最新发布。",
       search: "搜索标题或摘要",
       category: "分类",
@@ -117,6 +117,12 @@ const categories = categoryOrder.map((key) => ({
   const posts = JSON.parse(document.getElementById("blog-posts-data")?.textContent || "[]") as BlogPostClient[];
   const labels = JSON.parse(document.getElementById("blog-labels-data")?.textContent || "{}") as BlogLabels;
 
+  const formatDate = (iso: string): string => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    if (!m) return iso || "";
+    return `${m[2]}·${m[3]}`;
+  };
+
   const listEl = document.getElementById("blog-list") as HTMLDivElement | null;
   const treeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".tree-filter"));
 
@@ -154,13 +160,15 @@ const categories = categoryOrder.map((key) => ({
         .map(
           (p: BlogPostClient, index: number) => `
           <article class=\"post-card\" style=\"--idx:${index};\">
-            <div class=\"post-head\">
-              <span class=\"post-cat\">${p.categoryLabel}</span>
-              <time datetime=\"${p.date}\">${p.date}</time>
+            <span class=\"post-date\">${formatDate(p.date)}</span>
+            <div class=\"post-body\">
+              <h3><a href=\"${p.url}\">${p.title}</a></h3>
+              <p>${p.description || ""}</p>
+              <div class=\"post-meta\">
+                <span class=\"post-chip\">${p.categoryLabel}</span>
+                <a class=\"post-read\" href=\"${p.url}\">${labels.read} →</a>
+              </div>
             </div>
-            <h3>${p.title}</h3>
-            <p>${p.description || ""}</p>
-            <a href=\"${p.url}\">${labels.read}</a>
           </article>
         `
         )
@@ -205,69 +213,6 @@ const categories = categoryOrder.map((key) => ({
     margin: 0.6rem 0 0;
     max-width: 60ch;
     color: var(--sl-color-gray-3);
-  }
-
-  .hub-stats {
-    display: grid;
-    gap: 0.6rem;
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-  }
-
-  .hub-stats div {
-    padding: 0.8rem;
-    border: 1px solid var(--sl-color-hairline);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--sl-color-gray-6) 16%, transparent);
-  }
-
-  .hub-stats span {
-    display: block;
-    color: var(--sl-color-gray-3);
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .hub-stats strong {
-    display: block;
-    margin-top: 0.3rem;
-    font-size: 1rem;
-  }
-
-  .hub-controls {
-    display: grid;
-    grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)) auto;
-    gap: 0.55rem;
-    margin-bottom: 1rem;
-    animation: hub-rise 0.54s ease-out both;
-  }
-
-  .hub-controls input,
-  .hub-controls select,
-  .hub-controls button {
-    border: 1px solid var(--sl-color-hairline);
-    background: color-mix(in srgb, var(--sl-color-black) 84%, transparent);
-    color: var(--sl-color-white);
-    border-radius: 10px;
-    padding: 0.55rem 0.7rem;
-    font: inherit;
-  }
-
-  .hub-controls button {
-    cursor: pointer;
-  }
-
-  .hub-controls input:focus,
-  .hub-controls select:focus,
-  .hub-controls button:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--sl-color-accent) 62%, transparent);
-    outline-offset: 2px;
-    border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
-  }
-
-  .hub-controls button:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--sl-color-accent) 44%, transparent);
   }
 
   .hub-layout {
@@ -333,91 +278,85 @@ const categories = categoryOrder.map((key) => ({
     opacity: 0.72;
   }
 
-  .result-meta {
-    margin-bottom: 0.7rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.9rem;
-  }
-
   .blog-list {
     display: block;
   }
 
+  /* —— 信息流：对齐首页“精选文章”分割线列表 —— */
   .post-card {
     position: relative;
-    border-top: 1px solid color-mix(in srgb, var(--sl-color-white) 20%, transparent);
-    padding: 1.1rem 1.2rem;
-    transition: background-color 0.22s ease;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--sl-color-hairline);
+    transition: padding-left 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     animation: card-rise 0.42s ease-out both;
     animation-delay: calc(var(--idx, 0) * 0.04s);
   }
   .post-card:first-child { border-top: none; }
-  .post-card::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: var(--sl-color-accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.22s ease;
-  }
-  .post-card:hover {
-    background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
-  }
-  .post-card:hover::before { transform: scaleX(1); }
-  .post-card:hover h3 { color: var(--sl-color-accent); }
+  .post-card:hover { padding-left: 0.75rem; }
 
-  .post-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  .post-cat {
+  .post-date {
+    font-family: var(--sl-font-mono, ui-monospace, monospace);
     font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     color: var(--sl-color-gray-3);
-  }
-
-  .post-card time {
-    color: var(--sl-color-gray-3);
-    font-size: 0.83rem;
+    padding-top: 4px;
+    white-space: nowrap;
   }
 
   .post-card h3 {
-    margin: 0;
+    margin: 0 0 0.5rem;
     font-size: 1.15rem;
+    transition: color 0.22s ease;
   }
+  .post-card h3 a {
+    color: var(--sl-color-white);
+    text-decoration: none;
+  }
+  .post-card h3 a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .post-card:hover h3 a { color: var(--sl-color-accent); }
+  .post-card h3 a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 3px; border-radius: 2px; }
 
   .post-card p {
-    margin: 0.55rem 0;
+    margin: 0 0 0.55rem;
     color: var(--sl-color-gray-3);
+    font-size: 0.9rem;
+    line-height: 1.6;
   }
 
-  .post-card a {
-    text-decoration: none;
+  .post-meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .post-chip {
+    font-size: 0.75rem;
+    color: var(--sl-color-gray-3);
+    background: color-mix(in srgb, var(--sl-color-white) 7%, transparent);
+    border: 1px solid var(--sl-color-hairline);
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+  }
+  .post-read {
+    font-family: var(--sl-font-mono, ui-monospace, monospace);
+    font-size: 0.78rem;
     color: var(--sl-color-accent);
+    text-decoration: none;
     font-weight: 600;
   }
+  .post-read:hover { text-decoration: underline; }
 
   .empty {
     border: 1px dashed var(--sl-color-hairline);
     border-radius: 12px;
     padding: 1.2rem;
     color: var(--sl-color-gray-3);
-  }
-
-  :root[data-theme="light"] .hub-controls input,
-  :root[data-theme="light"] .hub-controls select,
-  :root[data-theme="light"] .hub-controls button {
-    background: color-mix(in srgb, var(--sl-color-white) 88%, transparent);
-    color: var(--sl-color-black);
   }
 
   @keyframes hub-rise {
@@ -443,10 +382,6 @@ const categories = categoryOrder.map((key) => ({
   }
 
   @media (max-width: 980px) {
-    .hub-controls {
-      grid-template-columns: 1fr 1fr;
-    }
-
     .hub-layout {
       grid-template-columns: 1fr;
     }
@@ -458,14 +393,12 @@ const categories = categoryOrder.map((key) => ({
 
   @media (prefers-reduced-motion: reduce) {
     .hub-header,
-    .hub-controls,
     .post-card {
       animation: none;
     }
 
     .tree-filter,
-    .post-card,
-    .hub-controls button {
+    .post-card {
       transition: none;
     }
   }

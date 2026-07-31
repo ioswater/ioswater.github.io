@@ -177,3 +177,22 @@ body {
 }
 .toast.hidden { display: none; }
 .hidden { display: none; }
+
+/* ===== 与线上站点同步的 markdown/callout 渲染样式（预览区渲染正文时使用） ===== */
+.md-preview { color: var(--text); line-height: 1.7; }
+.md-preview table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 1.2rem 0; }
+.md-preview thead th { background: rgba(34,211,238,.14); color: var(--primary); text-align: left; font-weight: 600; }
+.md-preview th, .md-preview td { border: 1px solid var(--border); padding: .55rem .85rem; vertical-align: top; }
+.md-preview tbody tr:nth-child(even) { background: rgba(255,255,255,.03); }
+.md-preview strong { color: var(--primary); font-weight: 700; }
+.md-preview em { color: var(--primary); font-style: italic; }
+.md-preview mark { background: rgba(34,211,238,.22); color: var(--text); padding: .05em .35em; border-radius: 5px; }
+.md-preview blockquote { margin: 1.2rem 0; padding: .55rem 1rem; border-left: 3px solid var(--primary); background: rgba(34,211,238,.08); border-radius: 0 10px 10px 0; color: var(--muted); }
+.md-preview :not(pre) > code { background: var(--bg-3); border: 1px solid var(--border); padding: .1em .4em; border-radius: 6px; font-size: .88em; }
+/* callout（与 rehype-callouts 品牌化一致） */
+.md-preview .callout { border-left: .25em solid var(--primary); border-radius: 0 10px 10px 0; padding: .6rem 1rem; margin: 1.2rem 0; background: rgba(34,211,238,.08); }
+.md-preview .callout-title { display: flex; gap: 8px; font-weight: 600; color: var(--primary); }
+.md-preview .callout[data-callout="tip"] { border-left-color: #34d399; }
+.md-preview .callout[data-callout="warning"] { border-left-color: #f59e0b; }
+.md-preview .callout[data-callout="caution"],
+.md-preview .callout[data-callout="danger"] { border-left-color: #f87171; }

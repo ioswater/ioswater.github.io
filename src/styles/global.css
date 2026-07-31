@@ -8,6 +8,7 @@
 
 @plugin "../tailwind-plugin/tw-theme";
 @plugin "../tailwind-plugin/tw-bs-grid";
+@plugin "@tailwindcss/typography";
 
 :root {
   --sl-color-accent-low: color-mix(in srgb, var(--color-primary), #000 86%) !important;
@@ -516,8 +517,72 @@ html.reading-focus .main-pane {
   font-size: 0.88em;
 }
 
-/* ===== 右侧目录点击即时高亮（叠加在 Starlight scrollspy 之上） ===== */
-.right-sidebar-container a.user-active {
-  color: var(--sl-color-accent) !important;
-  border-left-color: var(--sl-color-accent) !important;
+/* ===== 右侧目录高亮 =====
+   点击与滑动共用 Starlight 原生 scrollspy 的 aria-current="true" 机制（见 TwoColumnContent.astro），
+   不再使用独立的 .user-active 类，保证两套交互视觉/算法一致。 */
+
+/* ===== 文档 callout（rehype-callouts 输出） ===== */
+.sl-markdown-content .callout {
+  --rc-color-default: var(--sl-color-gray-3);
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-left: 0.25em solid var(--rc-color-dark, var(--rc-color-default));
+  border-radius: 0 10px 10px 0;
+  margin: 1.4rem 0;
+  background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+}
+.sl-markdown-content .callout-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--rc-color-dark, var(--rc-color-default));
+  font-weight: 600;
+  line-height: 1.4;
+}
+.sl-markdown-content .callout-title-icon svg {
+  display: inline-block;
+  vertical-align: text-bottom;
+  overflow: visible;
+}
+.sl-markdown-content .callout-content > :first-child { margin-top: 0.5rem; }
+.sl-markdown-content .callout-content > :last-child { margin-bottom: 0; }
+.sl-markdown-content .callout[data-collapsible="true"] .callout-title { cursor: pointer; }
+.sl-markdown-content .callout[data-collapsible="true"] .callout-fold-icon {
+  display: flex;
+  align-items: center;
+  padding-inline-end: 8px;
+  margin-left: -2px;
+}
+.sl-markdown-content .callout[data-collapsible="true"] > .callout-title .callout-fold-icon svg {
+  transform: rotate(-90deg);
+  transition: transform 100ms ease-in-out;
+}
+.sl-markdown-content .callout[data-collapsible="true"][open] > .callout-title .callout-fold-icon svg {
+  transform: none;
+}
+/* callout 配色（沿用品牌 token，自动适配明暗） */
+.sl-markdown-content .callout[data-callout="note"],
+.sl-markdown-content .callout[data-callout="info"] {
+  --rc-color-dark: var(--sl-color-accent);
+  --rc-color-light: var(--sl-color-accent);
+}
+.sl-markdown-content .callout[data-callout="tip"] {
+  --rc-color-dark: #34d399;
+  --rc-color-light: #34d399;
+}
+.sl-markdown-content .callout[data-callout="important"] {
+  --rc-color-dark: var(--sl-color-accent-high);
+  --rc-color-light: var(--sl-color-accent-high);
+}
+.sl-markdown-content .callout[data-callout="warning"] {
+  --rc-color-dark: #f59e0b;
+  --rc-color-light: #f59e0b;
+}
+.sl-markdown-content .callout[data-callout="caution"],
+.sl-markdown-content .callout[data-callout="danger"],
+.sl-markdown-content .callout[data-callout="error"],
+.sl-markdown-content .callout[data-callout="fail"],
+.sl-markdown-content .callout[data-callout="failure"] {
+  --rc-color-dark: #f87171;
+  --rc-color-light: #f87171;
 }

@@ -5,6 +5,7 @@ import astroExpressiveCode from "astro-expressive-code";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import { viewTransitions } from "astro-vtbot/starlight-view-transitions";
 import tailwindcss from "@tailwindcss/vite";
+import rehypeCallouts from "rehype-callouts";
 import config from "./src/config/config.json";
 import social from "./src/config/social.json";
 import locals from "./src/config/locals.json";
@@ -67,6 +68,9 @@ export default defineConfig({
       }
     })
   ],
+  markdown: {
+    rehypePlugins: [rehypeCallouts]
+  },
   vite: {
     plugins: /** @type {any} */ ([tailwindcss(), viewTransitions()]),
     resolve: {

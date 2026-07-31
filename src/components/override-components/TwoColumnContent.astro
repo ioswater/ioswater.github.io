@@ -61,27 +61,49 @@ import Breadcrumb from "../Breadcrumb.astro";
 
 <script is:inline>
   (function () {
-    // 右侧目录：点击即时高亮（叠加在 Starlight scrollspy 之上，消除“点第4条仍高亮第3条”的滞后感）
+    // 右侧目录：点击与滑动共用 Starlight 原生 scrollspy 的 aria-current="true" 机制，保证两者一致
     function bindToc() {
       var links = Array.prototype.slice.call(
         document.querySelectorAll(".right-sidebar-container a[href^='#']")
       );
       if (!links.length) return;
+
+      var sidebar = document.querySelector(".right-sidebar");
+
+      // 高亮项滚入目录可视区（点击与滑动都会触发）
+      var scrollActiveIntoView = function (link) {
+        if (!sidebar || !link) return;
+        var sbRect = sidebar.getBoundingClientRect();
+        var linkRect = link.getBoundingClientRect();
+        var offsetWithin = linkRect.top - sbRect.top + sidebar.scrollTop;
+        var target = offsetWithin - sbRect.height / 2 + linkRect.height / 2;
+        target = Math.max(0, Math.min(target, sidebar.scrollHeight - sbRect.height));
+        sidebar.scrollTo({ top: target, behavior: "smooth" });
+      };
+
+      // 监听 Starlight 写入的 aria-current="true"（滑动高亮，以它为准）+ 点击写入，统一处理自动滚动
+      var mo = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+          if (m.attributeName === "aria-current" && m.target.getAttribute("aria-current") === "true") {
+            scrollActiveIntoView(m.target);
+          }
+        });
+      });
+
       links.forEach(function (link) {
         if (link.__tocBound) return;
         link.__tocBound = true;
+        mo.observe(link, { attributes: true, attributeFilter: ["aria-current"] });
         link.addEventListener("click", function () {
-          links.forEach(function (l) { l.classList.remove("user-active"); });
-          link.classList.add("user-active");
+          // 点击即与滑动共用同一套高亮（aria-current="true"），立即反馈，消除“两套算法不一致”
+          links.forEach(function (l) { l.removeAttribute("aria-current"); });
+          link.setAttribute("aria-current", "true");
           var id = (link.getAttribute("href") || "").slice(1);
           var target = id && document.getElementById(id);
           if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+          scrollActiveIntoView(link);
         });
       });
-      var clear = function () {
-        links.forEach(function (l) { l.classList.remove("user-active"); });
-      };
-      window.addEventListener("scroll", clear, { passive: true });
     }
 
     // 表格：悬停整列高亮（事件委托，按 cellIndex 给同列单元格加 .col-hover）

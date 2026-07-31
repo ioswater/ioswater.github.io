@@ -7,7 +7,7 @@
     "community": {
       "title": "社区与更新",
       "links": [
-        { "name": "博客聚合页", "url": "/blog/" },
+        { "name": "技术博客", "url": "/blog/" },
         { "name": "更新记录", "url": "/content/release-notes/" },
         { "name": "GitHub", "url": "https://github.com/ioswater" }
       ]
