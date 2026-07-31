@@ -17,7 +17,7 @@ const isEn = locale === "en";
 const labels = isEn
   ? {
       title: "Blog Hub",
-      subtitle: "Search by keyword, filter by category and date, then jump to the exact note.",
+      subtitle: "Browse all engineering notes by category, or jump to the latest posts.",
       search: "Search title or summary",
       category: "Category",
       startDate: "Start",
@@ -35,7 +35,7 @@ const labels = isEn
     }
   : {
       title: "博客聚合页",
-      subtitle: "按关键词搜索、按分类和时间筛选，快速定位到具体文章。",
+      subtitle: "按左侧分类浏览全部技术笔记，或浏览最新发布。",
       search: "搜索标题或摘要",
       category: "分类",
       startDate: "开始日期",
@@ -67,36 +67,7 @@ const categories = categoryOrder.map((key) => ({
       <h1>{labels.title}</h1>
       <p>{labels.subtitle}</p>
     </div>
-    <div class="hub-stats">
-      <div>
-        <span>{labels.total}</span>
-        <strong>{posts.length}</strong>
-      </div>
-      <div>
-        <span>{labels.latest}</span>
-        <strong>{latestDate}</strong>
-      </div>
-    </div>
   </header>
-
-  <div class="hub-controls">
-    <input id="blog-q" type="search" placeholder={labels.search} />
-
-    <select id="blog-category" aria-label={labels.category}>
-      <option value="">{labels.all}</option>
-      {categories.map((c) => <option value={c.key}>{c.label}</option>)}
-    </select>
-
-    <input id="blog-start" type="date" aria-label={labels.startDate} />
-    <input id="blog-end" type="date" aria-label={labels.endDate} />
-
-    <select id="blog-sort" aria-label={labels.sort}>
-      <option value="newest">{labels.newest}</option>
-      <option value="oldest">{labels.oldest}</option>
-    </select>
-
-    <button id="blog-clear" type="button">{labels.clear}</button>
-  </div>
 
   <div class="hub-layout">
     <aside class="hub-tree">
@@ -120,7 +91,6 @@ const categories = categoryOrder.map((key) => ({
     </aside>
 
     <div>
-      <div id="blog-result-meta" class="result-meta"></div>
       <div id="blog-list" class="blog-list"></div>
     </div>
   </div>
@@ -147,20 +117,13 @@ const categories = categoryOrder.map((key) => ({
   const posts = JSON.parse(document.getElementById("blog-posts-data")?.textContent || "[]") as BlogPostClient[];
   const labels = JSON.parse(document.getElementById("blog-labels-data")?.textContent || "{}") as BlogLabels;
 
-  const qEl = document.getElementById("blog-q") as HTMLInputElement | null;
-  const catEl = document.getElementById("blog-category") as HTMLSelectElement | null;
-  const startEl = document.getElementById("blog-start") as HTMLInputElement | null;
-  const endEl = document.getElementById("blog-end") as HTMLInputElement | null;
-  const sortEl = document.getElementById("blog-sort") as HTMLSelectElement | null;
-  const clearEl = document.getElementById("blog-clear") as HTMLButtonElement | null;
   const listEl = document.getElementById("blog-list") as HTMLDivElement | null;
-  const metaEl = document.getElementById("blog-result-meta") as HTMLDivElement | null;
   const treeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(".tree-filter"));
 
-  if (!listEl || !metaEl) {
-    console.warn("BlogHub mount skipped: missing list or meta container.");
+  if (!listEl) {
+    console.warn("BlogHub mount skipped: missing list container.");
   } else {
-    const parse = (v: string): number | null => (v ? new Date(v).getTime() : null);
+    let activeCategory = "";
 
     const allBtn = document.querySelector<HTMLButtonElement>(".tree-filter.is-all");
     const syncTreeState = (currentCategory: string) => {
@@ -176,37 +139,20 @@ const categories = categoryOrder.map((key) => ({
     };
 
     const render = () => {
-      const q = (qEl?.value || "").trim().toLowerCase();
-      const category = catEl?.value || "";
-      const start = parse(startEl?.value || "");
-      const end = parse(endEl?.value || "");
-      const sort = sortEl?.value || "newest";
+      const filtered: BlogPostClient[] = posts
+        .filter((p: BlogPostClient) => !activeCategory || p.category === activeCategory)
+        .sort((a: BlogPostClient, b: BlogPostClient) => b.date.localeCompare(a.date));
 
-      const filtered: BlogPostClient[] = posts.filter((p: BlogPostClient) => {
-        const matchedText = !q || `${p.title} ${p.description}`.toLowerCase().includes(q);
-        const matchedCategory = !category || p.category === category;
-        const t = parse(p.date);
-        const matchedStart = !start || (t !== null && t >= start);
-        const matchedEnd = !end || (t !== null && t <= end);
-        return matchedText && matchedCategory && matchedStart && matchedEnd;
-      });
-
-      filtered.sort((a: BlogPostClient, b: BlogPostClient) => {
-        if (sort === "oldest") return a.date.localeCompare(b.date);
-        return b.date.localeCompare(a.date);
-      });
-
-      metaEl.textContent = `${filtered.length} / ${posts.length}`;
-      syncTreeState(category);
+      syncTreeState(activeCategory);
 
       if (!filtered.length) {
         listEl.innerHTML = `<div class=\"empty\">${labels.empty}</div>`;
         return;
       }
 
-    listEl.innerHTML = filtered
-      .map(
-        (p: BlogPostClient, index: number) => `
+      listEl.innerHTML = filtered
+        .map(
+          (p: BlogPostClient, index: number) => `
           <article class=\"post-card\" style=\"--idx:${index};\">
             <div class=\"post-head\">
               <span class=\"post-cat\">${p.categoryLabel}</span>
@@ -221,20 +167,9 @@ const categories = categoryOrder.map((key) => ({
         .join("");
     };
 
-    [qEl, catEl, startEl, endEl, sortEl].forEach((el) => el?.addEventListener("input", render));
-    clearEl?.addEventListener("click", () => {
-      if (qEl) qEl.value = "";
-      if (catEl) catEl.value = "";
-      if (startEl) startEl.value = "";
-      if (endEl) endEl.value = "";
-      if (sortEl) sortEl.value = "newest";
-      render();
-    });
-
     treeButtons.forEach((btn) => {
       btn.addEventListener("click", () => {
-        const target = btn.dataset.category || "";
-        if (catEl) catEl.value = target;
+        activeCategory = btn.dataset.category || "";
         render();
       });
     });
@@ -405,29 +340,35 @@ const categories = categoryOrder.map((key) => ({
   }
 
   .blog-list {
-    display: grid;
-    gap: 1.05rem;
+    display: block;
   }
 
   .post-card {
     position: relative;
-    border: 1px solid var(--sl-color-hairline);
-    border-left: 3px solid color-mix(in srgb, var(--sl-color-accent) 55%, transparent);
-    border-radius: 14px;
+    border-top: 1px solid color-mix(in srgb, var(--sl-color-white) 20%, transparent);
     padding: 1.1rem 1.2rem;
-    background: color-mix(in srgb, var(--sl-color-gray-6) 20%, transparent);
-    box-shadow: 0 1px 2px color-mix(in srgb, var(--sl-color-black) 40%, transparent);
-    transition: border-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    transition: background-color 0.22s ease;
     animation: card-rise 0.42s ease-out both;
     animation-delay: calc(var(--idx, 0) * 0.04s);
   }
-
-  .post-card:hover {
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--sl-color-accent) 40%, transparent);
-    border-left-color: var(--sl-color-accent);
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--sl-color-accent) 14%, transparent);
+  .post-card:first-child { border-top: none; }
+  .post-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--sl-color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.22s ease;
   }
+  .post-card:hover {
+    background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  }
+  .post-card:hover::before { transform: scaleX(1); }
+  .post-card:hover h3 { color: var(--sl-color-accent); }
 
   .post-head {
     display: flex;

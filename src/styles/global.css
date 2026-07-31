@@ -295,7 +295,7 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
     justify-content: center;
     position: fixed;
     top: calc(var(--sl-nav-height, 3.5rem) + 0.9rem);
-    right: 1.25rem;
+    right: 2.25rem;
     z-index: calc(var(--sl-z-index-navbar, 60) + 5);
     width: 2.5rem;
     height: 2.5rem;
@@ -450,4 +450,74 @@ html.reading-focus .main-pane {
   opacity: 0;
   transform: translateY(10px);
   pointer-events: none;
+}
+
+/* ===== 富表格（markdown 内容） ===== */
+.sl-markdown-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.4rem 0;
+  font-size: 0.95rem;
+}
+.sl-markdown-content thead th {
+  background: color-mix(in srgb, var(--sl-color-accent) 16%, transparent);
+  color: var(--sl-color-accent);
+  text-align: left;
+  font-weight: 600;
+}
+.sl-markdown-content th,
+.sl-markdown-content td {
+  border: 1px solid var(--sl-color-gray-5);
+  padding: 0.6rem 0.9rem;
+  vertical-align: top;
+}
+.sl-markdown-content tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--sl-color-gray-6) 30%, transparent);
+}
+.sl-markdown-content table tr:first-child th:first-child { border-top-left-radius: 12px; }
+.sl-markdown-content table tr:first-child th:last-child { border-top-right-radius: 12px; }
+.sl-markdown-content table tr:last-child td:first-child { border-bottom-left-radius: 12px; }
+.sl-markdown-content table tr:last-child td:last-child { border-bottom-right-radius: 12px; }
+.sl-markdown-content td.col-hover,
+.sl-markdown-content th.col-hover {
+  background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
+}
+/* 状态色单元格：在 markdown 中给单元格加 class，如 <td class="t-success"> */
+.sl-markdown-content td.t-success { background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent); color: var(--sl-color-accent-high); }
+.sl-markdown-content td.t-warning { background: color-mix(in srgb, #f59e0b 16%, transparent); color: #fbbf24; }
+.sl-markdown-content td.t-danger  { background: color-mix(in srgb, #ef4444 16%, transparent); color: #f87171; }
+
+/* ===== 富排版（重点 / 加粗 / 标记 / 引用 / 行内代码） ===== */
+.sl-markdown-content strong { color: var(--sl-color-accent); font-weight: 700; }
+.sl-markdown-content em { color: var(--sl-color-accent-high); font-style: italic; }
+.sl-markdown-content mark {
+  background: color-mix(in srgb, var(--sl-color-accent) 24%, transparent);
+  color: var(--sl-color-white);
+  padding: 0.05em 0.35em;
+  border-radius: 5px;
+}
+.sl-markdown-content blockquote {
+  margin: 1.4rem 0;
+  padding: 0.6rem 1rem;
+  border-left: 3px solid var(--sl-color-accent);
+  background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
+  border-radius: 0 10px 10px 0;
+  color: var(--sl-color-gray-2);
+}
+.sl-markdown-content :not(pre) > code {
+  background: color-mix(in srgb, var(--sl-color-gray-6) 50%, transparent);
+  border: 1px solid var(--sl-color-hairline);
+  padding: 0.1em 0.4em;
+  border-radius: 6px;
+  font-size: 0.88em;
+}
+
+/* ===== 右侧目录点击即时高亮（叠加在 Starlight scrollspy 之上） ===== */
+.right-sidebar-container a.user-active {
+  color: var(--sl-color-accent) !important;
+  border-left-color: var(--sl-color-accent) !important;
 }

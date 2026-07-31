@@ -59,6 +59,65 @@ import Breadcrumb from "../Breadcrumb.astro";
   }
 </div>
 
+<script is:inline>
+  (function () {
+    // 右侧目录：点击即时高亮（叠加在 Starlight scrollspy 之上，消除“点第4条仍高亮第3条”的滞后感）
+    function bindToc() {
+      var links = Array.prototype.slice.call(
+        document.querySelectorAll(".right-sidebar-container a[href^='#']")
+      );
+      if (!links.length) return;
+      links.forEach(function (link) {
+        if (link.__tocBound) return;
+        link.__tocBound = true;
+        link.addEventListener("click", function () {
+          links.forEach(function (l) { l.classList.remove("user-active"); });
+          link.classList.add("user-active");
+          var id = (link.getAttribute("href") || "").slice(1);
+          var target = id && document.getElementById(id);
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+      var clear = function () {
+        links.forEach(function (l) { l.classList.remove("user-active"); });
+      };
+      window.addEventListener("scroll", clear, { passive: true });
+    }
+
+    // 表格：悬停整列高亮（事件委托，按 cellIndex 给同列单元格加 .col-hover）
+    function bindTableColHover() {
+      var tables = Array.prototype.slice.call(
+        document.querySelectorAll(".sl-markdown-content table")
+      );
+      tables.forEach(function (table) {
+        if (table.__colHoverBound) return;
+        table.__colHoverBound = true;
+        table.addEventListener("mouseover", function (e) {
+          var cell = e.target.closest("td, th");
+          if (!cell) return;
+          var idx = Array.prototype.indexOf.call(cell.parentNode.children, cell);
+          table.querySelectorAll("tr").forEach(function (tr) {
+            var c = tr.children[idx];
+            if (c) c.classList.add("col-hover");
+          });
+        });
+        table.addEventListener("mouseout", function () {
+          table.querySelectorAll(".col-hover").forEach(function (c) {
+            c.classList.remove("col-hover");
+          });
+        });
+      });
+    }
+
+    document.addEventListener("astro:page-load", function () {
+      bindToc();
+      bindTableColHover();
+    });
+    bindToc();
+    bindTableColHover();
+  })();
+</script>
+
 <style>
   @layer starlight.core {
     .content-container {

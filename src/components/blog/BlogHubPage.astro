@@ -48,12 +48,6 @@ const copy = isEn
         <span>LiuLuit</span>
       </a>
 
-      <nav class="blog-top-nav" aria-label="Blog sections">
-        {copy.nav.map((item) => (
-          <a href={item.href}>{item.label}</a>
-        ))}
-      </nav>
-
       <div class="blog-header-actions">
         <a class="btn btn-secondary" href={homeLink}>{copy.backDocs}</a>
         <ThemeSwitch />
@@ -62,12 +56,6 @@ const copy = isEn
   </header>
 
   <main class="container blog-page-main">
-    <section class="blog-page-hero">
-      <p class="blog-hero-kicker">LiuLuit Tech Field Notes</p>
-      <h1>{copy.title}</h1>
-      <p>{copy.subtitle}</p>
-    </section>
-
     <BlogHub posts={posts} locale={locale} />
   </main>
 

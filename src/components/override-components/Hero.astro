@@ -104,7 +104,6 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
             开始阅读
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </a>
-          <a class="btn btn-ghost" href={blogLink}>浏览博客</a>
         </div>
         <div class="hero-tags reveal" style="--i:4">
           <span class="tag"># Swift</span>
@@ -410,7 +409,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .sec-head { display: flex; align-items: end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap; }
   .sec-head h2 { font-size: var(--fs-2xl); }
   .sec-head p { color: var(--text-muted); max-width: 52ch; margin-top: var(--space-2); }
-  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); }
   .card {
     background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg);
     padding: var(--space-5); transition: transform var(--dur) var(--ease-expo), border-color var(--dur), box-shadow var(--dur);
