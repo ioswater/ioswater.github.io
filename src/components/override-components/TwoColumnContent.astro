@@ -71,25 +71,44 @@ import Breadcrumb from "../Breadcrumb.astro";
       if (!links.length) return;
 
       var sidebar = document.querySelector(".right-sidebar");
+      // 程序化滚动抑制态：点击后正文平滑滚动途中，scrollspy 会依次命中中间小节，
+      // 此时目录“追尾”式滚动正是抖动的元凶；标记期内只认被点击的那一项。
+      var programmatic = false;
+      var clickedLink = null;
+      var programmaticTimer = null;
 
-      // 高亮项滚入目录可视区（点击与滑动都会触发）
-      var scrollActiveIntoView = function (link) {
+      // 仅当高亮项超出目录可视范围（含缓冲边距）时才滚动居中；已在范围内则不动，
+      // 避免页面滚动时目录面板持续漂移产生卡顿。
+      var scrollActiveIntoView = function (link, immediate) {
         if (!sidebar || !link) return;
         var sbRect = sidebar.getBoundingClientRect();
         var linkRect = link.getBoundingClientRect();
-        var offsetWithin = linkRect.top - sbRect.top + sidebar.scrollTop;
+        var topWithin = linkRect.top - sbRect.top;
+        var bottomWithin = topWithin + linkRect.height;
+        var edge = 14;
+        var visible = topWithin >= edge && bottomWithin <= sbRect.height - edge;
+        if (visible && !immediate) return;
+        var offsetWithin = topWithin + sidebar.scrollTop;
         var target = offsetWithin - sbRect.height / 2 + linkRect.height / 2;
         target = Math.max(0, Math.min(target, sidebar.scrollHeight - sbRect.height));
-        sidebar.scrollTo({ top: target, behavior: "smooth" });
+        sidebar.scrollTo({ top: target, behavior: immediate ? "auto" : "smooth" });
       };
 
       // Starlight 原生 scrollspy 写入 aria-current="true" 即为唯一高亮来源（点击与滑动共用）。
       // 监听该属性变化，让目录面板自动滚动，使高亮项始终处于可视范围。
       var mo = new MutationObserver(function (mutations) {
         mutations.forEach(function (m) {
-          if (m.attributeName === "aria-current" && m.target.getAttribute("aria-current") === "true") {
-            scrollActiveIntoView(m.target);
+          if (m.attributeName !== "aria-current") return;
+          if (m.target.getAttribute("aria-current") !== "true") return;
+          if (programmatic && m.target !== clickedLink) return; // 点击途中中间态：跳过，杜绝抖动
+          if (programmatic && m.target === clickedLink) {
+            scrollActiveIntoView(m.target); // 目标项最终命中：平滑居中一次，解除抑制
+            programmatic = false;
+            clickedLink = null;
+            if (programmaticTimer) { clearTimeout(programmaticTimer); programmaticTimer = null; }
+            return;
           }
+          scrollActiveIntoView(m.target);
         });
       });
 
@@ -109,10 +128,18 @@ import Breadcrumb from "../Breadcrumb.astro";
             var headerH = header ? header.getBoundingClientRect().height : 56;
             var rect = target.getBoundingClientRect();
             var y = rect.top + window.scrollY - (headerH + 56);
+            programmatic = true;
+            clickedLink = link;
+            if (programmaticTimer) clearTimeout(programmaticTimer);
+            programmaticTimer = setTimeout(function () {
+              programmatic = false;
+              clickedLink = null;
+              programmaticTimer = null;
+            }, 900);
             window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
             try { history.replaceState(null, "", "#" + id); } catch (err) {}
           }
-          scrollActiveIntoView(link);
+          // 不再立即 scrollActiveIntoView：交 scrollspy 在目标项激活后统一居中一次
         });
       });
     }

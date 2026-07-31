@@ -282,98 +282,12 @@ const categories = categoryOrder.map((key) => ({
     display: block;
   }
 
-  /* —— 信息流：对齐首页“精选文章”分割线列表 —— */
-  .post-card {
-    position: relative;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 1rem;
-    padding: 1.1rem 0;
-    border-top: 1px solid var(--sl-color-hairline);
-    transition: padding-left 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: card-rise 0.42s ease-out both;
-    animation-delay: calc(var(--idx, 0) * 0.04s);
-  }
-  .post-card:first-child { border-top: none; }
-  .post-card:hover { padding-left: 0.75rem; }
-
-  .post-date {
-    font-family: var(--sl-font-mono, ui-monospace, monospace);
-    font-size: 0.78rem;
-    color: var(--sl-color-gray-3);
-    padding-top: 4px;
-    white-space: nowrap;
-  }
-
-  .post-card h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.15rem;
-    transition: color 0.22s ease;
-  }
-  .post-card h3 a {
-    color: var(--sl-color-white);
-    text-decoration: none;
-  }
-  .post-card h3 a::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-  .post-card:hover h3 a { color: var(--sl-color-accent); }
-  .post-card h3 a:focus-visible { outline: 2px solid var(--sl-color-accent); outline-offset: 3px; border-radius: 2px; }
-
-  .post-card p {
-    margin: 0 0 0.55rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.9rem;
-    line-height: 1.6;
-  }
-
-  .post-meta {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .post-chip {
-    font-size: 0.75rem;
-    color: var(--sl-color-gray-3);
-    background: color-mix(in srgb, var(--sl-color-white) 7%, transparent);
-    border: 1px solid var(--sl-color-hairline);
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-  }
-  .post-read {
-    font-family: var(--sl-font-mono, ui-monospace, monospace);
-    font-size: 0.78rem;
-    color: var(--sl-color-accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .post-read:hover { text-decoration: underline; }
-
-  .empty {
-    border: 1px dashed var(--sl-color-hairline);
-    border-radius: 12px;
-    padding: 1.2rem;
-    color: var(--sl-color-gray-3);
-  }
-
+  /* 信息流卡片样式（分割线 + hover + card-rise 入场）已迁至 global.css：
+     卡片由 JS 经 innerHTML 注入、不带 Astro 的 data-astro-cid，作用域样式无法命中，故须全局。 */
   @keyframes hub-rise {
     from {
       opacity: 0;
       transform: translateY(14px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes card-rise {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
     }
     to {
       opacity: 1;
@@ -392,13 +306,11 @@ const categories = categoryOrder.map((key) => ({
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .hub-header,
-    .post-card {
+    .hub-header {
       animation: none;
     }
 
-    .tree-filter,
-    .post-card {
+    .tree-filter {
       transition: none;
     }
   }
