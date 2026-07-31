@@ -10,6 +10,9 @@
 
 .navbar-brand {
   @apply no-underline text-white text-lg font-semibold;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
   transition: transform 0.24s ease;
 }
 

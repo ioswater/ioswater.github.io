@@ -309,6 +309,8 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
     cursor: pointer;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease,
       transform 0.2s ease, box-shadow 0.2s ease;
+    /* 常驻呼吸动效：静默态也持续提示可点击（展开/收起皆然） */
+    animation: toc-pulse 1.8s ease-out infinite;
   }
   :root[data-theme="light"] .toc-toggle {
     color: var(--sl-color-black);
@@ -329,13 +331,8 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
   }
 
   .content-container.toc-collapsed .toc-caret {
-    /* 反向：箭头向上，明确示意「已展开 / 可收起」 */
+    /* 反向：箭头向左，明确示意「已展开 / 可收起」（常态向右指向收起方向） */
     transform: rotate(180deg);
-  }
-
-  /* 收起态：保持圆形箭头按钮不变位，仅以呼吸动效提示可点击重新展开 */
-  .content-container.toc-collapsed .toc-toggle {
-    animation: toc-pulse 1.8s ease-out infinite;
   }
 
   /* 隐藏 Starlight 自带目录标题，避免与自定义 toggle 重复 */
@@ -348,6 +345,20 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
 @media (max-width: 71.9375rem) {
   .right-sidebar-container {
     display: none;
+  }
+}
+
+/* 桌面端（≥72rem）：隐藏移动端目录（<mobile-starlight-toc>），避免与桌面目录重复显示/高亮。
+   Starlight 自带的 lg:sl-hidden 在本构建未生效，这里显式兜底隐藏。 */
+@media (min-width: 72rem) {
+  mobile-starlight-toc {
+    display: none !important;
+  }
+}
+/* 中间断点（<72rem）：桌面目录已隐藏，确保移动端目录可见（覆盖 lg:sl-hidden 的隐藏） */
+@media (max-width: 71.9375rem) {
+  mobile-starlight-toc {
+    display: block !important;
   }
 }
 

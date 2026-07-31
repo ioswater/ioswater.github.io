@@ -44,7 +44,7 @@ import Breadcrumb from "../Breadcrumb.astro";
             stroke-linejoin="round"
             aria-hidden="true"
           >
-            <polyline points="6 9 12 15 18 9" />
+            <polyline points="9 6 15 12 9 18" />
           </svg>
         </button>
         <div class="right-sidebar">
@@ -63,8 +63,10 @@ import Breadcrumb from "../Breadcrumb.astro";
   (function () {
     // 右侧目录：点击与滑动共用 Starlight 原生 scrollspy 的 aria-current="true" 机制，保证两者一致
     function bindToc() {
+      // 仅针对桌面端目录（<starlight-toc>），排除移动端 <mobile-starlight-toc> 的重复链接，
+      // 否则点击/滑动会出现两个高亮
       var links = Array.prototype.slice.call(
-        document.querySelectorAll(".right-sidebar-container a[href^='#']")
+        document.querySelectorAll(".right-sidebar-container starlight-toc a[href^='#']")
       );
       if (!links.length) return;
 
@@ -81,7 +83,8 @@ import Breadcrumb from "../Breadcrumb.astro";
         sidebar.scrollTo({ top: target, behavior: "smooth" });
       };
 
-      // 监听 Starlight 写入的 aria-current="true"（滑动高亮，以它为准）+ 点击写入，统一处理自动滚动
+      // Starlight 原生 scrollspy 写入 aria-current="true" 即为唯一高亮来源（点击与滑动共用）。
+      // 监听该属性变化，让目录面板自动滚动，使高亮项始终处于可视范围。
       var mo = new MutationObserver(function (mutations) {
         mutations.forEach(function (m) {
           if (m.attributeName === "aria-current" && m.target.getAttribute("aria-current") === "true") {
@@ -94,13 +97,21 @@ import Breadcrumb from "../Breadcrumb.astro";
         if (link.__tocBound) return;
         link.__tocBound = true;
         mo.observe(link, { attributes: true, attributeFilter: ["aria-current"] });
-        link.addEventListener("click", function () {
-          // 点击即与滑动共用同一套高亮（aria-current="true"），立即反馈，消除“两套算法不一致”
-          links.forEach(function (l) { l.removeAttribute("aria-current"); });
-          link.setAttribute("aria-current", "true");
+        link.addEventListener("click", function (e) {
+          // 不手动写 aria-current：交由 Starlight scrollspy 统一高亮，杜绝双高亮。
+          // 滚动时把目标标题定位到 Starlight 的激活带（nav 高度 + ~56px）内，
+          // 使 scrollspy 命中“被点击的”这一项，且正文平滑滑动到对应位置。
           var id = (link.getAttribute("href") || "").slice(1);
           var target = id && document.getElementById(id);
-          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (target) {
+            e.preventDefault();
+            var header = document.querySelector("header");
+            var headerH = header ? header.getBoundingClientRect().height : 56;
+            var rect = target.getBoundingClientRect();
+            var y = rect.top + window.scrollY - (headerH + 56);
+            window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+            try { history.replaceState(null, "", "#" + id); } catch (err) {}
+          }
           scrollActiveIntoView(link);
         });
       });
