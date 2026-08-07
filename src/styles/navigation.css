@@ -20,6 +20,12 @@
   transform: translateY(-1px);
 }
 
+/* 浅色模式下品牌字改用品牌 accent 色（原 text-white 在浅色下=near-black，过重），
+   既解决「太暗」，又让品牌色进入 chrome。深色模式保持浅色字不变。 */
+:root[data-theme="light"] .navbar-brand {
+  color: var(--sl-color-accent);
+}
+
 .site-title-with-mark {
   @apply inline-flex items-center gap-2;
 }

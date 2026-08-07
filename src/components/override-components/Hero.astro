@@ -32,78 +32,51 @@ const posts = [
   { date: "06·30", title: "SwiftUI 列表性能：Identifiable 与差分更新的真相", desc: "为什么你的 ForEach 会整段重绘？用 Instruments 定位并修复滚动卡顿。", tags: ["SwiftUI", "Performance"], read: "8 分钟", href: "/blog/" },
 ];
 
-// 代码卡片内容放在字符串里用 set:html 渲染，避免 Astro 把 Swift/CSS 的 {} 当作表达式解析
-const swiftCode = `<pre><code><span class="tok-com">// 清晰的依赖边界，比聪明的代码更重要</span>
-<span class="tok-key">struct</span> ContentStore {
-  <span class="tok-key">private let</span> repo: ArticleRepository
-  <span class="tok-key">private let</span> cache: Cache
+// 个人化代码卡片：用真实感更强的 Actor 隔离片段（仍放字符串里用 set:html 渲染，
+// 避免 Astro 把 Swift 的 {} 当作表达式解析）。恒深色面板，保证浅色模式下语法高亮仍可读。
+const swiftCode = `<pre><code><span class="tok-com">// 隔离边界没划清，并发 bug 就会在生产环境炸</span>
+<span class="tok-key">actor</span> ImageCache {
+  <span class="tok-key">private var</span> store: [Key: Image] = [:]
 
-  <span class="tok-key">func</span> <span class="tok-fn">load</span>(<span class="tok-key">_</span> id: Article.ID) <span class="tok-key">async</span> <span class="tok-key">throws</span> -> Article {
-    <span class="tok-key">if let</span> cached = <span class="tok-key">try</span> cache.<span class="tok-fn">get</span>(id) { <span class="tok-key">return</span> cached }
-    <span class="tok-key">let</span> article = <span class="tok-key">try</span> <span class="tok-key">await</span> repo.<span class="tok-fn">fetch</span>(id)
-    <span class="tok-key">try</span> cache.<span class="tok-fn">set</span>(article)
-    <span class="tok-key">return</span> article
+  <span class="tok-key">func</span> <span class="tok-fn">image</span>(<span class="tok-key">for</span> key: Key) <span class="tok-key">async</span> -> Image? {
+    <span class="tok-key">return</span> store[key]
+  }
+
+  <span class="tok-key">func</span> <span class="tok-fn">insert</span>(<span class="tok-key">_</span> img: Image, <span class="tok-key">for</span> key: Key) {
+    store[key] = img   <span class="tok-com">// actor 保证此处互斥</span>
   }
 }</code></pre>`;
 
-// 代码质感展示：多语言片段（Swift / CSS / Terminal），含 { } 必须放字符串里用 set:html 渲染
-const showSwiftCode = `<span class="ln"><span class="tok-com">// 视图即声明：界面也是可组合的代码</span></span>
-<span class="ln"><span class="tok-key">import</span> SwiftUI</span>
-<span class="ln"></span>
-<span class="ln"><span class="tok-key">struct</span> <span class="tok-type">PostCard</span>: <span class="tok-type">View</span> {</span>
-<span class="ln">  <span class="tok-key">let</span> post: <span class="tok-type">Article</span></span>
-<span class="ln">  <span class="tok-key">@State private var</span> hovered = <span class="tok-key">false</span></span>
-<span class="ln"></span>
-<span class="ln">  <span class="tok-key">var</span> body: <span class="tok-key">some</span> <span class="tok-type">View</span> {</span>
-<span class="ln">    <span class="tok-fn">VStack</span>(alignment: .leading, spacing: <span class="tok-num">12</span>) {</span>
-<span class="ln">      <span class="tok-fn">Text</span>(post.title)</span>
-<span class="ln">        .font(.headline)</span>
-<span class="ln">      <span class="tok-fn">Text</span>(post.excerpt)</span>
-<span class="ln">        .foregroundStyle(.secondary)</span>
-<span class="ln">    }</span>
-<span class="ln">    .padding(<span class="tok-num">20</span>)</span>
-<span class="ln">    .background(.ultraThinMaterial)</span>
-<span class="ln">  }</span>
-<span class="ln">}</span>`;
+// 数字事实带（替代原“代码质感”孪生区，制造节奏 + 个人可信度）
+const stats = [
+  { num: "100+", lab: "篇技术笔记" },
+  { num: "4", lab: "个主题专栏" },
+  { num: "52", lab: "周连续更新" },
+  { num: "2", lab: "套主题 · 深色优先" },
+];
 
-const showCssCode = `<span class="ln"><span class="tok-com">/* 设计 token：亮 / 暗仅切换语义层 */</span></span>
-<span class="ln"><span class="tok-key">:root</span> {</span>
-<span class="ln">  <span class="tok-prop">--accent</span>: <span class="tok-str">oklch(74% 0.14 195)</span>;</span>
-<span class="ln">  <span class="tok-prop">--surface</span>: <span class="tok-str">oklch(18.5% 0.03 255)</span>;</span>
-<span class="ln">  <span class="tok-prop">--radius</span>: <span class="tok-num">12px</span>;</span>
-<span class="ln">}</span>
-<span class="ln"></span>
-<span class="ln"><span class="tok-key">.btn-primary</span> {</span>
-<span class="ln">  <span class="tok-prop">background</span>: <span class="tok-fn">var</span>(<span class="tok-str">--brand-gradient</span>);</span>
-<span class="ln">  <span class="tok-prop">color</span>: <span class="tok-str">#f8fbff</span>;</span>
-<span class="ln">  <span class="tok-prop">border-radius</span>: <span class="tok-fn">var</span>(<span class="tok-str">--radius</span>);</span>
-<span class="ln">}</span>`;
-
-const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run build</span>
-<span class="ln"><span class="tok-ok">✓</span> <span class="tok-out">512 modules transformed</span></span>
-<span class="ln"><span class="tok-ok">✓</span> <span class="tok-out">built in 3.42s</span></span>
-<span class="ln"></span>
-<span class="ln"><span class="tok-prompt">$</span> astro check</span>
-<span class="ln"><span class="tok-ok">✔</span> <span class="tok-out">0 errors — everything looks good</span></span>`;
+// 热门标签云（替代原首页 TOC，收益更小）
+const tags = ["Swift", "SwiftUI", "Actor", "RAG", "Embedding", "Astro", "性能", "迁移", "架构", "Debug", "Instruments"];
 ---
 
 <div class="ll-home">
-  <!-- ============================ HERO ============================ -->
+  <!-- ============================ HERO（个人化重构） ============================ -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="wrap hero-grid">
       <div class="hero-copy">
-        <span class="eyebrow reveal" style="--i:0">iOS · AI 架构 · 真实项目</span>
+        <span class="eyebrow reveal" style="--i:0">IT-Liu · iOS / AI 架构</span>
         <h1 id="hero-title" class="reveal" style="--i:1">
-          把复杂的东西<br /><span class="grad">讲得清楚明白</span>
+          我在大厂做 iOS 与 AI 架构，<br /><span class="grad">把踩过的坑写成能抄的答案</span>
         </h1>
         <p class="lead reveal" style="--i:2">
-          LiuLuit 技术博客——关于 iOS 开发、AI 系统架构与一线实战项目的深度笔记。结构清晰，检索顺手，读起来不累。
+          LiuLuit 是我的一线工程笔记——Swift 并发、RAG 系统设计、真实项目的选型与复盘。不堆术语，只给能用上的结论。
         </p>
         <div class="hero-cta reveal" style="--i:3">
           <a class="btn btn-primary" href={blogLink}>
             开始阅读
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
           </a>
+          <a class="btn btn-ghost" href={withLocale("/blog/")}>浏览博客</a>
         </div>
         <div class="hero-tags reveal" style="--i:4">
           <span class="tag"># Swift</span>
@@ -111,12 +84,23 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
           <span class="tag"># RAG</span>
           <span class="tag"># 架构设计</span>
         </div>
+        <!-- 个人 rail：让 Hero 读起来是“人写的”，不是模板 -->
+        <div class="hero-rail reveal" style="--i:5">
+          <span class="avatar">L</span>
+          <div>
+            <div class="who">IT-Liu</div>
+            <div class="role">客户端 &amp; AI 架构工程师 · 写一线踩坑笔记</div>
+          </div>
+          <nav class="socials" aria-label="社交">
+            <a href="#">GitHub</a><a href="#">RSS</a><a href="#">X</a>
+          </nav>
+        </div>
       </div>
 
       <div class="code-card reveal" style="--i:3">
         <div class="code-head">
           <span class="dots"><i></i><i></i><i></i></span>
-          <span class="code-title">Architecture.swift</span>
+          <span class="code-title">ActorIsolation.swift</span>
         </div>
         <div class="code-body" set:html={swiftCode}></div>
       </div>
@@ -151,7 +135,31 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     </div>
   </section>
 
-  <!-- =========================== ARTICLES =========================== -->
+  <!-- =========================== STATS（替代原“代码质感”孪生区） =========================== -->
+  <section class="section" id="stats" aria-labelledby="stat-title" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <span class="eyebrow">数字里的 LiuLuit</span>
+          <h2 id="stat-title" style="margin-top:var(--space-3)">六年一线，持续记录</h2>
+        </div>
+      </div>
+      <div class="stat-card reveal" style="--i:0">
+        <div class="stat-grid">
+          {
+            stats.map((s) => (
+              <div class="stat">
+                <span class="num">{s.num}</span>
+                <span class="lab">{s.lab}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== ARTICLES（首页 TOC 改为热门标签云） =========================== -->
   <section class="section" id="articles" aria-labelledby="post-title">
     <div class="wrap">
       <div class="sec-head">
@@ -178,43 +186,12 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
             ))
           }
         </div>
-        <aside class="toc" aria-label="本页目录">
-          <h4>本页目录</h4>
-          <ul>
-            <li><a href="#categories">内容导航</a></li>
-            <li><a href="#articles">最新发布</a></li>
-            <li><a href="#showcase">代码质感</a></li>
-          </ul>
-        </aside>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================== CODE SHOWCASE ========================== -->
-  <section class="section" id="showcase" aria-labelledby="show-title">
-    <div class="wrap">
-      <div class="sec-head">
-        <div>
-          <span class="eyebrow">细节质感</span>
-          <h2 id="show-title" style="margin-top:var(--space-3)">代码块也是界面的一部分</h2>
-          <p>行号槽、窗口栏、多语言语法高亮——读代码，也像在读一份精心排版的界面。</p>
-        </div>
-      </div>
-      <div class="showcase reveal" style="--i:0" data-showcase>
-        <div class="showcase-bar">
-          <span class="dots"><i></i><i></i><i></i></span>
-          <div class="showcase-tabs" role="tablist" aria-label="切换代码语言">
-            <button class="tab is-active" role="tab" aria-selected="true" data-lang="swift" id="tab-swift">PostCard.swift</button>
-            <button class="tab" role="tab" aria-selected="false" data-lang="css" id="tab-css">theme.css</button>
-            <button class="tab" role="tab" aria-selected="false" data-lang="term" id="tab-term">Terminal</button>
+        <aside class="tagcloud" aria-label="热门标签">
+          <h4>热门标签</h4>
+          <div class="cloud">
+            {tags.map((t) => <a href="#">{t}</a>)}
           </div>
-          <span class="showcase-lang" aria-hidden="true">Swift</span>
-        </div>
-        <div class="showcase-body">
-          <div class="code-pane is-active" role="tabpanel" aria-labelledby="tab-swift" data-pane="swift" set:html={showSwiftCode}></div>
-          <div class="code-pane" role="tabpanel" aria-labelledby="tab-css" data-pane="css" hidden set:html={showCssCode}></div>
-          <div class="code-pane" role="tabpanel" aria-labelledby="tab-term" data-pane="term" hidden set:html={showTermCode}></div>
-        </div>
+        </aside>
       </div>
     </div>
   </section>
@@ -238,6 +215,12 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     --accent-contrast: var(--sl-color-black);
     --glow: color-mix(in srgb, var(--sl-color-accent) 22%, transparent);
     --brand-gradient: var(--color-primary-gradient);
+    /* 重构新增：小字/链接专用深主色（修亮色对比度），标题渐变文字在亮色下更深 */
+    --accent-deep: var(--sl-color-accent);
+    --text-gradient: var(--color-primary-gradient);
+    /* 代码卡恒深色面板（无论主题），保证 github-dark 语法高亮在浅色模式下可读 */
+    --code-surface: oklch(18.5% 0.026 255);
+    --code-fg: oklch(90% 0.015 250);
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
@@ -255,6 +238,12 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     --maxw: 72rem;
   }
 
+  /* 亮色主题：小字主色压到 ~42% 亮度，标题渐变文字也用更深值，统一过 WCAG AA */
+  :root[data-theme="light"] .ll-home {
+    --accent-deep: oklch(42% 0.14 212);
+    --text-gradient: linear-gradient(135deg, oklch(48% 0.15 205), oklch(43% 0.16 230) 58%, oklch(40% 0.18 258));
+  }
+
   .ll-home :where(h1, h2, h3, h4) {
     font-family: var(--font-display);
     color: var(--text-strong);
@@ -268,7 +257,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .eyebrow {
     font-family: var(--font-mono); font-size: var(--fs-xs);
     letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--accent); display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--accent-deep); display: inline-flex; align-items: center; gap: var(--space-2);
   }
   .eyebrow::before { content: ""; width: 22px; height: 1px; background: var(--accent); display: inline-block; }
 
@@ -291,7 +280,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .hero-grid { position: relative; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--space-8); align-items: center; }
   .hero h1 { font-size: var(--fs-4xl); font-weight: 700; margin: var(--space-4) 0; }
   .hero h1 .grad {
-    background: var(--brand-gradient); -webkit-background-clip: text; background-clip: text;
+    background: var(--text-gradient); -webkit-background-clip: text; background-clip: text;
     color: transparent; -webkit-text-fill-color: transparent;
   }
   .hero .lead { font-size: var(--fs-lg); color: var(--text-muted); max-width: 46ch; line-height: 1.65; }
@@ -315,13 +304,22 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     flex: 0 0 auto; width: fit-content; max-width: 100%;
   }
 
+  /* 个人 rail：让 Hero 读起来是“人写的”，不是模板 */
+  .hero-rail { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--border); }
+  .hero-rail .avatar { width: 44px; height: 44px; border-radius: var(--r-full); flex: none; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; color: var(--accent-contrast); background: var(--brand-gradient); }
+  .hero-rail .who { font-weight: 600; color: var(--text-strong); font-size: var(--fs-sm); }
+  .hero-rail .role { font-size: var(--fs-xs); color: var(--text-muted); }
+  .hero-rail .socials { margin-left: auto; display: flex; gap: var(--space-2); }
+  .hero-rail .socials a { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--accent-deep); padding: 0.3rem 0.7rem; border: 1px solid var(--border); border-radius: var(--r-full); text-decoration: none; transition: border-color var(--dur-fast), color var(--dur-fast); }
+  .hero-rail .socials a:hover { border-color: var(--accent); color: var(--accent); }
+
   /* ---- code-card frame (dark panel + gradient hairline + corner glow) ---- */
   .code-card {
     position: relative;
     border: 0;
     border-radius: 14px;
     overflow: hidden;
-    background: var(--surface-1);
+    background: var(--code-surface);
     box-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 18px 50px rgba(0, 0, 0, .35);
   }
   .code-card::before {
@@ -359,7 +357,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent);
   }
   .dots i {
     width: 11px;
@@ -383,7 +381,7 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     font-family: var(--font-mono);
     font-size: var(--fs-sm);
     line-height: 1.85;
-    color: var(--text);
+    color: var(--code-fg);
     overflow-x: auto;
   }
   .code-body pre {
@@ -425,6 +423,38 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .card .meta { margin-top: auto; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-3); border-top: 1px solid var(--border); }
   .card .meta .more { color: var(--accent); font-weight: 500; }
 
+  /* ---------------- STATS（替代原“代码质感”孪生区） ---------------- */
+  .stat-card {
+    position: relative;
+    border: 0;
+    border-radius: var(--r-xl);
+    overflow: hidden;
+    background: var(--surface-1);
+    padding: var(--space-6) var(--space-7);
+  }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--brand-gradient);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .stat-grid { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+  .stat { display: flex; flex-direction: column; gap: var(--space-1); padding-left: var(--space-5); border-left: 1px solid var(--border); }
+  .stat:first-child { padding-left: 0; border-left: 0; }
+  .stat .num {
+    font-family: var(--font-display); font-weight: 700; font-size: var(--fs-3xl); line-height: 1;
+    background: var(--text-gradient); -webkit-background-clip: text; background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+  }
+  .stat .lab { font-size: var(--fs-sm); color: var(--text-muted); }
+
   /* ---------------- ARTICLES ---------------- */
   .articles { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-7); align-items: start; }
   .post-list { display: flex; flex-direction: column; }
@@ -446,129 +476,18 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
   .chip { font-size: var(--fs-xs); color: var(--text-muted); background: var(--surface-2); border: 1px solid var(--border); padding: 0.2rem 0.6rem; border-radius: var(--r-full); flex: 0 0 auto; width: fit-content; max-width: 100%; }
   .read { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-faint); }
 
-  .toc { position: sticky; top: 92px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--space-5); scroll-margin-top: 5.5rem; }
-  .toc h4 { font-size: var(--fs-sm); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin: 0 0 var(--space-3); }
-  .toc ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
-  .toc a { font-size: var(--fs-sm); color: var(--text-muted); padding-left: var(--space-3); border-left: 2px solid var(--border); transition: color var(--dur-fast), border-color var(--dur-fast); text-decoration: none; }
-  .toc a:hover { color: var(--accent); border-left-color: var(--accent); }
-  .toc a.active { color: var(--accent); border-left-color: var(--accent); }
-  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-  /* ---------------- SHOWCASE（真正的代码质感） ---------------- */
-  .showcase {
-    position: relative;
-    border: 0;
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--surface-1);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 18px 50px rgba(0, 0, 0, .35);
+  /* 热门标签云（替代原首页“本页目录” TOC） */
+  .tagcloud { position: sticky; top: 92px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: var(--space-5); scroll-margin-top: 5.5rem; }
+  .tagcloud h4 { font-size: var(--fs-sm); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-faint); margin: 0 0 var(--space-3); }
+  .tagcloud .cloud { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .tagcloud .cloud a {
+    font-size: var(--fs-xs); color: var(--text-muted); background: var(--surface-2);
+    border: 1px solid var(--border); padding: 0.35rem 0.75rem; border-radius: var(--r-full);
+    text-decoration: none; flex: 0 0 auto; width: fit-content; max-width: 100%;
+    transition: color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
   }
-  .showcase::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: var(--brand-gradient);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: 2;
-  }
-  .showcase::after {
-    content: "";
-    position: absolute;
-    top: -40%;
-    right: -20%;
-    width: 60%;
-    height: 80%;
-    background: radial-gradient(circle, var(--glow), transparent 70%);
-    filter: blur(30px);
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 0;
-  }
-  .showcase-bar {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border);
-    background: color-mix(in srgb, var(--sl-color-white) 4%, transparent);
-  }
-  .showcase-tabs {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .showcase-tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    background: transparent;
-    border: 0;
-    padding: 0.4rem 0.7rem;
-    border-radius: var(--r-sm);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: color var(--dur-fast), background var(--dur-fast);
-  }
-  .tab:hover { color: var(--text-strong); background: var(--surface-2); }
-  .tab.is-active { color: var(--text-strong); background: var(--surface-3); }
-  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .showcase-lang {
-    font-family: var(--font-mono);
-    font-size: var(--fs-xs);
-    color: var(--accent);
-    border: 1px solid var(--border-strong);
-    padding: 0.25rem 0.6rem;
-    border-radius: var(--r-full);
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .showcase-body { position: relative; z-index: 1; }
-  .code-pane {
-    position: relative;
-    z-index: 1;
-    font-family: var(--font-mono);
-    font-size: var(--fs-sm);
-    line-height: 1.85;
-    color: var(--text);
-    counter-reset: ln;
-    padding: var(--space-4) 0;
-    overflow-x: auto;
-  }
-  .code-pane[hidden] { display: none; }
-  .ln {
-    display: block;
-    white-space: pre;
-    padding: 0 1rem 0 3.5rem;
-    position: relative;
-    min-height: 1.85em;
-    counter-increment: ln;
-  }
-  /* 行号槽：低对比度等宽行号，是“代码质感”的关键 */
-  .ln::before {
-    content: counter(ln);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 2.6rem;
-    text-align: right;
-    color: var(--text-faint);
-    opacity: 0.5;
-    user-select: none;
-  }
+  .tagcloud .cloud a:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+  .tagcloud .cloud a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------------- ENTRANCE ANIM ---------------- */
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
@@ -579,12 +498,17 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     .hero-grid { grid-template-columns: 1fr; }
     .cards { grid-template-columns: repeat(2, 1fr); }
     .articles { grid-template-columns: 1fr; }
-    .toc { position: static; top: auto; }
+    .tagcloud { position: static; top: auto; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(3) { padding-left: 0; border-left: 0; }
   }
   @media (max-width: 680px) {
     .cards { grid-template-columns: 1fr; }
     .hero h1 { font-size: var(--fs-3xl); }
     .section { padding: var(--space-7) 0; }
+    .stat-grid { grid-template-columns: 1fr; }
+    .stat { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); padding-top: var(--space-4); }
+    .stat:first-child { border-top: 0; padding-top: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
     .reveal { animation: none; opacity: 1; }
@@ -592,63 +516,3 @@ const showTermCode = `<span class="ln"><span class="tok-prompt">$</span> npm run
     html { scroll-behavior: auto; }
   }
 </style>
-
-<script>
-  // 本页目录滚动高亮（scrollspy）
-  const tocLinks = Array.from(document.querySelectorAll(".ll-home .toc a"));
-  const sections = tocLinks
-    .map((l) => document.getElementById(l.getAttribute("href")?.slice(1) || ""))
-    .filter((s): s is HTMLElement => !!s);
-
-  if (sections.length && "IntersectionObserver" in window) {
-    const setActive = (id: string) => {
-      tocLinks.forEach((l) => l.classList.toggle("active", l.getAttribute("href") === `#${id}`));
-    };
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive((e.target as HTMLElement).id);
-        });
-      },
-      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
-    );
-    sections.forEach((s) => obs.observe(s));
-  }
-</script>
-
-<script>
-  // 代码质感模块：多语言 tab 切换（Swift / CSS / Terminal）
-  const showcase = document.querySelector(".ll-home .showcase");
-  if (showcase) {
-    const tabs = Array.from(showcase.querySelectorAll(".tab"));
-    const panes = Array.from(showcase.querySelectorAll(".code-pane"));
-    const badge = showcase.querySelector(".showcase-lang");
-    const labels: Record<string, string> = { swift: "Swift", css: "CSS", term: "Terminal" };
-
-    const activate = (lang: string) => {
-      tabs.forEach((t) => {
-        const on = t.dataset.lang === lang;
-        t.classList.toggle("is-active", on);
-        t.setAttribute("aria-selected", on ? "true" : "false");
-      });
-      panes.forEach((p) => {
-        const on = p.dataset.pane === lang;
-        p.hidden = !on;
-        p.classList.toggle("is-active", on);
-      });
-      if (badge) badge.textContent = labels[lang] || lang;
-    };
-
-    tabs.forEach((t, i) => {
-      t.addEventListener("click", () => activate(t.dataset.lang as string));
-      t.addEventListener("keydown", (e: KeyboardEvent) => {
-        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-        e.preventDefault();
-        const dir = e.key === "ArrowRight" ? 1 : -1;
-        const next = tabs[(i + dir + tabs.length) % tabs.length];
-        next.focus();
-        activate(next.dataset.lang as string);
-      });
-    });
-  }
-</script>

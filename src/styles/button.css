@@ -26,7 +26,7 @@
 
 :root[data-theme="light"] .btn-secondary,
 :root[data-theme="light"] .btn-outline-primary {
-  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
+  background: color-mix(in srgb, var(--sl-color-black) 84%, transparent);
 }
 
 .btn-secondary:hover,

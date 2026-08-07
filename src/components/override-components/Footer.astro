@@ -27,7 +27,9 @@ const footerLinks = [
 <style>
   .site-footer {
     margin-top: 4rem;
-    border-top: 1px solid var(--sl-color-hairline);
+    /* 品牌渐变顶线：让品牌色成为整站贯穿线，而不只是卡片镶边 */
+    border-top: 2px solid transparent;
+    border-image: var(--color-primary-gradient) 1;
     padding: 3rem 0;
     background: color-mix(in srgb, var(--sl-color-black) 82%, transparent);
   }

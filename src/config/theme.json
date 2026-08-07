@@ -13,7 +13,7 @@
     },
     "lightmode": {
       "theme_color": {
-        "primary": "oklch(54% 0.13 195)",
+        "primary": "oklch(50% 0.15 205)",
         "body": "oklch(98.5% 0.004 250)",
         "light": "oklch(98.5% 0.004 250)",
         "dark": "oklch(20% 0.03 250)"

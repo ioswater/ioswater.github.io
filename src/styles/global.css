@@ -36,14 +36,17 @@
   --sl-color-accent: var(--color-lightmode-primary) !important;
   --sl-color-accent-high: color-mix(in srgb, var(--color-lightmode-primary), #001 84%) !important;
 
-  --sl-color-white: var(--color-lightmode-light) !important;
-  --sl-color-gray-1: color-mix(in srgb, var(--color-lightmode-dark) 12%, var(--color-lightmode-light) 88%) !important;
-  --sl-color-gray-2: color-mix(in srgb, var(--color-lightmode-dark) 25%, var(--color-lightmode-light) 75%) !important;
-  --sl-color-gray-3: color-mix(in srgb, var(--color-lightmode-dark) 47%, var(--color-lightmode-light) 53%) !important;
-  --sl-color-gray-4: color-mix(in srgb, var(--color-lightmode-dark) 66%, var(--color-lightmode-light) 34%) !important;
-  --sl-color-gray-5: color-mix(in srgb, var(--color-lightmode-dark) 81%, var(--color-lightmode-light) 19%) !important;
-  --sl-color-gray-6: color-mix(in srgb, var(--color-lightmode-dark) 92%, var(--color-lightmode-light) 8%) !important;
-  --sl-color-black: var(--color-lightmode-dark) !important;
+  --sl-color-white: var(--color-lightmode-dark) !important;
+  /* 浅色灰阶重校准：原 gray-3 仅 ~47% 深、对比度不足（中灰发闷），统一调成清晰可读的冷调灰，
+     同时保证 gray-1..6 单调（数值越大越深）。影响范围：博客卡片描述/日期/标签、页脚、侧栏、
+     kbd 提示、callout 边框、搜索图标、首页 Hero 次级文字。 */
+  --sl-color-gray-1: color-mix(in srgb, var(--color-lightmode-dark) 22%, var(--color-lightmode-light) 78%) !important;
+  --sl-color-gray-2: color-mix(in srgb, var(--color-lightmode-dark) 40%, var(--color-lightmode-light) 60%) !important;
+  --sl-color-gray-3: color-mix(in srgb, var(--color-lightmode-dark) 70%, var(--color-lightmode-light) 30%) !important;
+  --sl-color-gray-4: color-mix(in srgb, var(--color-lightmode-dark) 82%, var(--color-lightmode-light) 18%) !important;
+  --sl-color-gray-5: color-mix(in srgb, var(--color-lightmode-dark) 90%, var(--color-lightmode-light) 10%) !important;
+  --sl-color-gray-6: color-mix(in srgb, var(--color-lightmode-dark) 96%, var(--color-lightmode-light) 4%) !important;
+  --sl-color-black: var(--color-lightmode-light) !important;
 }
 
 /* 超宽屏：正文进一步加宽，避免在 2560px+ 上仍显窄 */
@@ -157,8 +160,8 @@ html { scroll-behavior: smooth; }
     transform 0.2s ease;
 }
 :root[data-theme="light"] .focus-toggle {
-  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
-  color: var(--sl-color-black);
+  background: color-mix(in srgb, var(--sl-color-black) 86%, transparent);
+  color: var(--sl-color-white);
 }
 .focus-toggle:hover {
   border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
@@ -191,8 +194,8 @@ html { scroll-behavior: smooth; }
     transform 0.2s ease;
 }
 :root[data-theme="light"] .sidebar-toggle {
-  background: color-mix(in srgb, var(--sl-color-white) 84%, transparent);
-  color: var(--sl-color-black);
+  background: color-mix(in srgb, var(--sl-color-black) 86%, transparent);
+  color: var(--sl-color-white);
 }
 .sidebar-toggle:hover {
   border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
@@ -313,7 +316,7 @@ html.sidebar-collapsed [data-has-sidebar][data-has-toc] .main-pane {
     animation: toc-pulse 1.8s ease-out infinite;
   }
   :root[data-theme="light"] .toc-toggle {
-    color: var(--sl-color-black);
+    color: var(--sl-color-white);
   }
   .toc-toggle:hover {
     color: var(--sl-color-accent);
@@ -533,7 +536,7 @@ html.reading-focus .main-pane {
   transition: opacity 0.35s ease, transform 0.35s ease;
 }
 :root[data-theme="light"] .kbd-hint {
-  background: color-mix(in srgb, var(--sl-color-white) 86%, transparent);
+  background: color-mix(in srgb, var(--sl-color-black) 86%, transparent);
   color: var(--sl-color-gray-4);
 }
 .kbd-hint kbd {
@@ -546,7 +549,7 @@ html.reading-focus .main-pane {
   background: color-mix(in srgb, var(--sl-color-white) 10%, transparent);
 }
 :root[data-theme="light"] .kbd-hint kbd {
-  color: var(--sl-color-black);
+  color: var(--sl-color-white);
   background: color-mix(in srgb, var(--sl-color-black) 8%, transparent);
 }
 .kbd-hint .kbd-sep {
@@ -612,7 +615,7 @@ html.reading-focus .main-pane {
   border-left: 3px solid var(--sl-color-accent);
   background: color-mix(in srgb, var(--sl-color-accent) 8%, transparent);
   border-radius: 0 10px 10px 0;
-  color: var(--sl-color-gray-2);
+  color: var(--sl-color-gray-3);
 }
 .sl-markdown-content :not(pre) > code {
   background: color-mix(in srgb, var(--sl-color-gray-6) 50%, transparent);

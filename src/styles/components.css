@@ -28,7 +28,7 @@
 }
 
 :root[data-theme="light"] .section-description {
-  color: color-mix(in srgb, var(--sl-color-black) 74%, transparent);
+  color: color-mix(in srgb, var(--sl-color-white) 74%, transparent);
 }
 
 .content-panel :where(.sl-link-card, .card) {

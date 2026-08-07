@@ -5,6 +5,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 
 <div class="site-shell sl-flex">
+  <div class="brand-rule" aria-hidden="true"></div>
   <header class={"header" + (hasSidebar ? " has-sidebar" : " no-sidebar")}>
     <slot name="header" />
   </header>
@@ -46,6 +47,18 @@ const { hasSidebar } = Astro.locals.starlightRoute;
         radial-gradient(circle at 20% -10%, color-mix(in srgb, var(--sl-color-accent) 14%, transparent), transparent 45%),
         radial-gradient(circle at 90% -25%, color-mix(in srgb, #0ea5e9 12%, transparent), transparent 38%),
         var(--sl-color-black);
+    }
+
+    /* 顶部品牌渐变规则条：整站贯穿线，叠在 sticky 顶栏之上 */
+    .brand-rule {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: calc(var(--sl-z-index-navbar, 60) + 5);
+      background: var(--color-primary-gradient);
+      pointer-events: none;
     }
 
     .header {
